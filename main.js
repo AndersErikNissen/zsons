@@ -1,3 +1,5 @@
+"use strict";
+
 const template = document.createElement('template');
 
 template.innerHTML = ``;
@@ -6,11 +8,12 @@ class Graph extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
-  }
-
-  connectedCallback() {
     this.shadowRoot.appendChild(this._template().content.cloneNode(true));
+  }
+  
+  connectedCallback() {
     this._addContent();
+    this.getData();
   }
 
   _style() {
@@ -26,7 +29,9 @@ class Graph extends HTMLElement {
 
     template.innerHTML = `
       <style>${this._style()}</style>
-      <slot name="data"></slot>
+      <div class="hidden">
+        <slot name="data" />
+      </div>
       <div id="content"></div>
     `;
 
@@ -36,8 +41,15 @@ class Graph extends HTMLElement {
   _addContent() {
     // Good to know to use .shadowRoot, but it might make more sense to just add the content to the template itself ;) 
     var content = this.shadowRoot.querySelector('#content');
-    console.log("Content",content)
+
     content.innerHTML = "<span>This is some NICE, content!</span>"
+  }
+
+  getData() {
+    var data = this.shadowRoot.querySelector('slot[name="data"]').assignedNodes()[0];
+    var form = new FormData(data);
+    console.log(new URLSearchParams(form).toString())
+
   }
 }
 
