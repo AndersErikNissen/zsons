@@ -1,8 +1,27 @@
 "use strict";
 
-const template = document.createElement('template');
 
-template.innerHTML = ``;
+  /*
+    Layouts
+    - Graph
+    - Bar chart
+      - Stacked on top of each other
+      - Stacked beside each other, grouped for each number (So "events", would all be beside each other, then "meetings" and so on)
+    - Backlog: Pie chart
+    - Difference between two array (Like LoL gold difference)
+
+    The data comes from and array of inputs [[name,value]...]
+
+    We want to end up with
+      An array of objects with:
+      - Name
+      - All the values
+
+      Global data:
+      - The highest number and the ones in between
+
+    Check for changes to current inputs or new ones with "slotchanged".
+  */
 
 class Graph extends HTMLElement {
   constructor() {
@@ -13,10 +32,10 @@ class Graph extends HTMLElement {
   
   connectedCallback() {
     this._addContent();
-    this._initData();
-    this.getData();
+    this.dataFromForm = this.shadowRoot.querySelector('slot[name="data"]').assignedNodes()[0];
+    this.dataCore = this.data;
 
-    console.log(this.data)
+    console.log("Core", this.core)
   }
 
   _style() {
@@ -48,69 +67,56 @@ class Graph extends HTMLElement {
     content.innerHTML = "<span>This is some NICE, content!</span>"
   }
 
+  /**
+   * @param {node} form - Proviode a <form> node
+   */
+  set dataFromForm(form) {
+    var 
+      formattedArray = [],
+      data = form.tagName === 'FORM' ? new FormData(form).entries() : false;
 
-  /*
-    Layouts
-    - Graph
-    - Bar chart
-      - Stacked on top of each other
-      - Stacked beside each other, grouped for each number (So "events", would all be beside each other, then "meetings" and so on)
-    - Backlog: Pie chart
-    - Difference between two array (Like LoL gold difference)
+    if (!data) return;
 
-    The data comes from and array of inputs [[name,value]...]
-
-    We want to end up with
-      An array of objects with:
-      - Name
-      - All the values
-
-      Global data:
-      - The highest number and the ones in between
-
-    Check for changes to current inputs or new ones with "slotchanged".
-
-  */
-
-  _initData() {
-    var handleArray = (entry, arr) => {
-      var name = entry[0];
-      var value = entry[1];
-      var i = arr.findIndex( entryObj => entryObj.name === name);
+    for (const [name, value] of data) {
+      var i = formattedArray.findIndex( existingObject => existingObject.name === name);
       var obj = i === -1 
-      ? {
-          name: name,
-          label: name.charAt(0).toUpperCase() + name.slice(1),
-          values: []
-        }
-      : arr[i];
-
+        ? {
+            name: name,
+            label: name.charAt(0).toUpperCase() + name.slice(1),
+            values: []
+          }
+        : formattedArray[i];
+  
       if(!isNaN(Number(value))) obj.values.push(Number(value));
-      if (i === -1) arr.push(obj);
+      if (i === -1) formattedArray.push(obj);
     }
 
-    var arr = [];
-    var form = this.shadowRoot.querySelector('slot[name="data"]').assignedNodes()[0];
-    if (form.tagName !== 'FORM') return;
-    form = new FormData(form);
-
-    [...form.entries()].forEach(entry => handleArray(entry, arr));
-
-
-    this.data = arr;
+    this.data = formattedArray;
   }
 
-  getData() {
-    
-    var form = new FormData();
-    console.log(...form.entries())
-    var obj = {};
-    var arr = [];
+  /**
+   * @param {array} array - Array of data to compare, to set the core values
+   */
+  set dataCore(array) {
+    var maxNumberFromArray = Math.max.apply(null, array.map( entry => entry.values).flat());
+    var max = 10;
 
-    [...form.entries()].forEach( entry => obj[entry[0]] = entry[1]);
+    if(isNaN(maxNumberFromArray)) return;
 
-    //console.log(new URLSearchParams(form).toString())
+    while(maxNumberFromArray % max < maxNumberFromArray) {
+      max *= 10;
+    }
 
+    var half = max / 2;
+
+    this.setAttribute('max', max)
+    this.setAttribute('half', half);
+
+    this.core = {
+      max: max,
+      half: half,
+      min: 0
+    }
   }
 }
 
