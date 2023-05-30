@@ -128,6 +128,21 @@ class Graph extends HTMLElement {
 
       subPercentages = subPercentages.map(per => per + "%");
 
+      /**
+       * 
+       * 
+       * 
+       * 
+       * 
+       * GET PERCENTAGES FOR EACH SUB COMPARED TO MAX (SO THEY CAN BE USED FOR THE "BUDDY" LAYOUT)
+       * 
+       * 
+       * 
+       * 
+       * 
+       * 
+       */
+
       obj.percentage = ((combinedValues / max) * 100) + "%";
       obj.sub_percentages = subPercentages;
     });
