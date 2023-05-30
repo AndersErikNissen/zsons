@@ -33,6 +33,7 @@ class Graph extends HTMLElement {
     this.dataFromForm = this.shadowRoot.querySelector('slot[name="data"]').assignedNodes()[0];
     this.coreData = this.data;
 
+    console.log("Data", this.data)
     console.log("Core", this.core)
   }
 
@@ -89,7 +90,9 @@ class Graph extends HTMLElement {
         max = max - minus;
       }
 
-      return nr < 0 ? (max * -1) * 2 : max * 2;
+      if (nr < 0) max * -1;
+
+      return max * 2;
     };
 
     var max = getMaxNumber(maxValueFromArray);
@@ -109,9 +112,24 @@ class Graph extends HTMLElement {
      */
     array.forEach( obj => {
       var combinedValues = 0;
+      var totalSubPercentage = 0;
+      var subPercentages = [];
       obj.values.forEach(nr => combinedValues += nr);
+      obj.values.forEach(nr => {
+        var percentage = Math.floor((nr / combinedValues) * 100);
+        subPercentages.push(percentage);
+        totalSubPercentage += percentage;
+      });
 
-      var percentage = (100 * combinedValues) / max;
+      if (totalSubPercentage < 100) {
+        var remainder = (100 - totalSubPercentage) / obj.values.length;
+        subPercentages = subPercentages.map( per => (per + remainder));
+      }
+
+      subPercentages = subPercentages.map(per => per + "%");
+
+      obj.percentage = ((combinedValues / max) * 100) + "%";
+      obj.sub_percentages = subPercentages;
     });
   }
 
