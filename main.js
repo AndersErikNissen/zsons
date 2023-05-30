@@ -1,27 +1,25 @@
 "use strict";
+/*
+  Layouts
+  - Graph
+  - Bar chart
+    - Stacked on top of each other
+    - Stacked beside each other, grouped for each number (So "events", would all be beside each other, then "meetings" and so on)
+  - Backlog: Pie chart
+  - Difference between two array (Like LoL gold difference)
 
+  The data comes from and array of inputs [[name,value]...]
 
-  /*
-    Layouts
-    - Graph
-    - Bar chart
-      - Stacked on top of each other
-      - Stacked beside each other, grouped for each number (So "events", would all be beside each other, then "meetings" and so on)
-    - Backlog: Pie chart
-    - Difference between two array (Like LoL gold difference)
+  We want to end up with
+    An array of objects with:
+    - Name
+    - All the values
 
-    The data comes from and array of inputs [[name,value]...]
+    Global data:
+    - The highest number and the ones in between
 
-    We want to end up with
-      An array of objects with:
-      - Name
-      - All the values
-
-      Global data:
-      - The highest number and the ones in between
-
-    Check for changes to current inputs or new ones with "slotchanged".
-  */
+  Check for changes to current inputs or new ones with "slotchanged".
+*/
 
 class Graph extends HTMLElement {
   constructor() {
@@ -33,7 +31,7 @@ class Graph extends HTMLElement {
   connectedCallback() {
     this._addContent();
     this.dataFromForm = this.shadowRoot.querySelector('slot[name="data"]').assignedNodes()[0];
-    this.dataCore = this.data;
+    this.coreData = this.data;
 
     console.log("Core", this.core)
   }
@@ -68,12 +66,64 @@ class Graph extends HTMLElement {
   }
 
   /**
+   * @param {array} array - Array of data to compare, to set the core values 
+   */
+  set coreData(array) {
+    var maxValueFromArray = Math.max.apply(null, array.map( obj => { 
+      var combinedValues = 0;
+      obj.values.forEach( value => combinedValues += value);
+      return combinedValues;
+    }));
+
+    if(isNaN(maxValueFromArray)) return;
+
+    const getMaxNumber = nr => {
+      var length = String(nr).length;
+      if (nr < 0) length--;
+
+      var base = 10 ** length;
+      var max = base;
+      var minus = base / 10;
+
+      while(nr % max === nr) {
+        max = max - minus;
+      }
+
+      return nr < 0 ? (max * -1) * 2 : max * 2;
+    };
+
+    var max = getMaxNumber(maxValueFromArray);
+    var half = max / 2;
+    
+    this.setAttribute('max', max);
+    this.setAttribute('half', half);
+
+    this.core = {
+      max: max,
+      half: half,
+      min: 0
+    };
+
+    /**
+     * Update data array
+     */
+    array.forEach( obj => {
+      var combinedValues = 0;
+      obj.values.forEach(nr => combinedValues += nr);
+
+      var percentage = (100 * combinedValues) / max;
+    });
+  }
+
+  /**
    * @param {node} form - Proviode a <form> node, to set the data that needs to be handled by the CE.
    */
   set dataFromForm(form) {
     var 
       formattedArray = [],
-      data = form.tagName === 'FORM' ? new FormData(form).entries() : false;
+      data = form.tagName === 'FORM' 
+        ? new FormData(form).entries() 
+        : false;
 
     if (!data) return;
 
@@ -92,31 +142,7 @@ class Graph extends HTMLElement {
     }
 
     this.data = formattedArray;
-  }
-
-  /**
-   * @param {array} array - Array of data to compare, to set the core values
-   */
-  set dataCore(array) {
-    var maxNumberFromArray = Math.max.apply(null, array.map( entry => entry.values).flat());
-    var max = 10;
-
-    if(isNaN(maxNumberFromArray)) return;
-
-    while(maxNumberFromArray % max < maxNumberFromArray) {
-      max *= 10;
-    }
-
-    var half = max / 2;
-
-    this.setAttribute('max', max)
-    this.setAttribute('half', half);
-
-    this.core = {
-      max: max,
-      half: half,
-      min: 0
-    }
+    this.coreData = formattedArray;
   }
 }
 
