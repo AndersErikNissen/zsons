@@ -68,7 +68,7 @@ class Graph extends HTMLElement {
   }
 
   /**
-   * @param {node} form - Proviode a <form> node
+   * @param {node} form - Proviode a <form> node, to set the data that needs to be handled by the CE.
    */
   set dataFromForm(form) {
     var 
