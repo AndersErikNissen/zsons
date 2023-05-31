@@ -29,9 +29,11 @@ class Graph extends HTMLElement {
   }
   
   connectedCallback() {
-    this._addContent();
     this.dataFromForm = this.shadowRoot.querySelector('slot[name="data"]').assignedNodes()[0];
     this.coreData = this.data;
+    this.upgradeData();
+
+    this._addContent();
 
     console.log("Data", this.data)
     console.log("Core", this.core)
@@ -106,46 +108,6 @@ class Graph extends HTMLElement {
       half: half,
       min: 0
     };
-
-    /**
-     * Update data array
-     */
-    array.forEach( obj => {
-      var combinedValues = 0;
-      var totalSubPercentage = 0;
-      var subPercentages = [];
-      obj.values.forEach(nr => combinedValues += nr);
-      obj.values.forEach(nr => {
-        var percentage = Math.floor((nr / combinedValues) * 100);
-        subPercentages.push(percentage);
-        totalSubPercentage += percentage;
-      });
-
-      if (totalSubPercentage < 100) {
-        var remainder = (100 - totalSubPercentage) / obj.values.length;
-        subPercentages = subPercentages.map( per => (per + remainder));
-      }
-
-      subPercentages = subPercentages.map(per => per + "%");
-
-      /**
-       * 
-       * 
-       * 
-       * 
-       * 
-       * GET PERCENTAGES FOR EACH SUB COMPARED TO MAX (SO THEY CAN BE USED FOR THE "BUDDY" LAYOUT)
-       * 
-       * 
-       * 
-       * 
-       * 
-       * 
-       */
-
-      obj.percentage = ((combinedValues / max) * 100) + "%";
-      obj.sub_percentages = subPercentages;
-    });
   }
 
   /**
@@ -175,8 +137,28 @@ class Graph extends HTMLElement {
     }
 
     this.data = formattedArray;
-    this.coreData = formattedArray;
   }
+  
+  upgradeData() {
+    this.data.forEach( obj => {
+      var combinedValues = 0;
+      obj.sub_percentages = [];
+      obj.max_percentages = [];
+      obj.values.forEach(nr => combinedValues += nr);
+      obj.values.forEach(nr => {
+        var percentages = [(nr / combinedValues) * 100, (nr / this.core.max) * 100];
+
+        // Help from: https://stackoverflow.com/questions/11832914/how-to-round-to-at-most-2-decimal-places-if-necessary/18358056#18358056
+        var rounded = percentages.map( perNr => +(Math.round(perNr + "e+2") + "e-2"));
+
+        obj.sub_percentages.push(rounded[0] + "%");
+        obj.max_percentages.push(rounded[1] + "%");
+      });
+
+      obj.percentage = ((combinedValues / this.core.max) * 100) + "%";
+    });
+  }
+
 }
 
 customElements.define('aenother-graph', Graph);
