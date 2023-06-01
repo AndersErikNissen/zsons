@@ -21,7 +21,7 @@
   Check for changes to current inputs or new ones with "slotchanged".
 */
 
-class Graph extends HTMLElement {
+class Infograph extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
@@ -66,6 +66,11 @@ class Graph extends HTMLElement {
     var content = this.shadowRoot.querySelector('#content');
 
     content.innerHTML = "<span>This is some NICE, content!</span>"
+  }
+
+  get aspect() {
+    var aspect = Number(this.getAttribute('aspect'));
+    return isNaN(aspect) ? 1 : aspect;
   }
 
   /**
@@ -161,4 +166,4 @@ class Graph extends HTMLElement {
 
 }
 
-customElements.define('aenother-graph', Graph);
+customElements.define('aenother-infograph', Infograph);
