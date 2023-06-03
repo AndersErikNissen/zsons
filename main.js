@@ -35,8 +35,10 @@ class Infograph extends HTMLElement {
 
     this._addContent();
 
+    this.buildWavy();
     console.log("Data", this.data)
     console.log("Core", this.core)
+    console.log(this.layout)
   }
 
   _style() {
@@ -70,7 +72,16 @@ class Infograph extends HTMLElement {
 
   get aspect() {
     var aspect = Number(this.getAttribute('aspect'));
+    if (aspect === 0) return 1;
     return isNaN(aspect) ? 1 : aspect;
+  }
+
+  get layout() {
+    var layoutTypes = ['wavy','buddy','towery'];
+    var attributeLayout = this.getAttribute('layout');
+    var check = layoutTypes.find(layout => layout === attributeLayout) ;
+
+    return check ? check : 'towery';
   }
 
   /**
@@ -111,6 +122,7 @@ class Infograph extends HTMLElement {
     this.core = {
       max: max,
       half: half,
+      svg_width: max * this.aspect,
       min: 0
     };
   }
@@ -162,6 +174,23 @@ class Infograph extends HTMLElement {
 
       obj.percentage = ((combinedValues / this.core.max) * 100) + "%";
     });
+  }
+
+  buildWavy() {
+    var graphSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    var width = this.core.svg_width;
+    var height = this.core.max;
+
+    graphSvg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+    graphSvg.setAttribute('width', width);
+    graphSvg.setAttribute('height', height);
+
+    /**
+     * 
+     * ADD PATH to each data or create them via this function via the data instead? Might be the best way to do it.
+     */
+
+    console.log("Wavy", graphSvg)
   }
 
 }
