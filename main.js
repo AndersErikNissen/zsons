@@ -186,6 +186,33 @@ class Infograph extends HTMLElement {
     graphSvg.setAttribute('height', height);
 
     /**
+     * Goal: Line for each input name
+     * 
+     * Before this
+     *  Find the input with the most values
+     *  Divide with the SVG width, to get each X
+     *    First should be X = 0 and last X = width
+     *    In betweens should be even since we are making a path
+     * 
+     * For each input
+     *  Create a path
+     *  Move To should be 0 and Y from input[0]
+     *  Add the X that matches the index from above
+     *  Take the input value as Y (might need to reverse it if 0,0 is the top-left corner)
+     *  Last should be X = width and should value from last input
+     *    If input amount is less than max amount, just have Y be the same as the last input (So i will create a line along the horizontal axis)
+     *  Add attributes like (Stroke, stroke-width)
+     *  Append path to SVG
+     *  
+     * Optional: Create path for the gradient/full background color
+     *  Keep path from the waves, and then around the border below
+     *    First draw another wave, then go from ("svg width" "value from last input", "svg width" "svg height", 0 "svg height", 0 input[0]) 
+     *    Fill the bg-path with a color if wanted
+     * 
+     */
+
+
+    /**
      * 
      * ADD PATH to each data or create them via this function via the data instead? Might be the best way to do it.
      */
