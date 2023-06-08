@@ -33,8 +33,6 @@ class Infograph extends HTMLElement {
     this.coreData = this.data;
     this.upgradeData();
 
-    this._addContent();
-
     this.buildWavy();
     console.log("Data", this.data)
     console.log("Core", this.core)
@@ -57,7 +55,7 @@ class Infograph extends HTMLElement {
       <div class="hidden">
         <slot name="data" />
       </div>
-      <div id="content"></div>
+      <div id="svg"></div>
     `;
 
     return template;
@@ -88,13 +86,17 @@ class Infograph extends HTMLElement {
    * @param {array} array - Array of data to compare, to set the core values 
    */
   set coreData(array) {
-    var maxValueFromArray = Math.max.apply(null, array.map( obj => { 
-      var combinedValues = 0;
-      obj.values.forEach( value => combinedValues += value);
-      return combinedValues;
-    }));
+    var maxValue = Math.max.apply(null, array.map(obj => obj.values).flat());
 
-    if(isNaN(maxValueFromArray)) return;
+    if (this.layout === 'towery') {
+      var maxValue = Math.max.apply(null, array.map( obj => {
+        var combinedValues = 0;
+        obj.values.forEach( value => combinedValues += value);
+        return combinedValues;
+      }));
+    }
+
+    if(isNaN(maxValue)) return;
 
     const getMaxNumber = nr => {
       var length = String(nr).length;
@@ -113,8 +115,21 @@ class Infograph extends HTMLElement {
       return max * 2;
     };
 
-    var max = getMaxNumber(maxValueFromArray);
+    var max = getMaxNumber(maxValue);
     var half = max / 2;
+
+    var maxAmountOfValues = Math.max.apply(null, array.map(obj => obj.values.length));
+    var xCordinates = [];
+    for(let i = 0; i < maxAmountOfValues; i++) {
+      var pushValue = ((max * this.aspect) / maxAmountOfValues) * i;
+      if (i === (maxAmountOfValues - 1)) {
+        pushValue = max * this.aspect;
+      }
+
+      xCordinates.push(pushValue);
+    }
+
+    console.log("x",xCordinates)
     
     this.setAttribute('max', max);
     this.setAttribute('half', half);
@@ -123,6 +138,8 @@ class Infograph extends HTMLElement {
       max: max,
       half: half,
       svg_width: max * this.aspect,
+      max_value: maxAmountOfValues,
+      x_cordinates: xCordinates,
       min: 0
     };
   }
@@ -159,8 +176,8 @@ class Infograph extends HTMLElement {
   upgradeData() {
     this.data.forEach( obj => {
       var combinedValues = 0;
-      obj.sub_percentages = [];
-      obj.max_percentages = [];
+      obj.compared_percentages = [];
+      obj.total_percentages = [];
       obj.values.forEach(nr => combinedValues += nr);
       obj.values.forEach(nr => {
         var percentages = [(nr / combinedValues) * 100, (nr / this.core.max) * 100];
@@ -168,8 +185,8 @@ class Infograph extends HTMLElement {
         // Help from: https://stackoverflow.com/questions/11832914/how-to-round-to-at-most-2-decimal-places-if-necessary/18358056#18358056
         var rounded = percentages.map( perNr => +(Math.round(perNr + "e+2") + "e-2"));
 
-        obj.sub_percentages.push(rounded[0] + "%");
-        obj.max_percentages.push(rounded[1] + "%");
+        obj.compared_percentages.push(rounded[0] + "%");
+        obj.total_percentages.push(rounded[1] + "%");
       });
 
       obj.percentage = ((combinedValues / this.core.max) * 100) + "%";
@@ -185,15 +202,35 @@ class Infograph extends HTMLElement {
     graphSvg.setAttribute('width', width);
     graphSvg.setAttribute('height', height);
 
+    this.data.forEach(obj => {
+      var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      var dString = 'M0 ' +(this.core.max - obj.values[0]);
+
+      obj.values.forEach((value, i) => dString += ' L' + this.core.x_cordinates[i] + ' ' + (this.core.max - value));
+
+      path.setAttribute('d', dString);
+      path.setAttribute('fill', 'transparent');
+      path.setAttribute('stroke', 'black')
+
+      graphSvg.appendChild(path);
+    });
+
+
+    this.shadowRoot.querySelector('#svg').appendChild(graphSvg);
     /**
      * Goal: Line for each input name
      * 
+     * ------DONE
      * Before this
      *  Find the input with the most values
      *  Divide with the SVG width, to get each X
      *    First should be X = 0 and last X = width
      *    In betweens should be even since we are making a path
-     * 
+     * ------DONE
+    
+
+
+
      * For each input
      *  Create a path
      *  Move To should be 0 and Y from input[0]
