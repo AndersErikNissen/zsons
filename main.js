@@ -33,7 +33,7 @@ class Infograph extends HTMLElement {
     this.coreData = this.data;
     this.upgradeData();
 
-    this.buildWavy();
+    this.buildSVG();
     console.log("Data", this.data)
     console.log("Core", this.core)
     console.log(this.layout)
@@ -75,7 +75,7 @@ class Infograph extends HTMLElement {
   }
 
   get layout() {
-    var layoutTypes = ['wavy','buddy','towery'];
+    var layoutTypes = ['wavy','buddy','towery','spikey'];
     var attributeLayout = this.getAttribute('layout');
     var check = layoutTypes.find(layout => layout === attributeLayout) ;
 
@@ -118,11 +118,12 @@ class Infograph extends HTMLElement {
     var max = getMaxNumber(maxValue);
     var half = max / 2;
 
-    var maxAmountOfValues = Math.max.apply(null, array.map(obj => obj.values.length));
+    var amountOfXs = Math.max.apply(null, array.map(obj => obj.values.length));
     var xCordinates = [];
-    for(let i = 0; i < maxAmountOfValues; i++) {
-      var pushValue = ((max * this.aspect) / maxAmountOfValues) * i;
-      if (i === (maxAmountOfValues - 1)) {
+
+    for(let i = 0; i < amountOfXs; i++) {
+      var pushValue = ((max * this.aspect) / amountOfXs) * i;
+      if (i === (amountOfXs - 1)) {
         pushValue = max * this.aspect;
       }
 
@@ -138,7 +139,7 @@ class Infograph extends HTMLElement {
       max: max,
       half: half,
       svg_width: max * this.aspect,
-      max_value: maxAmountOfValues,
+      x_amount: amountOfXs,
       x_cordinates: xCordinates,
       min: 0
     };
@@ -193,7 +194,7 @@ class Infograph extends HTMLElement {
     });
   }
 
-  buildWavy() {
+  buildSVG() {
     var graphSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     var width = this.core.svg_width;
     var height = this.core.max;
@@ -202,16 +203,39 @@ class Infograph extends HTMLElement {
     graphSvg.setAttribute('width', width);
     graphSvg.setAttribute('height', height);
 
+    var createLine = (x, y) => {
+      return ' L' + x + ' ' + (this.core.max - y);
+    };
+
     this.data.forEach(obj => {
       var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      var dString = 'M0 ' +(this.core.max - obj.values[0]);
+      var fullPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      var pathString = 'M0 ' + (this.core.max - obj.values[0]);
+      var lastX = this.core.x_cordinates.slice(-1);
+      var lastY = obj.values.slice(-1);
 
-      obj.values.forEach((value, i) => dString += ' L' + this.core.x_cordinates[i] + ' ' + (this.core.max - value));
+      obj.values.forEach((value, i) => {
+        pathString += createLine(this.core.x_cordinates[i], value);
+      });
 
-      path.setAttribute('d', dString);
+      if (this.core.x_amount > obj.values.length) {
+        pathString += createLine(lastX, lastY);
+      }
+
+      var fullPathString = pathString;
+
+      fullPathString += ' L' + lastX + ' ' + this.core.max;
+      fullPathString += ' L' + 0 + ' ' + this.core.max + ' Z';
+
+      path.setAttribute('d', pathString);
       path.setAttribute('fill', 'transparent');
       path.setAttribute('stroke', 'black')
 
+      fullPath.setAttribute('d', fullPathString);
+      fullPath.setAttribute('fill', 'red');
+      fullPath.setAttribute('stroke', 'red');
+
+      graphSvg.appendChild(fullPath);
       graphSvg.appendChild(path);
     });
 
@@ -226,32 +250,23 @@ class Infograph extends HTMLElement {
      *  Divide with the SVG width, to get each X
      *    First should be X = 0 and last X = width
      *    In betweens should be even since we are making a path
-     * ------DONE
     
-
-
-
      * For each input
-     *  Create a path
-     *  Move To should be 0 and Y from input[0]
-     *  Add the X that matches the index from above
-     *  Take the input value as Y (might need to reverse it if 0,0 is the top-left corner)
-     *  Last should be X = width and should value from last input
-     *    If input amount is less than max amount, just have Y be the same as the last input (So i will create a line along the horizontal axis)
-     *  Add attributes like (Stroke, stroke-width)
-     *  Append path to SVG
-     *  
-     * Optional: Create path for the gradient/full background color
-     *  Keep path from the waves, and then around the border below
-     *    First draw another wave, then go from ("svg width" "value from last input", "svg width" "svg height", 0 "svg height", 0 input[0]) 
-     *    Fill the bg-path with a color if wanted
-     * 
-     */
-
-
-    /**
-     * 
-     * ADD PATH to each data or create them via this function via the data instead? Might be the best way to do it.
+    *  Create a path
+    *  Move To should be 0 and Y from input[0]
+    *  Add the X that matches the index from above
+    *  Take the input value as Y (might need to reverse it if 0,0 is the top-left corner)
+    *  Last should be X = width and should value from last input
+    *    If input amount is less than max amount, just have Y be the same as the last input (So i will create a line along the horizontal axis)
+    *  Add attributes like (Stroke, stroke-width)
+    *  Append path to SVG
+    *  
+    * Optional: Create path for the gradient/full background color
+    *  Keep path from the waves, and then around the border below
+    *    First draw another wave, then go from ("svg width" "value from last input", "svg width" "svg height", 0 "svg height", 0 input[0]) 
+    *    Fill the bg-path with a color if wanted
+    * ------DONE
+    * 
      */
 
     console.log("Wavy", graphSvg)
