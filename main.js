@@ -194,6 +194,28 @@ class Infograph extends HTMLElement {
     });
   }
 
+  createGradient(name, stops, units) {
+    var gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+    gradient.id = name;
+
+    // Add gradientUnits
+    for (const property in units) {
+      gradient.setAttribute(property, units[property]);
+    }
+
+    stops.forEach(stop => {
+      var stopElement = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+
+      for (const property in stop) {
+        stopElement.setAttribute(property, stop[property]);
+      }
+
+      gradient.appendChild(stopElement);
+    });
+
+    return gradient;
+  }
+
   buildSVG() {
     var graphSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     var width = this.core.svg_width;
@@ -214,30 +236,56 @@ class Infograph extends HTMLElement {
       var lastX = this.core.x_cordinates.slice(-1);
       var lastY = obj.values.slice(-1);
 
+      // Add lines for each value
       obj.values.forEach((value, i) => {
         pathString += createLine(this.core.x_cordinates[i], value);
       });
 
+      // If the value amount is less than the max, then create a horizontal line to the end of the SVG.
       if (this.core.x_amount > obj.values.length) {
         pathString += createLine(lastX, lastY);
       }
 
+      // Complete path along the bottom of the SVG
       var fullPathString = pathString;
 
-      fullPathString += ' L' + lastX + ' ' + this.core.max;
-      fullPathString += ' L' + 0 + ' ' + this.core.max + ' Z';
-
+      fullPathString += ' L' + lastX + ' ' + height;
+      fullPathString += ' L' + 0 + ' ' + height + ' Z';
+      
       path.setAttribute('d', pathString);
       path.setAttribute('fill', 'transparent');
       path.setAttribute('stroke', 'black')
 
       fullPath.setAttribute('d', fullPathString);
-      fullPath.setAttribute('fill', 'red');
-      fullPath.setAttribute('stroke', 'red');
+      fullPath.setAttribute('fill', 'url(#test-gradient)');
+      fullPath.setAttribute('stroke', 'transparent');
 
-      graphSvg.appendChild(fullPath);
-      graphSvg.appendChild(path);
+      graphSvg.append(fullPath, path);
     });
+
+     // Styling
+     var defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+     var gradientConfig = [
+       {
+         offset: '0%',
+         'stop-color': 'red'
+       },
+       {
+         offset: '100%',
+         'stop-color': 'red',
+         'stop-opacity': 0
+       }
+     ];
+
+    var gradientUnits = {
+      'x1': 0,
+      'x2': 0,
+      'y1': 0,
+      'y2': 1
+    };
+     
+     defs.appendChild(this.createGradient('test-gradient', gradientConfig, gradientUnits));
+     graphSvg.appendChild(defs);
 
 
     this.shadowRoot.querySelector('#svg').appendChild(graphSvg);
