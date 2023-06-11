@@ -82,6 +82,16 @@ class Infograph extends HTMLElement {
     return check ? check : 'towery';
   }
 
+  get curveRatio() {
+    var attribute = Number(this.getAttribute('curve-level') ? this.getAttribute('curve-level') : 1);
+    var ratio = 1;
+
+    if (attribute === 1) ratio = 0.1;
+    if (attribute === 2) ratio = 0.5;
+
+    return ratio;
+  }
+
   /**
    * @param {array} array - Array of data to compare, to set the core values 
    */
@@ -117,20 +127,29 @@ class Infograph extends HTMLElement {
 
     var max = getMaxNumber(maxValue);
     var half = max / 2;
-
+    var SVGWidth = max * this.aspect;
     var amountOfXs = Math.max.apply(null, array.map(obj => obj.values.length));
     var xCordinates = [];
 
     for(let i = 0; i < amountOfXs; i++) {
-      var pushValue = ((max * this.aspect) / amountOfXs) * i;
-      if (i === (amountOfXs - 1)) {
-        pushValue = max * this.aspect;
+      var xBase = SVGWidth / amountOfXs;
+      var x = xBase * i;
+      var x1 = (x - xBase) + (xBase * this.curveRatio);
+      var x2 = x - (xBase * this.curveRatio);
+      
+      if (i === (amountOfXs - 1)) x = SVGWidth;
+
+      var returnObj = {
+        x: this.turnToTwoDigits(x),
+        x2: this.turnToTwoDigits(x2)
+      };
+
+      if (i !== 0) {
+        returnObj.x1 = this.turnToTwoDigits(x1);
       }
 
-      xCordinates.push(pushValue);
+      xCordinates.push(returnObj);
     }
-
-    console.log("x",xCordinates)
     
     this.setAttribute('max', max);
     this.setAttribute('half', half);
@@ -138,7 +157,7 @@ class Infograph extends HTMLElement {
     this.core = {
       max: max,
       half: half,
-      svg_width: max * this.aspect,
+      svg_width: SVGWidth,
       x_amount: amountOfXs,
       x_cordinates: xCordinates,
       min: 0
@@ -173,26 +192,18 @@ class Infograph extends HTMLElement {
 
     this.data = formattedArray;
   }
-  
-  upgradeData() {
-    this.data.forEach( obj => {
-      var combinedValues = 0;
-      obj.compared_percentages = [];
-      obj.total_percentages = [];
-      obj.values.forEach(nr => combinedValues += nr);
-      obj.values.forEach(nr => {
-        var percentages = [(nr / combinedValues) * 100, (nr / this.core.max) * 100];
 
-        // Help from: https://stackoverflow.com/questions/11832914/how-to-round-to-at-most-2-decimal-places-if-necessary/18358056#18358056
-        var rounded = percentages.map( perNr => +(Math.round(perNr + "e+2") + "e-2"));
+  /**
+   * Utility methods
+   */
 
-        obj.compared_percentages.push(rounded[0] + "%");
-        obj.total_percentages.push(rounded[1] + "%");
-      });
-
-      obj.percentage = ((combinedValues / this.core.max) * 100) + "%";
-    });
+  turnToTwoDigits(nr) {
+    return +(Math.round(nr + "e+2") + "e-2");
   }
+  
+  /**
+   * SVG methods
+   */
 
   createGradient(name, stops, units) {
     var gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
@@ -216,6 +227,67 @@ class Infograph extends HTMLElement {
     return gradient;
   }
 
+  createPath(yCordinates, addFilled = true) {
+    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    var string = '';
+    
+    yCordinates.forEach((y, i) => {
+      var xObj = this.x_cordinates[i];
+      var correctY = this.core.max - y;
+      var notStartOrEnd = true;
+      var nextString;
+
+      if (i === 0 || i === (yCordinates.length - 1)) notStartOrEnd = false;
+
+      if (notStartOrEnd = true) {
+        var lastY = yCordinates[i - 1];
+      }
+
+      if (this.layout == 'wavy' && notStartOrEnd) {
+        nextString = ` C ${xObj.x1} ${lastY}, ${xObj.x2} ${correctY}, ${xObj} ${correctY}`
+      }
+      
+      if (this.layout == 'spikey' && notStartOrEnd) {
+        nextString = ` L ${xObj.x} ${correctY}`;
+      }
+
+      // If first round in the Loop change the string output
+      if (i === 0) {
+        nextString = `M ${xObj.x} ${this.core.max - y}`;
+      }
+
+      string += nextString;
+    });
+
+    return path;
+  }
+
+
+  /**
+   * Main methods
+   */
+  
+  upgradeData() {
+    this.data.forEach( obj => {
+      var combinedValues = 0;
+      obj.compared_percentages = [];
+      obj.total_percentages = [];
+      obj.values.forEach(nr => combinedValues += nr);
+      obj.values.forEach(nr => {
+        var percentages = [(nr / combinedValues) * 100, (nr / this.core.max) * 100];
+
+        // Help from: https://stackoverflow.com/questions/11832914/how-to-round-to-at-most-2-decimal-places-if-necessary/18358056#18358056
+        var rounded = percentages.map(perNr => this.turnToTwoDigits(perNr));
+
+        obj.compared_percentages.push(rounded[0] + "%");
+        obj.total_percentages.push(rounded[1] + "%");
+      });
+
+      obj.percentage = ((combinedValues / this.core.max) * 100) + "%";
+    });
+  }
+
+
   buildSVG() {
     var graphSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     var width = this.core.svg_width;
@@ -234,7 +306,7 @@ class Infograph extends HTMLElement {
       Use X from start point on x1
         And y1 should maybe be + 10 or something
       */
-     var y1 = ;
+   
      return `
       C 0 ${y1}
      `;
