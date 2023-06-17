@@ -93,18 +93,28 @@ class Infograph extends HTMLElement {
   }
 
   get gatherColors() {
-    return [
-      this.getAttribute('stroke-color'), 
-      this.getAttribute('fill-color-one'),
-      this.getAttribute('fill-color-two')
-    ];
+    return {
+      stroke: this.getAttribute('stroke-color'), 
+      fill_one: this.getAttribute('fill-color-one'),
+      fill_two: this.getAttribute('fill-color-two')
+    };
   }
 
   /**
    * @param {array} colors - Array of color values (#HEX) that will be verified.
    */
   set createColors(colors) {
-    
+    /**
+     * Check each string if:
+     * 6 or 7 length
+     *  If 7 the first letter needs to be a #
+     * 
+     * Is there a letter that is not [a,b,c,d,e,f]?
+     *  (use a1.some(a = a2.includes(a)))
+     * 
+     * Is there a value for stroke/full one / full two
+     *  If not give it transparent
+     */
   }
 
   /**
