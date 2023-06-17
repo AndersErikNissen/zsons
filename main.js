@@ -92,8 +92,23 @@ class Infograph extends HTMLElement {
     return ratio;
   }
 
+  get gatherColors() {
+    return [
+      this.getAttribute('stroke-color'), 
+      this.getAttribute('fill-color-one'),
+      this.getAttribute('fill-color-two')
+    ];
+  }
+
   /**
-   * @param {array} array - Array of data to compare, to set the core values 
+   * @param {array} colors - Array of color values (#HEX) that will be verified.
+   */
+  set createColors(colors) {
+    
+  }
+
+  /**
+   * @param {array} array - Array of data to compare, to set the core values.
    */
   set coreData(array) {
     var maxValue = Math.max.apply(null, array.map(obj => obj.values).flat());
@@ -229,36 +244,57 @@ class Infograph extends HTMLElement {
 
   createPath(yCordinates, addFilled = true) {
     var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    var lastX = this.core.x_cordinates.slice(-1).x;
+    var lastY = yCordinates.slice(-1);
     var string = '';
     
     yCordinates.forEach((y, i) => {
       var xObj = this.x_cordinates[i];
       var correctY = this.core.max - y;
-      var notStartOrEnd = true;
-      var nextString;
-
-      // If index is first or last 
-      if (i === 0 || i === (yCordinates.length - 1)) notStartOrEnd = false;
-
-      if (notStartOrEnd = true) {
-        var lastY = yCordinates[i - 1];
-      }
-
-      if (this.layout == 'wavy' && notStartOrEnd) {
-        nextString = ` C ${xObj.x1} ${lastY}, ${xObj.x2} ${correctY}, ${xObj} ${correctY}`
-      }
+      var nextString = `M ${xObj.x} ${this.core.max - y}`;
       
-      if (this.layout == 'spikey' && notStartOrEnd) {
-        nextString = ` L ${xObj.x} ${correctY}`;
-      }
+      // If not the first or last cordinate
+      if (i !== 0 || i !== (yCordinates.length - 1)) {
+        var previousY = yCordinates[i - 1];
 
-      // If first round in the Loop change the string output
-      if (i === 0) {
-        nextString = `M ${xObj.x} ${this.core.max - y}`;
+        if (this.layout == 'wavy') {
+          nextString = ` C ${xObj.x1} ${previousY}, ${xObj.x2} ${correctY}, ${xObj.x} ${correctY}`
+        }
+        
+        if (this.layout == 'spikey') {
+          nextString = ` L ${xObj.x} ${correctY}`;
+        }
       }
 
       string += nextString;
     });
+
+    // Finishing the path to the right side of the SVG
+    if (this.core.x_amount > yCordinates) {
+      string += `L ${lastX} ${lastY}`;
+    }
+
+    path.setAttribute('d', string);
+    // COLORS!!!!
+
+    // Return if not fill
+    if (!addFilled) return path;
+
+    var SVGHeight = this.core.max;
+    string += `L ${lastX} ${SVGHeight} L 0 ${SVGHeight} Z`;
+    
+    var filledPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    filledPath.setAttribute('d', string);
+
+
+    
+    path.setAttribute('d', pathString);
+    path.setAttribute('fill', 'transparent');
+    path.setAttribute('stroke', 'black')
+
+    fullPath.setAttribute('d', fullPathString);
+    fullPath.setAttribute('fill', 'url(#test-gradient)');
+    fullPath.setAttribute('stroke', 'transparent');
 
     return path;
   }
