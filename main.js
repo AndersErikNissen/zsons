@@ -237,6 +237,7 @@ class Infograph extends HTMLElement {
       var notStartOrEnd = true;
       var nextString;
 
+      // If index is first or last 
       if (i === 0 || i === (yCordinates.length - 1)) notStartOrEnd = false;
 
       if (notStartOrEnd = true) {
