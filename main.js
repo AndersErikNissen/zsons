@@ -33,6 +33,8 @@ class Infograph extends HTMLElement {
     this.coreData = this.data;
     this.upgradeData();
 
+    this.createColors = this.gatherColors;
+
     this.buildSVG();
     console.log("Data", this.data)
     console.log("Core", this.core)
@@ -83,7 +85,7 @@ class Infograph extends HTMLElement {
   }
 
   get curveRatio() {
-    var attribute = Number(this.getAttribute('curve-level') ? this.getAttribute('curve-level') : 1);
+    var attribute = isNaN(Number(this.getAttribute('curve-level'))) ? 1 : Number(this.getAttribute('curve-level'));
     var ratio = 1;
 
     if (attribute === 1) ratio = 0.1;
@@ -104,17 +106,26 @@ class Infograph extends HTMLElement {
    * @param {array} colors - Array of color values (#HEX) that will be verified.
    */
   set createColors(colors) {
-    /**
-     * Check each string if:
-     * 6 or 7 length
-     *  If 7 the first letter needs to be a #
-     * 
-     * Is there a letter that is not [a,b,c,d,e,f]?
-     *  (use a1.some(a = a2.includes(a)))
-     * 
-     * Is there a value for stroke/full one / full two
-     *  If not give it transparent
-     */
+    var validatedColors = {};
+
+    for(const key in colors) {
+      var returnValue = 'transparent';
+      var keyValue = colors[key];
+
+      if(!!keyValue) {
+        // Does the string start with # followed by 6 allowed letters(or numbers) or is there 6 allowed letters(or numbers)?
+        var isAColor = true || keyValue.match(/^[#a-fA-F0-9][a-fA-F0-9]{6}|[a-fA-F0-9]{6}/);
+  
+        if (!!isAColor) {
+          if (keyValue.charAt(0) !== '#') keyValue += "#" + keyValue;
+          returnValue = keyValue;
+        }
+      }
+
+      validatedColors[key] = returnValue;
+    }
+
+    this.colors = validatedColors;
   }
 
   /**
@@ -158,7 +169,8 @@ class Infograph extends HTMLElement {
 
     for(let i = 0; i < amountOfXs; i++) {
       var xBase = SVGWidth / amountOfXs;
-      var x = xBase * i;
+      var x = xBase * (i + 1);
+      
       var x1 = (x - xBase) + (xBase * this.curveRatio);
       var x2 = x - (xBase * this.curveRatio);
       
@@ -173,8 +185,12 @@ class Infograph extends HTMLElement {
         returnObj.x1 = this.turnToTwoDigits(x1);
       }
 
+      if (i === 0) {
+
+      }
       xCordinates.push(returnObj);
     }
+    console.log(xCordinates)
     
     this.setAttribute('max', max);
     this.setAttribute('half', half);
@@ -254,17 +270,17 @@ class Infograph extends HTMLElement {
 
   createPath(yCordinates, addFilled = true) {
     var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    var lastX = this.core.x_cordinates.slice(-1).x;
+    var lastX = this.core.x_cordinates[this.core.x_cordinates.length - 1].x;
     var lastY = yCordinates.slice(-1);
     var string = '';
-    
+
     yCordinates.forEach((y, i) => {
-      var xObj = this.x_cordinates[i];
+      var xObj = this.core.x_cordinates[i];
       var correctY = this.core.max - y;
       var nextString = `M ${xObj.x} ${this.core.max - y}`;
-      
-      // If not the first or last cordinate
-      if (i !== 0 || i !== (yCordinates.length - 1)) {
+ 
+      // If not the first
+      if (i !== 0) {
         var previousY = yCordinates[i - 1];
 
         if (this.layout == 'wavy') {
@@ -283,30 +299,25 @@ class Infograph extends HTMLElement {
     if (this.core.x_amount > yCordinates) {
       string += `L ${lastX} ${lastY}`;
     }
-
     path.setAttribute('d', string);
-    // COLORS!!!!
+    path.setAttribute('stroke', this.colors.stroke);
+    path.setAttribute('fill', 'transparent');
+    path.setAttribute('stroke-width', '3%');
 
-    // Return if not fill
-    if (!addFilled) return path;
-
-    var SVGHeight = this.core.max;
-    string += `L ${lastX} ${SVGHeight} L 0 ${SVGHeight} Z`;
     
+    // Return if no need for a filled background
+    if (!addFilled) return [path];
+    
+    var SVGHeight = this.core.max;
+    string += ` L ${lastX} ${SVGHeight} L 0 ${SVGHeight} Z`;
+    
+    console.log(string)
     var filledPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     filledPath.setAttribute('d', string);
+    filledPath.setAttribute('stroke', this.colors.stroke);
+    filledPath.setAttribute('stroke', this.colors.stroke);
 
-
-    
-    path.setAttribute('d', pathString);
-    path.setAttribute('fill', 'transparent');
-    path.setAttribute('stroke', 'black')
-
-    fullPath.setAttribute('d', fullPathString);
-    fullPath.setAttribute('fill', 'url(#test-gradient)');
-    fullPath.setAttribute('stroke', 'transparent');
-
-    return path;
+    return [path, filledPath];
   }
 
 
@@ -336,32 +347,19 @@ class Infograph extends HTMLElement {
 
 
   buildSVG() {
-    var graphSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    var graphSVG = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     var width = this.core.svg_width;
     var height = this.core.max;
 
-    graphSvg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-    graphSvg.setAttribute('width', width);
-    graphSvg.setAttribute('height', height);
+    graphSVG.setAttribute('viewBox', `0 0 ${width} ${height}`);
+    graphSVG.setAttribute('width', width);
+    graphSVG.setAttribute('height', height);
 
-    var createLine = (x, y) => {
-      return ' L' + x + ' ' + (this.core.max - y);
-    };
+    this.data.forEach(obj => {
+      this.createPath(obj.values, false).forEach(path => graphSVG.appendChild(path));
+    })
 
-    var createCurve = (x, y) => {
-      /*
-      Use X from start point on x1
-        And y1 should maybe be + 10 or something
-      */
-   
-     return `
-      C 0 ${y1}
-     `;
-
-      return ' C 0 ' + startCurve + ', ' + endCurve + ', ' + x + ' ' + (this.core.max - y);
-    }
-
-
+/*
     this.data.forEach(obj => {
       var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       var fullPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -393,19 +391,19 @@ class Infograph extends HTMLElement {
       fullPath.setAttribute('fill', 'url(#test-gradient)');
       fullPath.setAttribute('stroke', 'transparent');
 
-      graphSvg.append(fullPath, path);
+      graphSVG.append(fullPath, path);
     });
-
+*/
      // Styling
      var defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
      var gradientConfig = [
        {
          offset: '0%',
-         'stop-color': 'red'
+         'stop-color': this.colors.fill_one
        },
        {
          offset: '100%',
-         'stop-color': 'red',
+         'stop-color': this.colors.fill_two,
          'stop-opacity': 0
        }
      ];
@@ -418,10 +416,10 @@ class Infograph extends HTMLElement {
     };
      
      defs.appendChild(this.createGradient('test-gradient', gradientConfig, gradientUnits));
-     graphSvg.appendChild(defs);
+     graphSVG.appendChild(defs);
 
 
-    this.shadowRoot.querySelector('#svg').appendChild(graphSvg);
+    this.shadowRoot.querySelector('#svg').appendChild(graphSVG);
   }
 
 }
