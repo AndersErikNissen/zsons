@@ -190,7 +190,6 @@ class Infograph extends HTMLElement {
       }
       xCordinates.push(returnObj);
     }
-    console.log(xCordinates)
     
     this.setAttribute('max', max);
     this.setAttribute('half', half);
