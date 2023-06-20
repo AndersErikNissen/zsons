@@ -168,26 +168,20 @@ class Infograph extends HTMLElement {
     var xCordinates = [];
 
     for(let i = 0; i < amountOfXs; i++) {
-      var xBase = SVGWidth / amountOfXs;
-      var x = xBase * (i + 1);
+      var xBase = SVGWidth / (amountOfXs - 1);
+      var ratio = xBase * this.curveRatio
+      var x = xBase * i;
       
-      var x1 = (x - xBase) + (xBase * this.curveRatio);
-      var x2 = x - (xBase * this.curveRatio);
-      
+      var x1 = (xBase * (i - 1)) + ratio;
+      var x2 = x - ratio;
       if (i === (amountOfXs - 1)) x = SVGWidth;
 
       var returnObj = {
         x: this.turnToTwoDigits(x),
+        x1: this.turnToTwoDigits(x1),
         x2: this.turnToTwoDigits(x2)
       };
 
-      if (i !== 0) {
-        returnObj.x1 = this.turnToTwoDigits(x1);
-      }
-
-      if (i === 0) {
-
-      }
       xCordinates.push(returnObj);
     }
     
@@ -270,7 +264,7 @@ class Infograph extends HTMLElement {
   createPath(yCordinates, addFilled = true) {
     var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     var lastX = this.core.x_cordinates[this.core.x_cordinates.length - 1].x;
-    var lastY = yCordinates.slice(-1);
+    var lastY = this.core.max - yCordinates.slice(-1);
     var string = '';
 
     yCordinates.forEach((y, i) => {
@@ -280,7 +274,7 @@ class Infograph extends HTMLElement {
  
       // If not the first
       if (i !== 0) {
-        var previousY = yCordinates[i - 1];
+        var previousY = this.core.max - yCordinates[i - 1];
 
         if (this.layout == 'wavy') {
           nextString = ` C ${xObj.x1} ${previousY}, ${xObj.x2} ${correctY}, ${xObj.x} ${correctY}`
@@ -294,15 +288,15 @@ class Infograph extends HTMLElement {
       string += nextString;
     });
 
-    // Finishing the path to the right side of the SVG
-    if (this.core.x_amount > yCordinates) {
+    // If the data is shorter than the larges finish the path with a line across horizontally.
+    if (this.core.x_amount > yCordinates.length) {
       string += `L ${lastX} ${lastY}`;
     }
+
     path.setAttribute('d', string);
     path.setAttribute('stroke', this.colors.stroke);
     path.setAttribute('fill', 'transparent');
     path.setAttribute('stroke-width', '3%');
-
     
     // Return if no need for a filled background
     if (!addFilled) return [path];
@@ -310,13 +304,13 @@ class Infograph extends HTMLElement {
     var SVGHeight = this.core.max;
     string += ` L ${lastX} ${SVGHeight} L 0 ${SVGHeight} Z`;
     
-    console.log(string)
     var filledPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     filledPath.setAttribute('d', string);
-    filledPath.setAttribute('stroke', this.colors.stroke);
-    filledPath.setAttribute('stroke', this.colors.stroke);
+    filledPath.setAttribute('fill', 'url(#test-gradient)')
+    filledPath.setAttribute('stroke', 'transparent');
+    filledPath.setAttribute('stroke-width', '3%');
 
-    return [path, filledPath];
+    return [filledPath, path];
   }
 
 
@@ -355,7 +349,7 @@ class Infograph extends HTMLElement {
     graphSVG.setAttribute('height', height);
 
     this.data.forEach(obj => {
-      this.createPath(obj.values, false).forEach(path => graphSVG.appendChild(path));
+      this.createPath(obj.values, true).forEach(path => graphSVG.appendChild(path));
     })
 
 /*
