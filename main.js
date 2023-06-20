@@ -296,7 +296,7 @@ class Infograph extends HTMLElement {
     path.setAttribute('d', string);
     path.setAttribute('stroke', this.colors.stroke);
     path.setAttribute('fill', 'transparent');
-    path.setAttribute('stroke-width', '3%');
+    path.setAttribute('stroke-width', '2px');
     
     // Return if no need for a filled background
     if (!addFilled) return [path];
@@ -308,10 +308,19 @@ class Infograph extends HTMLElement {
     filledPath.setAttribute('d', string);
     filledPath.setAttribute('fill', 'url(#test-gradient)')
     filledPath.setAttribute('stroke', 'transparent');
-    filledPath.setAttribute('stroke-width', '3%');
 
     return [filledPath, path];
   }
+
+  /**
+   * 
+   * 
+   * NEXT THING!!!
+   * 
+   * Setup up things like the gradient (maybe have a couple of options, should it be tranparent or full color)?
+   * Have option for full of the same color
+   * Turn on/off the option to have a filled background
+   */
 
 
   /**
