@@ -361,41 +361,6 @@ class Infograph extends HTMLElement {
       this.createPath(obj.values, true).forEach(path => graphSVG.appendChild(path));
     })
 
-/*
-    this.data.forEach(obj => {
-      var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      var fullPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      var pathString = 'M0 ' + (this.core.max - obj.values[0]);
-      var lastX = this.core.x_cordinates.slice(-1);
-      var lastY = obj.values.slice(-1);
-
-      // Add lines for each value
-      obj.values.forEach((value, i) => {
-        pathString += createLine(this.core.x_cordinates[i], value);
-      });
-
-      // If the value amount is less than the max, then create a horizontal line to the end of the SVG.
-      if (this.core.x_amount > obj.values.length) {
-        pathString += createLine(lastX, lastY);
-      }
-
-      // Complete path along the bottom of the SVG
-      var fullPathString = pathString;
-
-      fullPathString += ' L' + lastX + ' ' + height;
-      fullPathString += ' L' + 0 + ' ' + height + ' Z';
-      
-      path.setAttribute('d', pathString);
-      path.setAttribute('fill', 'transparent');
-      path.setAttribute('stroke', 'black')
-
-      fullPath.setAttribute('d', fullPathString);
-      fullPath.setAttribute('fill', 'url(#test-gradient)');
-      fullPath.setAttribute('stroke', 'transparent');
-
-      graphSVG.append(fullPath, path);
-    });
-*/
      // Styling
      var defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
      var gradientConfig = [
@@ -406,7 +371,7 @@ class Infograph extends HTMLElement {
        {
          offset: '100%',
          'stop-color': this.colors.fill_two,
-         'stop-opacity': 0
+         'stop-opacity': 1
        }
      ];
 
