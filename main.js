@@ -97,24 +97,39 @@ class Infograph extends HTMLElement {
   get gatherColors() {
     return {
       stroke: this.getAttribute('stroke-color'), 
-      fill_one: this.getAttribute('fill-color-one'),
-      fill_two: this.getAttribute('fill-color-two')
+      fill: this.getAttribute('fill-colors')
     };
+  }
+
+  getTheme() {
+
   }
 
   /**
    * @param {array} colors - Array of color values (#HEX) that will be verified.
    */
   set createColors(colors) {
+
+    // Build in colors
+    var defaultColors = {
+
+    }
+
+
     var validatedColors = {};
 
     for(const key in colors) {
       var returnValue = 'transparent';
       var keyValue = colors[key];
 
+      if (key ==='fill') {
+        var colorArray = key.split(',');
+        if (colorArray)
+      }
+
       if(!!keyValue) {
         // Does the string start with # followed by 6 allowed letters(or numbers) or is there 6 allowed letters(or numbers)?
-        var isAColor = true || keyValue.match(/^[#a-fA-F0-9][a-fA-F0-9]{6}|[a-fA-F0-9]{6}/);
+        var isAColor = keyValue.match(/^[#a-fA-F0-9][a-fA-F0-9]{6}|[a-fA-F0-9]{6}/);
   
         if (!!isAColor) {
           if (keyValue.charAt(0) !== '#') keyValue += "#" + keyValue;
@@ -233,6 +248,21 @@ class Infograph extends HTMLElement {
 
   turnToTwoDigits(nr) {
     return +(Math.round(nr + "e+2") + "e-2");
+  }
+
+  _setDefaultThemes() {
+
+    this.themes = {
+      default: {
+
+      },
+      peachy: {
+
+      },
+      rainbow: {
+
+      }
+    }
   }
   
   /**
