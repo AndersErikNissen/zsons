@@ -29,7 +29,7 @@ class Infograph extends HTMLElement {
   }
   
   connectedCallback() {
-    this.dataFromForm = this.shadowRoot.querySelector('slot[name="data"]').assignedNodes()[0];
+    //this.dataFromForm = this.shadowRoot.querySelector('slot[name="data"]').assignedNodes()[0];
     this.coreData = this.data;
     this.upgradeData();
 
@@ -55,9 +55,10 @@ class Infograph extends HTMLElement {
     template.innerHTML = `
       <style>${this._style()}</style>
       <div class="hidden">
-        <slot name="data" />
+        <slot id="form" name="form" />
       </div>
       <div id="svg"></div>
+      <slot id="json" name="json" />
     `;
 
     return template;
@@ -101,16 +102,70 @@ class Infograph extends HTMLElement {
     };
   }
 
-  get getTheme() {
-    var attribute = this.getAttribute('theme');
-    if (!attribute || attribute.length === 0) return false;
+  get data() {
+    var validForm;
+    var form = this.shadowRoot.querySelector('#form').assignedNodes()[0];
+    if (form.tagName !== 'FORM') form = false;
 
-    
+    var validJSON = false;
+    var json = this.shadowRoot.querySelector('#json').assignedNodes()[0];
+    if (json.tagName !== 'SCRIPT') json = false;
+
+    if (form) {
+      validForm = new FormData(form).entries();
+    }
+
+    if (json) {
+      try {
+        validJSON = JSON.parse(json.innerHTML);
+        
+        if(!Array.isArray(validJSON)) {
+          json = false;
+        }
+      } catch(e) {
+        json = false;
+      }
+    }
+
+    // what data to use?
+    // validate the data from each data-source, so we are using data that can be validated.
+
+    console.log("Valid JSON",validJSON)
+
+/*
+    var 
+      formattedArray = [],
+      data = form.tagName === 'FORM' 
+        ? new FormData(form).entries() 
+        : false;
+
+    if (!data) return;
+
+    for (const [name, value] of data) {
+      var i = formattedArray.findIndex( existingObject => existingObject.name === name);
+      var obj = i === -1 
+        ? {
+            name: name,
+            label: name.charAt(0).toUpperCase() + name.slice(1),
+            values: []
+          }
+        : formattedArray[i];
+  
+      if(!isNaN(Number(value))) obj.values.push(Number(value));
+      if (i === -1) formattedArray.push(obj);
+    }
+
+    this.data = formattedArray;
+*/
+
+    console.log("new Data",form,json)
   }
+
 
   /**
    * @param {array} colors - Array of color values (#HEX) that will be verified.
    */
+
   set createColors(colors) {
 
     // Build in colors
@@ -127,7 +182,7 @@ class Infograph extends HTMLElement {
 
       if (key ==='fill') {
         var colorArray = key.split(',');
-        if (colorArray)
+        if (colorArray) {}
       }
 
       if(!!keyValue) {
@@ -251,6 +306,10 @@ class Infograph extends HTMLElement {
 
   turnToTwoDigits(nr) {
     return +(Math.round(nr + "e+2") + "e-2");
+  }
+
+  _getColors(object) {
+
   }
   
   /**

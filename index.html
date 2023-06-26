@@ -10,7 +10,7 @@
 <body>
   <aenother-infograph layout="wavy" curve-level="2" stroke-color="#000000" fill-color-two="#FFFFFF" fill-color-one="#ee3aa3">
     <span>Im content for the graph</span>
-    <form slot="data">
+    <form slot="form">
       <input type="hidden" name="january" value="100">
       <input type="hidden" name="january" value="50">
       <input type="hidden" name="january" value="100">
@@ -32,8 +32,33 @@
       <!--
 
       -->
+
     </form>
+    <script slot="json" type="application/json">
+      [
+        {
+          "label": "December",
+          "values": [123,22,33,44,55],
+          "colors": {
+            "stroke": "#0e0e0e",
+            "fill": ["#FFFFFF","67773e"]
+          }
+        },
+        {
+          "label": "November",
+          "values": [12,89,189,44,55],
+          "colors": {
+            "stroke": "#898989"
+          }
+        },
+        {
+          "label": "October",
+          "values": [50,84,100]
+        }
+      ]
+    </script>
   </aenother-infograph>
   <script src="/main.js" defer></script>
+  
 </body>
 </html>
