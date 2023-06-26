@@ -101,8 +101,11 @@ class Infograph extends HTMLElement {
     };
   }
 
-  getTheme() {
+  get getTheme() {
+    var attribute = this.getAttribute('theme');
+    if (!attribute || attribute.length === 0) return false;
 
+    
   }
 
   /**
@@ -248,21 +251,6 @@ class Infograph extends HTMLElement {
 
   turnToTwoDigits(nr) {
     return +(Math.round(nr + "e+2") + "e-2");
-  }
-
-  _setDefaultThemes() {
-
-    this.themes = {
-      default: {
-
-      },
-      peachy: {
-
-      },
-      rainbow: {
-
-      }
-    }
   }
   
   /**
