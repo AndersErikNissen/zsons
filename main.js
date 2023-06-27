@@ -104,7 +104,6 @@ class Infograph extends HTMLElement {
 
   get data() {
     var data = [];
-    var validForm = false;
     var validJSON = false;
     var formNode = this.shadowRoot.querySelector('#form').assignedNodes()[0];
     var jsonNode = this.shadowRoot.querySelector('#json').assignedNodes()[0];
@@ -168,6 +167,8 @@ class Infograph extends HTMLElement {
 
                   if (Array.isArray(obj.colors.fill) && !validColorObj.hasOwnProperty('fill')) {
                     var validatedColors = obj.colors.fill.filter(color => {
+                      if(typeof color !== 'string') return;
+
                       if (color.match(/^#?[a-fA-F0-9]{6}$/)) {
                         return color.charAt(0) === '#' 
                           ? color 
@@ -189,21 +190,25 @@ class Infograph extends HTMLElement {
     
     // If we have a <form> and no data have been added to our data-variable.
     if (formNode && data.length === 0) {
-      validForm = new FormData(form).entries();
+      var validatedForm = [];
+      var validForm = new FormData(form).entries();
 
+      for (const [name, value] of data) {
+        var i = validatedForm.findIndex( existingObject => existingObject.name === name);
 
+        // If the object doesn't exists then add it.
+        var obj = i === -1 
+          ? {
+              name: name,
+              label: name.charAt(0).toUpperCase() + name.slice(1),
+              values: []
+            }
+          : validatedForm[i];
+    
+        if(!isNaN(Number(value))) obj.values.push(Number(value));
+        if (i === -1) validatedForm.push(obj);
+      }
     }
-    // if json
-    // validate json
-      // Needs to be json, an array with objects that contain label, values, (colors)
-    // is the json valid?
-    // check, for objects and the some of the keys (label,values)
-    // skip form if valid json data
-    // do we have form?
-    // if form fails then no data
-
-    // what data to use?
-    // validate the data from each data-source, so we are using data that can be validated.
 
     console.log("Valid JSON",validJSON)
 
