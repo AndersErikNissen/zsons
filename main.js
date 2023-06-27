@@ -182,11 +182,12 @@ class Infograph extends HTMLElement {
                   }
                 }
 
+                
                 if (validColorObj.hasOwnProperty('outline') || validColorObj.hasOwnProperty('fill')) {
                   returnObject.colors = validColorObj;
                 }
               };
-
+              
               data.push(returnObject);
             }
           });
@@ -197,23 +198,31 @@ class Infograph extends HTMLElement {
     // If we have a <form> and no data have been added to our data-variable.
     if (formNode && data.length === 0) {
       var validForm = new FormData(form).entries();
-
+      
       for (const [name, value] of validForm) {
         var i = data.findIndex( existingObject => existingObject.name === name);
-
+        
         // If the object doesn't exists then add it.
         var obj = i === -1 
-          ? {
-              name: name,
-              label: name.charAt(0).toUpperCase() + name.slice(1),
-              values: []
-            }
-          : data[i];
-    
+        ? {
+          name: name,
+          label: name.charAt(0).toUpperCase() + name.slice(1),
+          values: []
+        }
+        : data[i];
+        
         if(!isNaN(Number(value))) obj.values.push(Number(value));
         if (i === -1) data.push(obj);
       }
     }
+
+    /**
+     * Maybe ADD THE COLORS TO OBJECTS that dont have a .colors object.
+     * meaning:
+     * If there color assiated, then add:
+     * theme colors if there are any?
+     * the default color
+     */
 
     return data.length > 0 ? data : false;
   }
