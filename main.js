@@ -138,6 +138,8 @@ class Infograph extends HTMLElement {
                 })
               };
 
+              if (returnObject.values.length === 0) return;
+
               // Validate the color object
               if (obj.hasOwnProperty('colors')) {
                 if (typeof obj.colors === 'object') {
@@ -165,12 +167,20 @@ class Infograph extends HTMLElement {
                   }
 
                   if (Array.isArray(obj.colors.fill) && !validColorObj.hasOwnProperty('fill')) {
+                    var validatedColors = obj.colors.fill.filter(color => {
+                      if (color.match(/^#?[a-fA-F0-9]{6}$/)) {
+                        return color.charAt(0) === '#' 
+                          ? color 
+                          : '#' + color;
+                      }
+                    });
                     
+                    if (validatedColors.length > 0) validColorObj.fill = validatedColors;
                   }
                 }
               };
 
-              if (returnObject.values.length > 0) data.push(returnObject);
+              data.push(returnObject);
             }
           });
         }
