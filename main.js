@@ -103,29 +103,94 @@ class Infograph extends HTMLElement {
   }
 
   get data() {
-    var validForm;
-    var form = this.shadowRoot.querySelector('#form').assignedNodes()[0];
-    if (form.tagName !== 'FORM') form = false;
-
+    var data = [];
+    var validForm = false;
     var validJSON = false;
-    var json = this.shadowRoot.querySelector('#json').assignedNodes()[0];
-    if (json.tagName !== 'SCRIPT') json = false;
-
-    if (form) {
-      validForm = new FormData(form).entries();
-    }
-
-    if (json) {
-      try {
-        validJSON = JSON.parse(json.innerHTML);
-        
-        if(!Array.isArray(validJSON)) {
-          json = false;
-        }
+    var formNode = this.shadowRoot.querySelector('#form').assignedNodes()[0];
+    var jsonNode = this.shadowRoot.querySelector('#json').assignedNodes()[0];
+    
+    if (formNode.tagName !== 'FORM') formNode = false;
+    if (jsonNode.tagName !== 'SCRIPT') jsonNode = false;
+    
+    if (jsonNode) {
+       try {
+        validJSON = JSON.parse(jsonNode.innerHTML);
       } catch(e) {
-        json = false;
+        console.error('The provided JSON is not valid', e);
+        jsonNode = false;
+      }
+      
+      if (validJSON) {
+        if (Array.isArray(validJSON)) {
+          validJSON.forEach(obj => {
+            if (typeof obj === 'object') {
+              if (!obj.hasOwnProperty('label')) return;
+              if (!obj.hasOwnProperty('values')) return;
+              if (!Array.isArray(obj.values)) return;
+              if (!obj.values.length > 0) return;
+
+              var returnObject = {
+                label: obj.label,
+                values: obj.values.filter(value => {
+                  if (!isNaN(Number(value))) {
+                    return Number(value);
+                  }
+                })
+              };
+
+              // Validate the color object
+              if (obj.hasOwnProperty('colors')) {
+                if (typeof obj.colors === 'object') {
+                  var validColorObj = {};
+
+                  
+                  if (obj.colors.hasOwnProperty('outline')) {
+                    if (typeof obj.colors.outline === 'string') {
+                      if (obj.colors.outline.match(/^#?[a-fA-F0-9]{6}$/)) {
+                        validColorObj.outline = obj.colors.outline.charAt(0) === '#' 
+                          ? obj.colors.outline 
+                          : '#' + obj.colors.outline;;
+                      }
+                    }
+                  }
+                }
+
+                if (obj.colors.hasOwnProperty('fill')) {
+                  if (typeof obj.colors.fill === 'string') {
+                    if (obj.colors.fill.match(/^#?[a-fA-F0-9]{6}$/)) {
+                      validColorObj.fill = obj.colors.fill.charAt(0) === '#' 
+                        ? obj.colors.fill 
+                        : '#' + obj.colors.fill;
+                    };
+                  }
+
+                  if (Array.isArray(obj.colors.fill) && !validColorObj.hasOwnProperty('fill')) {
+                    
+                  }
+                }
+              };
+
+              if (returnObject.values.length > 0) data.push(returnObject);
+            }
+          });
+        }
       }
     }
+    
+    // If we have a <form> and no data have been added to our data-variable.
+    if (formNode && data.length === 0) {
+      validForm = new FormData(form).entries();
+
+
+    }
+    // if json
+    // validate json
+      // Needs to be json, an array with objects that contain label, values, (colors)
+    // is the json valid?
+    // check, for objects and the some of the keys (label,values)
+    // skip form if valid json data
+    // do we have form?
+    // if form fails then no data
 
     // what data to use?
     // validate the data from each data-source, so we are using data that can be validated.
@@ -187,7 +252,7 @@ class Infograph extends HTMLElement {
 
       if(!!keyValue) {
         // Does the string start with # followed by 6 allowed letters(or numbers) or is there 6 allowed letters(or numbers)?
-        var isAColor = keyValue.match(/^[#a-fA-F0-9][a-fA-F0-9]{6}|[a-fA-F0-9]{6}/);
+        var isAColor = keyValue.match(/^#?[a-fA-F0-9]{6}$/);
   
         if (!!isAColor) {
           if (keyValue.charAt(0) !== '#') keyValue += "#" + keyValue;
