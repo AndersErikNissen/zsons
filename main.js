@@ -139,11 +139,12 @@ class Infograph extends HTMLElement {
 
               if (returnObject.values.length === 0) return;
 
-              // Validate the color object
+              // Validate the colors object
+              var validColorObj = {};
+
               if (obj.hasOwnProperty('colors')) {
                 if (typeof obj.colors === 'object') {
-                  var validColorObj = {};
-
+                  
                   
                   if (obj.colors.hasOwnProperty('outline')) {
                     if (typeof obj.colors.outline === 'string') {
@@ -166,18 +167,23 @@ class Infograph extends HTMLElement {
                   }
 
                   if (Array.isArray(obj.colors.fill) && !validColorObj.hasOwnProperty('fill')) {
-                    var validatedColors = obj.colors.fill.filter(color => {
-                      if(typeof color !== 'string') return;
+                    var validatedColors = [];
+                    obj.colors.fill.forEach(color => {
+                      if (typeof color !== 'string') return;
 
                       if (color.match(/^#?[a-fA-F0-9]{6}$/)) {
-                        return color.charAt(0) === '#' 
+                        validatedColors.push(color.charAt(0) === '#' 
                           ? color 
-                          : '#' + color;
+                          : "#" + color
+                        );
                       }
                     });
-                    
                     if (validatedColors.length > 0) validColorObj.fill = validatedColors;
                   }
+                }
+
+                if (validColorObj.hasOwnProperty('outline') || validColorObj.hasOwnProperty('fill')) {
+                  returnObject.colors = validColorObj;
                 }
               };
 
@@ -190,11 +196,10 @@ class Infograph extends HTMLElement {
     
     // If we have a <form> and no data have been added to our data-variable.
     if (formNode && data.length === 0) {
-      var validatedForm = [];
       var validForm = new FormData(form).entries();
 
-      for (const [name, value] of data) {
-        var i = validatedForm.findIndex( existingObject => existingObject.name === name);
+      for (const [name, value] of validForm) {
+        var i = data.findIndex( existingObject => existingObject.name === name);
 
         // If the object doesn't exists then add it.
         var obj = i === -1 
@@ -203,42 +208,14 @@ class Infograph extends HTMLElement {
               label: name.charAt(0).toUpperCase() + name.slice(1),
               values: []
             }
-          : validatedForm[i];
+          : data[i];
     
         if(!isNaN(Number(value))) obj.values.push(Number(value));
-        if (i === -1) validatedForm.push(obj);
+        if (i === -1) data.push(obj);
       }
     }
 
-    console.log("Valid JSON",validJSON)
-
-/*
-    var 
-      formattedArray = [],
-      data = form.tagName === 'FORM' 
-        ? new FormData(form).entries() 
-        : false;
-
-    if (!data) return;
-
-    for (const [name, value] of data) {
-      var i = formattedArray.findIndex( existingObject => existingObject.name === name);
-      var obj = i === -1 
-        ? {
-            name: name,
-            label: name.charAt(0).toUpperCase() + name.slice(1),
-            values: []
-          }
-        : formattedArray[i];
-  
-      if(!isNaN(Number(value))) obj.values.push(Number(value));
-      if (i === -1) formattedArray.push(obj);
-    }
-
-    this.data = formattedArray;
-*/
-
-    console.log("new Data",form,json)
+    return data.length > 0 ? data : false;
   }
 
 
