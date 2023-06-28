@@ -34,7 +34,7 @@ class Infograph extends HTMLElement {
     this.upgradeData();
 
     this.createColors = this.gatherColors;
-
+    console.log("Colors", this.buildInColors)
     this.buildSVG();
     console.log("Data", this.data)
     console.log("Core", this.core)
@@ -95,11 +95,29 @@ class Infograph extends HTMLElement {
     return ratio;
   }
 
-  get gatherColors() {
-    return {
-      stroke: this.getAttribute('stroke-color'), 
-      fill: this.getAttribute('fill-colors')
+  get buildInColors() {
+    // Theme generated with help from https://coolors.co
+    var themes = {
+      oldschool: ["#0c1618","#004643","#faf4d3","#d1ac00","#f6be9a","#f4d6cc","#004643","#f4b860","#922d50","#501537"],
+      history: ["#04151f","#183a37","#efd6ac","#c44900","#432534","#cc5803", "#12100e", "#efd6ac", "#30321c", "#4a4b2f"],
+      bubblegum: ["#8fbfe0","#7c77b9","#1d8a99","#0bc9cd","#14fff7","#8b80f9","#cfbff7","#dd7373","#0bc9cd","#f9f5e3"],
+      wise: ["#5d737e","#55505c","#d4f4dd","#fe5f55","#fb5012","#f9ada0","#f9627d","#d4f4dd","#613f75","#426a5a"],
+      default: ["#F0FAF0","#D1F0D1","#B2E6B2","#93DC93","#74D274","#56C856","#3CB93C","#329A32","#287B28","#1E5C1E"]
     };
+
+    var themeName = 'default';
+    if (this.hasAttribute('theme')) {
+      var attributeValue = this.getAttribute('theme').toLowerCase();
+
+      if (themes.hasOwnProperty(attributeValue)) {
+        themeName = attributeValue;
+      }
+    }
+
+    return {
+      outline: "#EEEEEE",
+      fill: themes[themeName]
+    }
   }
 
   get data() {
@@ -107,9 +125,9 @@ class Infograph extends HTMLElement {
     var validJSON = false;
     var formNode = this.shadowRoot.querySelector('#form').assignedNodes()[0];
     var jsonNode = this.shadowRoot.querySelector('#json').assignedNodes()[0];
-    
-    if (formNode.tagName !== 'FORM') formNode = false;
-    if (jsonNode.tagName !== 'SCRIPT') jsonNode = false;
+
+    if (formNode && formNode.tagName !== 'FORM') formNode = false;
+    if (jsonNode && jsonNode.tagName !== 'SCRIPT') jsonNode = false;
     
     if (jsonNode) {
        try {
@@ -197,7 +215,7 @@ class Infograph extends HTMLElement {
     
     // If we have a <form> and no data have been added to our data-variable.
     if (formNode && data.length === 0) {
-      var validForm = new FormData(form).entries();
+      var validForm = new FormData(formNode).entries();
       
       for (const [name, value] of validForm) {
         var i = data.findIndex( existingObject => existingObject.name === name);
@@ -222,7 +240,9 @@ class Infograph extends HTMLElement {
      * If there color assiated, then add:
      * theme colors if there are any?
      * the default color
-     */
+    */
+
+    
 
     return data.length > 0 ? data : false;
   }
