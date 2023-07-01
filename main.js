@@ -233,58 +233,8 @@ class Infograph extends HTMLElement {
         if (i === -1) data.push(obj);
       }
     }
-
-    /**
-     * Maybe ADD THE COLORS TO OBJECTS that dont have a .colors object.
-     * meaning:
-     * If there color assiated, then add:
-     * theme colors if there are any?
-     * the default color
-    */
-
     
-
     return data.length > 0 ? data : false;
-  }
-
-
-  /**
-   * @param {array} colors - Array of color values (#HEX) that will be verified.
-   */
-
-  set createColors(colors) {
-
-    // Build in colors
-    var defaultColors = {
-
-    }
-
-
-    var validatedColors = {};
-
-    for(const key in colors) {
-      var returnValue = 'transparent';
-      var keyValue = colors[key];
-
-      if (key ==='fill') {
-        var colorArray = key.split(',');
-        if (colorArray) {}
-      }
-
-      if(!!keyValue) {
-        // Does the string start with # followed by 6 allowed letters(or numbers) or is there 6 allowed letters(or numbers)?
-        var isAColor = keyValue.match(/^#?[a-fA-F0-9]{6}$/);
-  
-        if (!!isAColor) {
-          if (keyValue.charAt(0) !== '#') keyValue += "#" + keyValue;
-          returnValue = keyValue;
-        }
-      }
-
-      validatedColors[key] = returnValue;
-    }
-
-    this.colors = validatedColors;
   }
 
   /**
@@ -347,7 +297,7 @@ class Infograph extends HTMLElement {
     this.setAttribute('max', max);
     this.setAttribute('half', half);
 
-    this.core = {
+    this.core = { 
       max: max,
       half: half,
       svg_width: SVGWidth,
