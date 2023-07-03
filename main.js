@@ -297,6 +297,9 @@ class Infograph extends HTMLElement {
     this.setAttribute('max', max);
     this.setAttribute('half', half);
 
+    // Set unique colors
+    
+
     this.core = { 
       max: max,
       half: half,
@@ -305,35 +308,6 @@ class Infograph extends HTMLElement {
       x_cordinates: xCordinates,
       min: 0
     };
-  }
-
-  /**
-   * @param {node} form - Proviode a <form> node, to set the data that needs to be handled by the CE.
-   */
-  set dataFromForm(form) {
-    var 
-      formattedArray = [],
-      data = form.tagName === 'FORM' 
-        ? new FormData(form).entries() 
-        : false;
-
-    if (!data) return;
-
-    for (const [name, value] of data) {
-      var i = formattedArray.findIndex( existingObject => existingObject.name === name);
-      var obj = i === -1 
-        ? {
-            name: name,
-            label: name.charAt(0).toUpperCase() + name.slice(1),
-            values: []
-          }
-        : formattedArray[i];
-  
-      if(!isNaN(Number(value))) obj.values.push(Number(value));
-      if (i === -1) formattedArray.push(obj);
-    }
-
-    this.data = formattedArray;
   }
 
   /**
@@ -352,7 +326,77 @@ class Infograph extends HTMLElement {
    * SVG methods
    */
 
-  createGradient(name, stops, units) {
+  buildGradients(name, stops, units) {
+
+    var gradientConfig = [
+      {
+        offset: '0%',
+        'stop-color': this.colors.fill_one
+      },
+      {
+        offset: '100%',
+        'stop-color': this.colors.fill_two,
+        'stop-opacity': 1
+      }
+    ];
+    
+    var gradientUnits = {
+      'x1': 0,
+      'x2': 0,
+      'y1': 0,
+      'y2': 1
+    };
+    defs.appendChild(this.createGradient('test-gradient', gradientConfig, gradientUnits));
+    
+    var defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+
+    var createGradient = (color) => {
+      var gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+      gradient.setAttribute('x1', 0);
+      gradient.setAttribute('x2', 0);
+      gradient.setAttribute('y1', 0);
+      gradient.setAttribute('y2', 1);
+  
+      [
+        {
+          offset: '0%',
+          'stop-color': color,
+          'stop-opacity': 0
+        },
+        {
+          offset: '100%',
+          'stop-color': color
+        }
+      ].forEach(config => {
+        var stopElement = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+
+        for (const key in config) {
+          stopElement.setAttribute(key, stop[key]);
+        }
+  
+        gradient.appendChild(stopElement);
+      });
+
+      defs.appendChild(gradient);
+    }
+
+    this.buildInColors.fill.forEach(fill => createGradient(fill));
+
+    // Create gradient for each buildIn
+    // Create gradient for each color given in the data
+    
+    // How to name them?
+    // Call gradient-color
+
+    // Dont build if they already exists
+
+    // Does gradient with the name exist?
+    // Create gradient
+    // Add x1,x2,y1,y2
+    // Create stops
+      // 0% and 100%
+
+
     var gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
     gradient.id = name;
 
@@ -374,7 +418,8 @@ class Infograph extends HTMLElement {
     return gradient;
   }
 
-  createPath(yCordinates, addFilled = true) {
+  createPath(dataObject, otherLoopIndex, addFilled = true) {
+    var yCordinates =dataObject.values;
     var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     var lastX = this.core.x_cordinates[this.core.x_cordinates.length - 1].x;
     var lastY = this.core.max - yCordinates.slice(-1);
@@ -406,8 +451,13 @@ class Infograph extends HTMLElement {
       string += `L ${lastX} ${lastY}`;
     }
 
+    // Find the correct color
+    var colorIndex = this.buildInColors.fill.length - (otherLoopIndex % this.buildInColors.fill.length);
+    var strokeColor = this.buildInColors.fill[colorIndex];
+    if (dataObject.hasOwnProperty('colors')) strokeColor = dataObject.colors.outline;
+    
     path.setAttribute('d', string);
-    path.setAttribute('stroke', this.colors.stroke);
+    path.setAttribute('stroke', strokeColor);
     path.setAttribute('fill', 'transparent');
     path.setAttribute('stroke-width', '2px');
     
@@ -470,8 +520,8 @@ class Infograph extends HTMLElement {
     graphSVG.setAttribute('width', width);
     graphSVG.setAttribute('height', height);
 
-    this.data.forEach(obj => {
-      this.createPath(obj.values, true).forEach(path => graphSVG.appendChild(path));
+    this.data.forEach((obj, i) => {
+      this.createPath(obj, i, true).forEach(path => graphSVG.appendChild(path));
     })
 
      // Styling
