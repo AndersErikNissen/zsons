@@ -32,6 +32,7 @@ class Infograph extends HTMLElement {
     //this.dataFromForm = this.shadowRoot.querySelector('slot[name="data"]').assignedNodes()[0];
     this.coreData = this.data;
     this.upgradeData();
+    this.buildGradients();
 
     this.createColors = this.gatherColors;
     console.log("Colors", this.buildInColors)
@@ -298,7 +299,14 @@ class Infograph extends HTMLElement {
     this.setAttribute('half', half);
 
     // Set unique colors
-    
+    var collectedColors = [];
+    array.forEach(item => {
+      if(item.hasOwnProperty('colors')) {
+        if (item.colors.hasOwnProperty('fill')) {
+          collectedColors.push(item.colors.fill);
+        }
+      }
+    });
 
     this.core = { 
       max: max,
@@ -306,6 +314,7 @@ class Infograph extends HTMLElement {
       svg_width: SVGWidth,
       x_amount: amountOfXs,
       x_cordinates: xCordinates,
+      unique_colors: [...new Set(collectedColors.flat())],
       min: 0
     };
   }
@@ -317,41 +326,17 @@ class Infograph extends HTMLElement {
   turnToTwoDigits(nr) {
     return +(Math.round(nr + "e+2") + "e-2");
   }
-
-  _getColors(object) {
-
-  }
   
   /**
    * SVG methods
    */
 
-  buildGradients(name, stops, units) {
-
-    var gradientConfig = [
-      {
-        offset: '0%',
-        'stop-color': this.colors.fill_one
-      },
-      {
-        offset: '100%',
-        'stop-color': this.colors.fill_two,
-        'stop-opacity': 1
-      }
-    ];
-    
-    var gradientUnits = {
-      'x1': 0,
-      'x2': 0,
-      'y1': 0,
-      'y2': 1
-    };
-    defs.appendChild(this.createGradient('test-gradient', gradientConfig, gradientUnits));
-    
+  buildGradients() {
     var defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
 
     var createGradient = (color) => {
       var gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+      gradient.id = 'gradient-color-' + color.replace('#','');
       gradient.setAttribute('x1', 0);
       gradient.setAttribute('x2', 0);
       gradient.setAttribute('y1', 0);
@@ -380,7 +365,10 @@ class Infograph extends HTMLElement {
       defs.appendChild(gradient);
     }
 
-    this.buildInColors.fill.forEach(fill => createGradient(fill));
+    var allUniqueColors = [...new Set(this.buildInColors.fill.concat(this.unique_colors).flat())];
+
+    allUniqueColors.forEach(color => createGradient(color));
+    console.log(allUniqueColors)
 
     // Create gradient for each buildIn
     // Create gradient for each color given in the data
