@@ -32,7 +32,6 @@ class Infograph extends HTMLElement {
     //this.dataFromForm = this.shadowRoot.querySelector('slot[name="data"]').assignedNodes()[0];
     this.coreData = this.data;
     this.upgradeData();
-    this.buildGradients();
 
     this.createColors = this.gatherColors;
     console.log("Colors", this.buildInColors)
@@ -356,7 +355,7 @@ class Infograph extends HTMLElement {
         var stopElement = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
 
         for (const key in config) {
-          stopElement.setAttribute(key, stop[key]);
+          stopElement.setAttribute(key, config[key]);
         }
   
         gradient.appendChild(stopElement);
@@ -365,45 +364,10 @@ class Infograph extends HTMLElement {
       defs.appendChild(gradient);
     }
 
-    var allUniqueColors = [...new Set(this.buildInColors.fill.concat(this.unique_colors).flat())];
-
+    var allUniqueColors = [...new Set(this.buildInColors.fill.concat(this.core.unique_colors).flat())];
     allUniqueColors.forEach(color => createGradient(color));
-    console.log(allUniqueColors)
 
-    // Create gradient for each buildIn
-    // Create gradient for each color given in the data
-    
-    // How to name them?
-    // Call gradient-color
-
-    // Dont build if they already exists
-
-    // Does gradient with the name exist?
-    // Create gradient
-    // Add x1,x2,y1,y2
-    // Create stops
-      // 0% and 100%
-
-
-    var gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
-    gradient.id = name;
-
-    // Add gradientUnits
-    for (const property in units) {
-      gradient.setAttribute(property, units[property]);
-    }
-
-    stops.forEach(stop => {
-      var stopElement = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-
-      for (const property in stop) {
-        stopElement.setAttribute(property, stop[property]);
-      }
-
-      gradient.appendChild(stopElement);
-    });
-
-    return gradient;
+    return defs;
   }
 
   createPath(dataObject, otherLoopIndex, addFilled = true) {
@@ -439,10 +403,16 @@ class Infograph extends HTMLElement {
       string += `L ${lastX} ${lastY}`;
     }
 
-    // Find the correct color
+    // Find the correct colors
     var colorIndex = this.buildInColors.fill.length - (otherLoopIndex % this.buildInColors.fill.length);
     var strokeColor = this.buildInColors.fill[colorIndex];
-    if (dataObject.hasOwnProperty('colors')) strokeColor = dataObject.colors.outline;
+    var fillColor = this.buildInColors.fill[colorIndex];
+    if (dataObject.hasOwnProperty('colors')) {
+      strokeColor = dataObject.colors.outline;
+      if (dataObject.colors.hasOwnProperty('fill')) {
+        fillColor = typeof dataObject.colors.fill === 'string' ? dataObject.colors.fill : dataObject.colors.fill[0];
+      }
+    } 
     
     path.setAttribute('d', string);
     path.setAttribute('stroke', strokeColor);
@@ -451,13 +421,15 @@ class Infograph extends HTMLElement {
     
     // Return if no need for a filled background
     if (!addFilled) return [path];
+
+    this.buildGradients();
     
     var SVGHeight = this.core.max;
     string += ` L ${lastX} ${SVGHeight} L 0 ${SVGHeight} Z`;
     
     var filledPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     filledPath.setAttribute('d', string);
-    filledPath.setAttribute('fill', 'url(#test-gradient)')
+    filledPath.setAttribute('fill', 'url(#gradient-color-' + fillColor.replace('#','') + ')')
     filledPath.setAttribute('stroke', 'transparent');
 
     return [filledPath, path];
@@ -512,29 +484,7 @@ class Infograph extends HTMLElement {
       this.createPath(obj, i, true).forEach(path => graphSVG.appendChild(path));
     })
 
-     // Styling
-     var defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-     var gradientConfig = [
-       {
-         offset: '0%',
-         'stop-color': this.colors.fill_one
-       },
-       {
-         offset: '100%',
-         'stop-color': this.colors.fill_two,
-         'stop-opacity': 1
-       }
-     ];
-
-    var gradientUnits = {
-      'x1': 0,
-      'x2': 0,
-      'y1': 0,
-      'y2': 1
-    };
-     
-     defs.appendChild(this.createGradient('test-gradient', gradientConfig, gradientUnits));
-     graphSVG.appendChild(defs);
+     graphSVG.appendChild(this.buildGradients());
 
 
     this.shadowRoot.querySelector('#svg').appendChild(graphSVG);
