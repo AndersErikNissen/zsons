@@ -237,6 +237,10 @@ class Infograph extends HTMLElement {
     return data.length > 0 ? data : false;
   }
 
+  turnToTwoDigits(nr) {
+    return +(Math.round(nr + "e+2") + "e-2");
+  }
+
   /**
    * @param {array} array - Array of data to compare, to set the core values.
    */
@@ -300,7 +304,7 @@ class Infograph extends HTMLElement {
     // Set unique colors
     var collectedColors = [];
     array.forEach(item => {
-      if(item.hasOwnProperty('colors')) {
+      if (item.hasOwnProperty('colors')) {
         if (item.colors.hasOwnProperty('fill')) {
           collectedColors.push(item.colors.fill);
         }
@@ -318,12 +322,24 @@ class Infograph extends HTMLElement {
     };
   }
 
-  /**
-   * Utility methods
-   */
+  upgradeData() {
+    this.data.forEach( obj => {
+      var combinedValues = 0;
+      obj.compared_percentages = [];
+      obj.total_percentages = [];
+      obj.values.forEach(nr => combinedValues += nr);
+      obj.values.forEach(nr => {
+        var percentages = [(nr / combinedValues) * 100, (nr / this.core.max) * 100];
 
-  turnToTwoDigits(nr) {
-    return +(Math.round(nr + "e+2") + "e-2");
+        // Help from: https://stackoverflow.com/questions/11832914/how-to-round-to-at-most-2-decimal-places-if-necessary/18358056#18358056
+        var rounded = percentages.map(perNr => this.turnToTwoDigits(perNr));
+
+        obj.compared_percentages.push(rounded[0] + "%");
+        obj.total_percentages.push(rounded[1] + "%");
+      });
+
+      obj.percentage = ((combinedValues / this.core.max) * 100) + "%";
+    });
   }
   
   /**
@@ -344,12 +360,12 @@ class Infograph extends HTMLElement {
       [
         {
           offset: '0%',
-          'stop-color': color,
-          'stop-opacity': 0
+          'stop-color': color
         },
         {
           offset: '100%',
-          'stop-color': color
+          'stop-color': color,
+          'stop-opacity': 0
         }
       ].forEach(config => {
         var stopElement = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
@@ -370,7 +386,7 @@ class Infograph extends HTMLElement {
     return defs;
   }
 
-  createPath(dataObject, otherLoopIndex, addFilled = true) {
+  createPaths(dataObject, otherLoopIndex, addFilled = true) {
     var yCordinates =dataObject.values;
     var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     var lastX = this.core.x_cordinates[this.core.x_cordinates.length - 1].x;
@@ -404,11 +420,15 @@ class Infograph extends HTMLElement {
     }
 
     // Find the correct colors
-    var colorIndex = this.buildInColors.fill.length - (otherLoopIndex % this.buildInColors.fill.length);
+    var colorIndex = otherLoopIndex % (this.buildInColors.fill.length - 1);
     var strokeColor = this.buildInColors.fill[colorIndex];
     var fillColor = this.buildInColors.fill[colorIndex];
+
     if (dataObject.hasOwnProperty('colors')) {
-      strokeColor = dataObject.colors.outline;
+      if (dataObject.colors.hasOwnProperty('outline')) {
+        strokeColor = dataObject.colors.outline;
+      }
+
       if (dataObject.colors.hasOwnProperty('fill')) {
         fillColor = typeof dataObject.colors.fill === 'string' ? dataObject.colors.fill : dataObject.colors.fill[0];
       }
@@ -421,8 +441,6 @@ class Infograph extends HTMLElement {
     
     // Return if no need for a filled background
     if (!addFilled) return [path];
-
-    this.buildGradients();
     
     var SVGHeight = this.core.max;
     string += ` L ${lastX} ${SVGHeight} L 0 ${SVGHeight} Z`;
@@ -445,31 +463,47 @@ class Infograph extends HTMLElement {
    * Turn on/off the option to have a filled background
    */
 
+  buildMarkers(width,height) {
+    // Add valuta (Can be $ or USD etc)
+    // Use max to calculate the space needed
+    // Add some extra spacing between the markers and the graph
+    // Calculate the placements on the markers
+    // Surround the markers with a <g>
+    // Style the markers
 
-  /**
-   * Main methods
-   */
+    // Calculate the space
+    var rulerSVG = document.createElementNS('http://www.w3.org/2000/svg','svg');
+    rulerSVG.classList.add('ruler-svg')
+    rulerSVG.setAttribute('viewBox', `0 0 ${width} ${height}`);
+    rulerSVG.setAttribute('width', width);
+    rulerSVG.setAttribute('height', height);
+    rulerSVG.style.opacity = '0';
+    
+    var ruler = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    ruler.textContent = this.core.max + 'USD';
+    rulerSVG.appendChild(ruler);
+    this.shadowRoot.appendChild(rulerSVG);
+    
+    var rulerElement = this.shadowRoot.querySelector('.ruler-svg text');
+    var rulerWidth = Math.ceil(rulerElement.getBBox().width + (width * 0.05));
+    var rulerHeight = Math.ceil(rulerElement.getBBox().height);
+    
+    rulerElement.remove();
   
-  upgradeData() {
-    this.data.forEach( obj => {
-      var combinedValues = 0;
-      obj.compared_percentages = [];
-      obj.total_percentages = [];
-      obj.values.forEach(nr => combinedValues += nr);
-      obj.values.forEach(nr => {
-        var percentages = [(nr / combinedValues) * 100, (nr / this.core.max) * 100];
 
-        // Help from: https://stackoverflow.com/questions/11832914/how-to-round-to-at-most-2-decimal-places-if-necessary/18358056#18358056
-        var rounded = percentages.map(perNr => this.turnToTwoDigits(perNr));
+    console.log("RUler",rulerWidth,rulerHeight)
 
-        obj.compared_percentages.push(rounded[0] + "%");
-        obj.total_percentages.push(rounded[1] + "%");
-      });
+    var maxMarker = {
 
-      obj.percentage = ((combinedValues / this.core.max) * 100) + "%";
-    });
+    };
+
+    var minMarker = {
+
+    };
+
+    // Amount to add the all x-data to make room.
+
   }
-
 
   buildSVG() {
     var graphSVG = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -480,8 +514,10 @@ class Infograph extends HTMLElement {
     graphSVG.setAttribute('width', width);
     graphSVG.setAttribute('height', height);
 
+    this.buildMarkers(width,height);
+
     this.data.forEach((obj, i) => {
-      this.createPath(obj, i, true).forEach(path => graphSVG.appendChild(path));
+      this.createPaths(obj, i, true).forEach(path => graphSVG.appendChild(path));
     })
 
      graphSVG.appendChild(this.buildGradients());
