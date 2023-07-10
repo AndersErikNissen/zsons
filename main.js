@@ -29,23 +29,29 @@ class Infograph extends HTMLElement {
   }
   
   connectedCallback() {
-    //this.dataFromForm = this.shadowRoot.querySelector('slot[name="data"]').assignedNodes()[0];
+    console.log("Node data",this.nodeData)
     this.coreData = this.data;
     this.upgradeData();
 
     this.createColors = this.gatherColors;
-    console.log("Colors", this.buildInColors)
     this.buildSVG();
     console.log("Data", this.data)
     console.log("Core", this.core)
-    console.log(this.layout)
   }
 
   _style() {
     return `
+      :host {
+        width: 50vw;
+        display: block;
+        min-height: 200px;
+        height: 100%;
+      }
+
       #content {
         background-color: purple;
       }
+
     `;
   }
 
@@ -73,8 +79,19 @@ class Infograph extends HTMLElement {
 
   get aspect() {
     var aspect = Number(this.getAttribute('aspect'));
-    if (aspect === 0) return 1;
-    return isNaN(aspect) ? 1 : aspect;
+    if (aspect === 0) return false;
+    return isNaN(aspect) ? false : aspect;
+  }
+  
+  get nodeData() {
+    console.log("this", this)
+    var rect = this.getBoundingClientRect();
+    var width = rect.width;
+    var height = this.aspect ? this.aspect * width : rect.height; 
+    return {
+      width: width,
+      height: height
+    }
   }
 
   get layout() {
@@ -276,7 +293,7 @@ class Infograph extends HTMLElement {
 
     var max = getMaxNumber(maxValue);
     var half = max / 2;
-    var SVGWidth = max * this.aspect;
+    var SVGWidth = this.nodeData.width;
     var amountOfXs = Math.max.apply(null, array.map(obj => obj.values.length));
     var xCordinates = [];
 
@@ -508,7 +525,7 @@ class Infograph extends HTMLElement {
   buildSVG() {
     var graphSVG = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     var width = this.core.svg_width;
-    var height = this.core.max;
+    var height = this.nodeData.height;
 
     graphSVG.setAttribute('viewBox', `0 0 ${width} ${height}`);
     graphSVG.setAttribute('width', width);
