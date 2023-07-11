@@ -25,11 +25,12 @@ class Infograph extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
-    this.shadowRoot.appendChild(this._template().content.cloneNode(true));
   }
   
   connectedCallback() {
-    console.log("Node data",this.nodeData)
+    this.shadowRoot.appendChild(this._style());
+    console.warn(this.getBoundingClientRect())
+    this.shadowRoot.appendChild(this._template().content.cloneNode(true));
     this.coreData = this.data;
     this.upgradeData();
 
@@ -40,30 +41,45 @@ class Infograph extends HTMLElement {
   }
 
   _style() {
-    return `
+    var style = document.createElement('style');
+    style.innerHTML = `
       :host {
-        width: 50vw;
-        display: block;
-        min-height: 200px;
+        width: 100%;
         height: 100%;
+        display: block;
       }
-
-      #content {
-        background-color: purple;
-      }
-
     `;
+
+    return style;
+  }
+
+  
+  get dimensions() {
+    var rect = this.getBoundingClientRect();
+    var height = rect.height;
+
+    if (this.hasAttribute('aspect')) {
+      var aspect = Number(this.getAttribute('aspect'));
+      if (!isNaN(aspect)) {
+        height = rect.width * aspect;
+      }
+    }
+
+    return {
+      width: rect.width,
+      height: height
+    }
   }
 
   _template() {
     const template = document.createElement('template');
 
     template.innerHTML = `
-      <style>${this._style()}</style>
       <div class="hidden">
         <slot id="form" name="form" />
       </div>
-      <div id="svg"></div>
+
+      <svg width="${this.dimensions.width}" height="${this.dimensions.height}" id="svg"></svg>
       <slot id="json" name="json" />
     `;
 
@@ -75,12 +91,6 @@ class Infograph extends HTMLElement {
     var content = this.shadowRoot.querySelector('#content');
 
     content.innerHTML = "<span>This is some NICE, content!</span>"
-  }
-
-  get aspect() {
-    var aspect = Number(this.getAttribute('aspect'));
-    if (aspect === 0) return false;
-    return isNaN(aspect) ? false : aspect;
   }
   
   get nodeData() {
@@ -538,7 +548,6 @@ class Infograph extends HTMLElement {
     })
 
      graphSVG.appendChild(this.buildGradients());
-
 
     this.shadowRoot.querySelector('#svg').appendChild(graphSVG);
   }
