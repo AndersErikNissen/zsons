@@ -31,6 +31,7 @@ class Infograph extends HTMLElement {
     this.shadowRoot.appendChild(this._style());
     console.warn(this.getBoundingClientRect())
     this.shadowRoot.appendChild(this._template().content.cloneNode(true));
+    this.svg = this.shadowRoot.querySelector('#svg');
     this.coreData = this.data;
     this.upgradeData();
 
@@ -54,6 +55,29 @@ class Infograph extends HTMLElement {
   }
 
   
+  
+  _template() {
+    const template = document.createElement('template');
+    
+    template.innerHTML = `
+      <div class="hidden">
+        <slot id="form" name="form" />
+        <slot id="json" name="json" />
+      </div>
+      
+      <svg width="${this.dimensions.width}" height="${this.dimensions.height}" id="svg"></svg>
+    `;
+    
+    return template;
+  }
+  
+  _addContent() {
+    // Good to know to use .shadowRoot, but it might make more sense to just add the content to the template itself ;) 
+    var content = this.shadowRoot.querySelector('#content');
+    
+    content.innerHTML = "<span>This is some NICE, content!</span>"
+  }
+  
   get dimensions() {
     var rect = this.getBoundingClientRect();
     var height = rect.height;
@@ -71,28 +95,6 @@ class Infograph extends HTMLElement {
     }
   }
 
-  _template() {
-    const template = document.createElement('template');
-
-    template.innerHTML = `
-      <div class="hidden">
-        <slot id="form" name="form" />
-      </div>
-
-      <svg width="${this.dimensions.width}" height="${this.dimensions.height}" id="svg"></svg>
-      <slot id="json" name="json" />
-    `;
-
-    return template;
-  }
-
-  _addContent() {
-    // Good to know to use .shadowRoot, but it might make more sense to just add the content to the template itself ;) 
-    var content = this.shadowRoot.querySelector('#content');
-
-    content.innerHTML = "<span>This is some NICE, content!</span>"
-  }
-  
   get nodeData() {
     console.log("this", this)
     var rect = this.getBoundingClientRect();
@@ -302,10 +304,65 @@ class Infograph extends HTMLElement {
     };
 
     var max = getMaxNumber(maxValue);
-    var half = max / 2;
+    var mid = max / 2;
     var SVGWidth = this.nodeData.width;
     var amountOfXs = Math.max.apply(null, array.map(obj => obj.values.length));
     var xCordinates = [];
+
+    var labels = () => {
+      var maxLabel = max;
+      var midLabel = mid;
+
+      if (max > 999) {
+        var afterLabel = 'K';
+        var maxLabel = max / 10e2;
+
+        if (max > (10e5 - 1)) {
+          afterLabel = 'M'
+          maxLabel = max / 10e5;
+        };
+
+        if (max > (10e8 - 1) && afterLabel !== 'M') {
+          afterLabel = 'B'
+          maxLabel = max / 10e8;
+        };
+
+        midLabel = maxLabel / 2;
+        maxLabel = maxLabel + afterLabel;
+        midLabel = midLabel + afterLabel;
+      }
+
+      return {
+        maxLabel: maxLabel,
+        midLabel: midLabel
+      }
+    };
+
+    var SVGCordinates = () => {
+
+
+      var longestLabel = Math.max.apply(null, array.map(obj => obj.label.length));
+
+      var xLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+
+      var yLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+
+      var rulerSVG = document.createElementNS('http://www.w3.org/2000/svg','svg');
+
+    
+    var ruler = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    ruler.textContent = this.core.max + 'USD';
+    rulerSVG.appendChild(ruler);
+    this.shadowRoot.appendChild(rulerSVG);
+    
+    var rulerElement = this.shadowRoot.querySelector('.ruler-svg text');
+    var rulerWidth = Math.ceil(rulerElement.getBBox().width + (width * 0.05));
+    var rulerHeight = Math.ceil(rulerElement.getBBox().height);
+    
+    rulerElement.remove();
+  
+
+    };
 
     for(let i = 0; i < amountOfXs; i++) {
       var xBase = SVGWidth / (amountOfXs - 1);
@@ -326,7 +383,7 @@ class Infograph extends HTMLElement {
     }
     
     this.setAttribute('max', max);
-    this.setAttribute('half', half);
+    this.setAttribute('mid', mid);
 
     // Set unique colors
     var collectedColors = [];
@@ -340,7 +397,7 @@ class Infograph extends HTMLElement {
 
     this.core = { 
       max: max,
-      half: half,
+      mid: mid,
       svg_width: SVGWidth,
       x_amount: amountOfXs,
       x_cordinates: xCordinates,
