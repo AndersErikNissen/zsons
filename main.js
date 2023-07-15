@@ -71,13 +71,6 @@ class Infograph extends HTMLElement {
     return template;
   }
   
-  _addContent() {
-    // Good to know to use .shadowRoot, but it might make more sense to just add the content to the template itself ;) 
-    var content = this.shadowRoot.querySelector('#content');
-    
-    content.innerHTML = "<span>This is some NICE, content!</span>"
-  }
-  
   get dimensions() {
     var rect = this.getBoundingClientRect();
     var height = rect.height;
@@ -191,8 +184,6 @@ class Infograph extends HTMLElement {
 
               if (obj.hasOwnProperty('colors')) {
                 if (typeof obj.colors === 'object') {
-                  
-                  
                   if (obj.colors.hasOwnProperty('outline')) {
                     if (typeof obj.colors.outline === 'string') {
                       if (obj.colors.outline.match(/^#?[a-fA-F0-9]{6}$/)) {
@@ -228,8 +219,6 @@ class Infograph extends HTMLElement {
                     if (validatedColors.length > 0) validColorObj.fill = validatedColors;
                   }
                 }
-
-                
                 if (validColorObj.hasOwnProperty('outline') || validColorObj.hasOwnProperty('fill')) {
                   returnObject.colors = validColorObj;
                 }
@@ -309,10 +298,10 @@ class Infograph extends HTMLElement {
     var amountOfXs = Math.max.apply(null, array.map(obj => obj.values.length));
     var xCordinates = [];
 
-    var labels = () => {
-      var maxLabel = max;
-      var midLabel = mid;
+    var maxLabel = max;
+    var midLabel = mid;
 
+    var formatLabels = () => {
       if (max > 999) {
         var afterLabel = 'K';
         var maxLabel = max / 10e2;
@@ -332,23 +321,36 @@ class Infograph extends HTMLElement {
         midLabel = midLabel + afterLabel;
       }
 
-      return {
-        maxLabel: maxLabel,
-        midLabel: midLabel
-      }
+      maxLabel = maxLabel;
+      midLabel = midLabel;
     };
+    formatLabels();
 
     var SVGCordinates = () => {
-
-
-      var longestLabel = Math.max.apply(null, array.map(obj => obj.label.length));
+      var longestYLabel = '';
+      array.map(obj => obj.label).forEach(label => {if (label.length > longestYLabel.length) longestYLabel = label});
 
       var xLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-
+      xLabel.textContent = maxLabel;
+      xLabel.id = "xLabel";
       var yLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      yLabel.textContent = longestYLabel;
+      yLabel.id = "yLabel";
 
-      var rulerSVG = document.createElementNS('http://www.w3.org/2000/svg','svg');
+      this.svg.append(xLabel, yLabel);
+      var svgXLabel = this.svg.querySelector('#xLabel').getBBox();
+      var svgXLabel = this.svg.querySelector('#xLabel').getBBox();
 
+      var spacing = 20;
+
+
+      // Areas
+      return {
+        graphArea: {},
+        xArea: {},
+        yArea: {} 
+      }
+/*
     
     var ruler = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     ruler.textContent = this.core.max + 'USD';
@@ -360,9 +362,11 @@ class Infograph extends HTMLElement {
     var rulerHeight = Math.ceil(rulerElement.getBBox().height);
     
     rulerElement.remove();
-  
+  */
 
     };
+
+    SVGCordinates();
 
     for(let i = 0; i < amountOfXs; i++) {
       var xBase = SVGWidth / (amountOfXs - 1);
