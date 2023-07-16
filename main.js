@@ -49,6 +49,10 @@ class Infograph extends HTMLElement {
         height: 100%;
         display: block;
       }
+
+      text {
+        font-size: 12px;
+      }
     `;
 
     return style;
@@ -339,16 +343,13 @@ class Infograph extends HTMLElement {
 
       this.svg.append(xLabel, yLabel);
       var svgXLabel = this.svg.querySelector('#xLabel').getBBox();
-      var svgXLabel = this.svg.querySelector('#xLabel').getBBox();
-
-      var spacing = 20;
-
+      var svgYLabel = this.svg.querySelector('#yLabel').getBBox();
 
       // Areas
       return {
-        graphArea: {},
-        xArea: {},
-        yArea: {} 
+        graphArea: {x: },
+        xArea: {width: Math.ceil(svgXLabel.width), height: Math.ceil(svgXLabel.height)},
+        yArea: {width:Math.ceil(svgYLabel.width), height: Math.ceil(svgYLabel.height)} 
       }
 /*
     
@@ -366,7 +367,7 @@ class Infograph extends HTMLElement {
 
     };
 
-    SVGCordinates();
+    console.log("Cordinates: ",SVGCordinates());
 
     for(let i = 0; i < amountOfXs; i++) {
       var xBase = SVGWidth / (amountOfXs - 1);
