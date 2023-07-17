@@ -346,33 +346,35 @@ class Infograph extends HTMLElement {
       var svgYLabel = this.svg.querySelector('#yLabel').getBBox();
 
       // Areas
-      return {
-        graphArea: {x: },
+      var areas = {
+        graphArea: {x: Math.ceil(svgXLabel.width) + 20, y: max - Math.ceil(svgYLabel.height)},
         xArea: {width: Math.ceil(svgXLabel.width), height: Math.ceil(svgXLabel.height)},
         yArea: {width:Math.ceil(svgYLabel.width), height: Math.ceil(svgYLabel.height)} 
-      }
-/*
-    
-    var ruler = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    ruler.textContent = this.core.max + 'USD';
-    rulerSVG.appendChild(ruler);
-    this.shadowRoot.appendChild(rulerSVG);
-    
-    var rulerElement = this.shadowRoot.querySelector('.ruler-svg text');
-    var rulerWidth = Math.ceil(rulerElement.getBBox().width + (width * 0.05));
-    var rulerHeight = Math.ceil(rulerElement.getBBox().height);
-    
-    rulerElement.remove();
-  */
+      };
 
+      this.svg.querySelector('#xLabel').remove();
+      this.svg.querySelector('#yLabel').remove();
+
+      return areas;
     };
 
     console.log("Cordinates: ",SVGCordinates());
 
+    // total = 300, remaining = 200
+    // 100 - 300
+    // 200 / 5 = 40
+    // "0" = 100
+    // 1 = 100 + 40
+
+    var gA = SVGCordinates().graphArea;
+
+    var xBase = gA / (amountOfXs - 1);
     for(let i = 0; i < amountOfXs; i++) {
+      /*
       var xBase = SVGWidth / (amountOfXs - 1);
       var ratio = xBase * this.curveRatio
       var x = xBase * i;
+      */
       
       var x1 = (xBase * (i - 1)) + ratio;
       var x2 = x - ratio;
