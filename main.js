@@ -298,7 +298,6 @@ class Infograph extends HTMLElement {
 
     var max = getMaxNumber(maxValue);
     var mid = max / 2;
-    var SVGWidth = this.nodeData.width;
     var amountOfXs = Math.max.apply(null, array.map(obj => obj.values.length));
     var xCordinates = [];
 
@@ -358,35 +357,19 @@ class Infograph extends HTMLElement {
       return areas;
     };
 
-    console.log("Cordinates: ",SVGCordinates());
-
-    // total = 300, remaining = 200
-    // 100 - 300
-    // 200 / 5 = 40
-    // "0" = 100
-    // 1 = 100 + 40
-
-    var gA = SVGCordinates().graphArea;
-
-    var xBase = gA / (amountOfXs - 1);
+    var xFragment = SVGCordinates().graphArea.x / (amountOfXs - 1);
+    var ratio = xFragment * this.curveRatio
     for(let i = 0; i < amountOfXs; i++) {
-      /*
-      var xBase = SVGWidth / (amountOfXs - 1);
-      var ratio = xBase * this.curveRatio
-      var x = xBase * i;
-      */
-      
-      var x1 = (xBase * (i - 1)) + ratio;
+      var x = SVGCordinates().graphArea.x + (xFragment * i);   
+      if (i === (amountOfXs - 1)) x = this.nodeData.width;
+      var x1 = (xFragment * (i - 1)) + ratio;
       var x2 = x - ratio;
-      if (i === (amountOfXs - 1)) x = SVGWidth;
 
-      var returnObj = {
+      xCordinates.push({
         x: this.turnToTwoDigits(x),
         x1: this.turnToTwoDigits(x1),
         x2: this.turnToTwoDigits(x2)
-      };
-
-      xCordinates.push(returnObj);
+      });
     }
     
     this.setAttribute('max', max);
