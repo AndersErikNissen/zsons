@@ -50,6 +50,10 @@ class Infograph extends HTMLElement {
         display: block;
       }
 
+      #graphGroup {
+        overflow: hidden;
+      }
+
       text {
         font-size: 12px;
       }
@@ -357,10 +361,12 @@ class Infograph extends HTMLElement {
       return areas;
     };
 
-    var xFragment = SVGCordinates().graphArea.x / (amountOfXs - 1);
+    var xFragment = (this.nodeData.width - SVGCordinates().graphArea.x) / (amountOfXs - 1);
     var ratio = xFragment * this.curveRatio
     for(let i = 0; i < amountOfXs; i++) {
-      var x = SVGCordinates().graphArea.x + (xFragment * i);   
+      
+      var x = SVGCordinates().graphArea.x + (xFragment * i);  
+      console.log("X",x) 
       if (i === (amountOfXs - 1)) x = this.nodeData.width;
       var x1 = (xFragment * (i - 1)) + ratio;
       var x2 = x - ratio;
@@ -388,7 +394,6 @@ class Infograph extends HTMLElement {
     this.core = { 
       max: max,
       mid: mid,
-      svg_width: SVGWidth,
       x_amount: amountOfXs,
       x_cordinates: xCordinates,
       unique_colors: [...new Set(collectedColors.flat())],
@@ -537,49 +542,8 @@ class Infograph extends HTMLElement {
    * Turn on/off the option to have a filled background
    */
 
-  buildMarkers(width,height) {
-    // Add valuta (Can be $ or USD etc)
-    // Use max to calculate the space needed
-    // Add some extra spacing between the markers and the graph
-    // Calculate the placements on the markers
-    // Surround the markers with a <g>
-    // Style the markers
-
-    // Calculate the space
-    var rulerSVG = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    rulerSVG.classList.add('ruler-svg')
-    rulerSVG.setAttribute('viewBox', `0 0 ${width} ${height}`);
-    rulerSVG.setAttribute('width', width);
-    rulerSVG.setAttribute('height', height);
-    rulerSVG.style.opacity = '0';
-    
-    var ruler = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    ruler.textContent = this.core.max + 'USD';
-    rulerSVG.appendChild(ruler);
-    this.shadowRoot.appendChild(rulerSVG);
-    
-    var rulerElement = this.shadowRoot.querySelector('.ruler-svg text');
-    var rulerWidth = Math.ceil(rulerElement.getBBox().width + (width * 0.05));
-    var rulerHeight = Math.ceil(rulerElement.getBBox().height);
-    
-    rulerElement.remove();
-  
-
-    console.log("RUler",rulerWidth,rulerHeight)
-
-    var maxMarker = {
-
-    };
-
-    var minMarker = {
-
-    };
-
-    // Amount to add the all x-data to make room.
-
-  }
-
   buildSVG() {
+    /*
     var graphSVG = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     var width = this.core.svg_width;
     var height = this.nodeData.height;
@@ -590,13 +554,16 @@ class Infograph extends HTMLElement {
 
     this.buildMarkers(width,height);
 
+    */
+
+    var graphGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    graphGroup.id = 'graphGroup'
     this.data.forEach((obj, i) => {
-      this.createPaths(obj, i, true).forEach(path => graphSVG.appendChild(path));
+      this.createPaths(obj, i, true).forEach(path => graphGroup.appendChild(path));
     })
 
-     graphSVG.appendChild(this.buildGradients());
 
-    this.shadowRoot.querySelector('#svg').appendChild(graphSVG);
+    this.svg.append(this.buildGradients(), graphGroup);
   }
 
 }
