@@ -1,25 +1,4 @@
 "use strict";
-/*
-  Layouts
-  - Graph
-  - Bar chart
-    - Stacked on top of each other
-    - Stacked beside each other, grouped for each number (So "events", would all be beside each other, then "meetings" and so on)
-  - Backlog: Pie chart
-  - Difference between two array (Like LoL gold difference)
-
-  The data comes from and array of inputs [[name,value]...]
-
-  We want to end up with
-    An array of objects with:
-    - Name
-    - All the values
-
-    Global data:
-    - The highest number and the ones in between
-
-  Check for changes to current inputs or new ones with "slotchanged".
-*/
 
 class Infograph extends HTMLElement {
   constructor() {
@@ -29,16 +8,15 @@ class Infograph extends HTMLElement {
   
   connectedCallback() {
     this.shadowRoot.appendChild(this._style());
-    console.warn(this.getBoundingClientRect())
     this.shadowRoot.appendChild(this._template().content.cloneNode(true));
     this.svg = this.shadowRoot.querySelector('#svg');
     this.coreData = this.data;
-    this.upgradeData();
+    this.upgradedData = this.data;
 
-    this.createColors = this.gatherColors;
     this.buildSVG();
-    console.log("Data", this.data)
+
     console.log("Core", this.core)
+    console.log("Up Data", this.core.data)
   }
 
   _style() {
@@ -69,8 +47,8 @@ class Infograph extends HTMLElement {
     
     template.innerHTML = `
       <div class="hidden">
-        <slot id="form" name="form" />
-        <slot id="json" name="json" />
+        <slot id="form" name="form"></slot>
+        <slot id="json" name="json"></slot>
       </div>
       
       <svg width="${this.dimensions.width}" height="${this.dimensions.height}" id="svg"></svg>
@@ -97,7 +75,6 @@ class Infograph extends HTMLElement {
   }
 
   get nodeData() {
-    console.log("this", this)
     var rect = this.getBoundingClientRect();
     var width = rect.width;
     var height = this.aspect ? this.aspect * width : rect.height; 
@@ -311,7 +288,7 @@ class Infograph extends HTMLElement {
     var formatLabels = () => {
       if (max > 999) {
         var afterLabel = 'K';
-        var maxLabel = max / 10e2;
+        maxLabel = max / 10e2;
 
         if (max > (10e5 - 1)) {
           afterLabel = 'M'
@@ -323,9 +300,8 @@ class Infograph extends HTMLElement {
           maxLabel = max / 10e8;
         };
 
-        midLabel = maxLabel / 2;
+        midLabel = (maxLabel / 2) + afterLabel;
         maxLabel = maxLabel + afterLabel;
-        midLabel = midLabel + afterLabel;
       }
 
       maxLabel = maxLabel;
@@ -333,7 +309,7 @@ class Infograph extends HTMLElement {
     };
     formatLabels();
 
-    var SVGCordinates = () => {
+    var cordinates = () => {
       var longestYLabel = '';
       array.map(obj => obj.label).forEach(label => {if (label.length > longestYLabel.length) longestYLabel = label});
 
@@ -349,24 +325,22 @@ class Infograph extends HTMLElement {
       var svgYLabel = this.svg.querySelector('#yLabel').getBBox();
 
       // Areas
-      var areas = {
-        graphArea: {x: Math.ceil(svgXLabel.width) + 20, y: max - Math.ceil(svgYLabel.height)},
+      var returnObj = {
+        graphArea: {x: Math.ceil(svgXLabel.width) + 20, y: this.nodeData.height - Math.ceil(svgYLabel.height)},
         xArea: {width: Math.ceil(svgXLabel.width), height: Math.ceil(svgXLabel.height)},
         yArea: {width:Math.ceil(svgYLabel.width), height: Math.ceil(svgYLabel.height)} 
       };
 
       this.svg.querySelector('#xLabel').remove();
       this.svg.querySelector('#yLabel').remove();
+      return returnObj;
+    }
 
-      return areas;
-    };
-
-    var xFragment = (this.nodeData.width - SVGCordinates().graphArea.x) / (amountOfXs - 1);
+    var xFragment = (this.nodeData.width - cordinates().graphArea.x) / (amountOfXs - 1);
     var ratio = xFragment * this.curveRatio
     for(let i = 0; i < amountOfXs; i++) {
       
-      var x = SVGCordinates().graphArea.x + (xFragment * i);  
-      console.log("X",x) 
+      var x = cordinates().graphArea.x + (xFragment * i);  
       if (i === (amountOfXs - 1)) x = this.nodeData.width;
       var x1 = (xFragment * (i - 1)) + ratio;
       var x2 = x - ratio;
@@ -394,36 +368,42 @@ class Infograph extends HTMLElement {
     this.core = { 
       max: max,
       mid: mid,
+      min: 0,
+      cordinates: cordinates().graphArea,
       x_amount: amountOfXs,
       x_cordinates: xCordinates,
       unique_colors: [...new Set(collectedColors.flat())],
-      min: 0
     };
   }
 
-  upgradeData() {
-    this.data.forEach( obj => {
+  /**
+   * @param {array} array - Go over the array and use the data to generate new data
+   */
+  set upgradedData(array) {
+    this.core.data = array.map( obj => {
       var combinedValues = 0;
       obj.compared_percentages = [];
       obj.total_percentages = [];
       obj.values.forEach(nr => combinedValues += nr);
       obj.values.forEach(nr => {
         var percentages = [(nr / combinedValues) * 100, (nr / this.core.max) * 100];
-
+        
         // Help from: https://stackoverflow.com/questions/11832914/how-to-round-to-at-most-2-decimal-places-if-necessary/18358056#18358056
         var rounded = percentages.map(perNr => this.turnToTwoDigits(perNr));
-
+        
         obj.compared_percentages.push(rounded[0] + "%");
         obj.total_percentages.push(rounded[1] + "%");
       });
-
+      
       obj.percentage = ((combinedValues / this.core.max) * 100) + "%";
+      obj.y_cordinates = obj.values.map(value => this.turnToTwoDigits((this.core.max - value) * (this.core.cordinates.y / this.core.max)));
+      while(obj.y_cordinates.length !== this.core.x_amount) {
+        obj.y_cordinates.push(obj.y_cordinates[obj.y_cordinates.length - 1]);
+      }
+
+      return obj;
     });
   }
-  
-  /**
-   * SVG methods
-   */
 
   buildGradients() {
     var defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
@@ -465,40 +445,38 @@ class Infograph extends HTMLElement {
     return defs;
   }
 
-  createPaths(dataObject, otherLoopIndex, addFilled = true) {
-    var yCordinates =dataObject.values;
+  createPaths(data, otherLoopIndex, addFilled = true) {
+    console.log(data)
+    //var yCordinates = dataObject.values;
     var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    var lastX = this.core.x_cordinates[this.core.x_cordinates.length - 1].x;
-    var lastY = this.core.max - yCordinates.slice(-1);
+    // var lastX = this.core.x_cordinates[this.core.x_cordinates.length - 1].x;
+    // var lastY = this.core.max - yCordinates.slice(-1);
+    var Ys = data.y_cordinates;
     var string = '';
 
-    yCordinates.forEach((y, i) => {
-      var xObj = this.core.x_cordinates[i];
-      var correctY = this.core.max - y;
-      var nextString = `M ${xObj.x} ${this.core.max - y}`;
- 
-      // If not the first
-      if (i !== 0) {
-        var previousY = this.core.max - yCordinates[i - 1];
-
-        if (this.layout == 'wavy') {
-          nextString = ` C ${xObj.x1} ${previousY}, ${xObj.x2} ${correctY}, ${xObj.x} ${correctY}`
-        }
-        
-        if (this.layout == 'spikey') {
-          nextString = ` L ${xObj.x} ${correctY}`;
-        }
+    var wavy = (xObj,i) => {
+      if (i === 0) {
+        string += `M ${xObj.x} ${Ys[i]}`;
+      } else {
+        string += `C ${xObj.x1} ${Ys[i - 1]}, ${xObj.x2} ${Ys[i]}, ${xObj.x} ${Ys[i]}`;
       }
+    };
+    var spikey = (xObj,i) => { string += `${i === 0 ? 'M' : 'L'} ${xObj.x} ${Ys[i]}`};
 
-      string += nextString;
-    });
-
-    // If the data is shorter than the larges finish the path with a line across horizontally.
-    if (this.core.x_amount > yCordinates.length) {
-      string += `L ${lastX} ${lastY}`;
+    switch(this.layout) {
+      case 'wavy':
+        this.core.x_cordinates.forEach((x,i) => wavy(x,i));
+        break;
+      case 'spikey':
+        this.core.x_cordinates.forEach((x,i) => spikey(x,i));
+        break;
     }
+    console.log(string)
+
+    // if outline use it, otherwise use buildincolor
 
     // Find the correct colors
+    /*
     var colorIndex = otherLoopIndex % (this.buildInColors.fill.length - 1);
     var strokeColor = this.buildInColors.fill[colorIndex];
     var fillColor = this.buildInColors.fill[colorIndex];
@@ -530,6 +508,7 @@ class Infograph extends HTMLElement {
     filledPath.setAttribute('stroke', 'transparent');
 
     return [filledPath, path];
+    */
   }
 
   /**
@@ -543,25 +522,14 @@ class Infograph extends HTMLElement {
    */
 
   buildSVG() {
-    /*
-    var graphSVG = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    var width = this.core.svg_width;
-    var height = this.nodeData.height;
-
-    graphSVG.setAttribute('viewBox', `0 0 ${width} ${height}`);
-    graphSVG.setAttribute('width', width);
-    graphSVG.setAttribute('height', height);
-
-    this.buildMarkers(width,height);
-
-    */
-
     var graphGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    graphGroup.id = 'graphGroup'
-    this.data.forEach((obj, i) => {
-      this.createPaths(obj, i, true).forEach(path => graphGroup.appendChild(path));
-    })
+    graphGroup.id = 'graphGroup';
 
+    // this.data.forEach((obj, i) => {
+    //   this.createPaths(obj, i, true).forEach(path => graphGroup.appendChild(path));
+    // })
+
+    this.core.data.forEach(dataObj => this.createPaths(dataObj));
 
     this.svg.append(this.buildGradients(), graphGroup);
   }
