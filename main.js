@@ -97,7 +97,11 @@ class Infograph extends HTMLElement {
     var ratio = 1;
 
     if (attribute === 1) ratio = 0.1;
-    if (attribute === 2) ratio = 0.5;
+    if (attribute === 2) ratio = 0.2;
+    if (attribute === 3) ratio = 0.3;
+    if (attribute === 4) ratio = 0.4;
+    if (attribute === 5) ratio = 0.5;
+    if (attribute === 6) ratio = 0.6;
 
     return ratio;
   }
@@ -261,20 +265,16 @@ class Infograph extends HTMLElement {
     if(isNaN(maxValue)) return;
 
     const getMaxNumber = nr => {
-      var length = String(nr).length;
-      if (nr < 0) length--;
+      var length = String(Math.abs(nr)).length;
 
-      var base = 10 ** length;
-      var max = base;
-      var minus = base / 10;
+      var part = (10 ** length) * 0.1;
+      var adjustetMax = part;
 
-      while(nr % max === nr) {
-        max = max - minus;
+      while (adjustetMax % nr === adjustetMax) {
+       adjustetMax += part;
       }
 
-      if (nr < 0) max * -1;
-
-      return max * 2;
+      return nr < 0 ? adjustetMax * -1 : adjustetMax; // Return negative number if nr is negative.
     };
 
     var max = getMaxNumber(maxValue);
@@ -337,7 +337,7 @@ class Infograph extends HTMLElement {
     }
 
     var xFragment = (this.nodeData.width - cordinates().graphArea.x) / (amountOfXs - 1);
-    var ratio = xFragment * this.curveRatio
+    var ratio = xFragment * this.curveRatio;
     for(let i = 0; i < amountOfXs; i++) {
       
       var x = cordinates().graphArea.x + (xFragment * i);  
@@ -445,12 +445,10 @@ class Infograph extends HTMLElement {
     return defs;
   }
 
-  createPaths(data, otherLoopIndex, addFilled = true) {
+  createPaths(data, parentLoopIndex, addFilled = true) {
     console.log(data)
     //var yCordinates = dataObject.values;
     var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    // var lastX = this.core.x_cordinates[this.core.x_cordinates.length - 1].x;
-    // var lastY = this.core.max - yCordinates.slice(-1);
     var Ys = data.y_cordinates;
     var string = '';
 
@@ -458,7 +456,7 @@ class Infograph extends HTMLElement {
       if (i === 0) {
         string += `M ${xObj.x} ${Ys[i]}`;
       } else {
-        string += `C ${xObj.x1} ${Ys[i - 1]}, ${xObj.x2} ${Ys[i]}, ${xObj.x} ${Ys[i]}`;
+        string += ` C ${xObj.x1} ${Ys[i - 1]}, ${xObj.x2} ${Ys[i]}, ${xObj.x} ${Ys[i]}`;
       }
     };
     var spikey = (xObj,i) => { string += `${i === 0 ? 'M' : 'L'} ${xObj.x} ${Ys[i]}`};
@@ -471,65 +469,37 @@ class Infograph extends HTMLElement {
         this.core.x_cordinates.forEach((x,i) => spikey(x,i));
         break;
     }
-    console.log(string)
 
-    // if outline use it, otherwise use buildincolor
-
-    // Find the correct colors
-    /*
-    var colorIndex = otherLoopIndex % (this.buildInColors.fill.length - 1);
-    var strokeColor = this.buildInColors.fill[colorIndex];
+    var colorIndex = parentLoopIndex % (this.buildInColors.fill.length - 1);
+    var strokeColor = (data.colors || {}).outline || this.buildInColors.fill[colorIndex];
     var fillColor = this.buildInColors.fill[colorIndex];
 
-    if (dataObject.hasOwnProperty('colors')) {
-      if (dataObject.colors.hasOwnProperty('outline')) {
-        strokeColor = dataObject.colors.outline;
-      }
 
-      if (dataObject.colors.hasOwnProperty('fill')) {
-        fillColor = typeof dataObject.colors.fill === 'string' ? dataObject.colors.fill : dataObject.colors.fill[0];
+    if (data.hasOwnProperty('colors')) {
+      if (data.colors.hasOwnProperty('fill')) {
+        fillColor = typeof data.colors.fill === 'string' ? data.colors.fill : data.colors.fill[0];
       }
-    } 
-    
+    }
+
     path.setAttribute('d', string);
     path.setAttribute('stroke', strokeColor);
     path.setAttribute('fill', 'transparent');
     path.setAttribute('stroke-width', '2px');
-    
-    // Return if no need for a filled background
+
     if (!addFilled) return [path];
-    
-    var SVGHeight = this.core.max;
-    string += ` L ${lastX} ${SVGHeight} L 0 ${SVGHeight} Z`;
-    
+    console.log(this.core.cordinates)
+    string += ` L ${this.nodeData.width} ${this.core.cordinates.y} L ${this.core.cordinates.x} ${this.core.cordinates.y} Z`;
     var filledPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     filledPath.setAttribute('d', string);
-    filledPath.setAttribute('fill', 'url(#gradient-color-' + fillColor.replace('#','') + ')')
+    filledPath.setAttribute('fill', `url(#gradient-color-${fillColor.replace('#','')})`);
     filledPath.setAttribute('stroke', 'transparent');
-
     return [filledPath, path];
-    */
   }
-
-  /**
-   * 
-   * 
-   * NEXT THING!!!
-   * 
-   * Setup up things like the gradient (maybe have a couple of options, should it be tranparent or full color)?
-   * Have option for full of the same color
-   * Turn on/off the option to have a filled background
-   */
 
   buildSVG() {
     var graphGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     graphGroup.id = 'graphGroup';
-
-    // this.data.forEach((obj, i) => {
-    //   this.createPaths(obj, i, true).forEach(path => graphGroup.appendChild(path));
-    // })
-
-    this.core.data.forEach(dataObj => this.createPaths(dataObj));
+    this.core.data.forEach((dataObj,i) => graphGroup.append(...this.createPaths(dataObj,i)));
 
     this.svg.append(this.buildGradients(), graphGroup);
   }
