@@ -284,11 +284,12 @@ class Infograph extends HTMLElement {
 
     var maxLabel = max;
     var midLabel = mid;
+    var afterLabel = '';
 
     var formatLabels = () => {
       if (max > 999) {
-        var afterLabel = 'K';
         maxLabel = max / 10e2;
+        afterLabel = 'K'
 
         if (max > (10e5 - 1)) {
           afterLabel = 'M'
@@ -303,9 +304,6 @@ class Infograph extends HTMLElement {
         midLabel = (maxLabel / 2) + afterLabel;
         maxLabel = maxLabel + afterLabel;
       }
-
-      maxLabel = maxLabel;
-      midLabel = midLabel;
     };
     formatLabels();
 
@@ -324,11 +322,13 @@ class Infograph extends HTMLElement {
       var svgXLabel = this.svg.querySelector('#xLabel').getBBox();
       var svgYLabel = this.svg.querySelector('#yLabel').getBBox();
 
+      var spacer = 20;
+
       // Areas
       var returnObj = {
-        graphArea: {x: Math.ceil(svgXLabel.width) + 20, y: this.nodeData.height - Math.ceil(svgYLabel.height)},
+        graphArea: {x: Math.ceil(svgXLabel.width) + spacer, y: this.nodeData.height - (Math.ceil(svgYLabel.height) + spacer)},
         xArea: {width: Math.ceil(svgXLabel.width), height: Math.ceil(svgXLabel.height)},
-        yArea: {width:Math.ceil(svgYLabel.width), height: Math.ceil(svgYLabel.height)} 
+        yArea: {width: Math.ceil(svgYLabel.width), height: Math.ceil(svgYLabel.height)} 
       };
 
       this.svg.querySelector('#xLabel').remove();
@@ -367,9 +367,14 @@ class Infograph extends HTMLElement {
 
     this.core = { 
       max: max,
+      max_label: maxLabel,
       mid: mid,
+      mid_label: midLabel,
       min: 0,
+      after_label: afterLabel,
       cordinates: cordinates().graphArea,
+      x_label_area: cordinates().xArea,
+      y_label_area: cordinates().yArea,
       x_amount: amountOfXs,
       x_cordinates: xCordinates,
       unique_colors: [...new Set(collectedColors.flat())],
@@ -456,7 +461,7 @@ class Infograph extends HTMLElement {
       if (i === 0) {
         string += `M ${xObj.x} ${Ys[i]}`;
       } else {
-        string += ` C ${xObj.x1} ${Ys[i - 1]}, ${xObj.x2} ${Ys[i]}, ${xObj.x} ${Ys[i]}`;
+        string += ` S ${xObj.x2} ${Ys[i]}, ${xObj.x} ${Ys[i]}`;
       }
     };
     var spikey = (xObj,i) => { string += `${i === 0 ? 'M' : 'L'} ${xObj.x} ${Ys[i]}`};
@@ -496,11 +501,30 @@ class Infograph extends HTMLElement {
     return [filledPath, path];
   }
 
+  addLabels() {
+    var cordinates = [0, this.core.cordinates.y / 2, this.core.cordinates.y];
+    var baseline = ['hanging','middle','auto'];
+    [this.core.max_label,this.core.mid_label, this.core.min].forEach((nr,i) => {
+      var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.setAttribute('width',this.core.x_label_area.width + 'px');
+      text.setAttribute('x', 0);
+      text.setAttribute('y',cordinates[i]);
+      text.setAttribute('dominant-baseline', baseline[i]);
+      text.textContent = nr;
+      this.svg.appendChild(text);
+    });
+  }
+
+  addCherries() {
+
+  }
+
   buildSVG() {
     var graphGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     graphGroup.id = 'graphGroup';
     this.core.data.forEach((dataObj,i) => graphGroup.append(...this.createPaths(dataObj,i)));
 
+    this.addLabels();
     this.svg.append(this.buildGradients(), graphGroup);
   }
 
