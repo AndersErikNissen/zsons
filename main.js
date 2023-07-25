@@ -429,7 +429,7 @@ class Infograph extends HTMLElement {
         {
           offset: '100%',
           'stop-color': color,
-          'stop-opacity': 0
+          'stop-opacity': 0.2
         }
       ].forEach(config => {
         var stopElement = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
@@ -506,13 +506,29 @@ class Infograph extends HTMLElement {
     var baseline = ['hanging','middle','auto'];
     [this.core.max_label,this.core.mid_label, this.core.min].forEach((nr,i) => {
       var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      text.setAttribute('width',this.core.x_label_area.width + 'px');
+      //text.setAttribute('inline-size',this.core.x_label_area.width + 'px');
+      text.setAttribute('text-anchor', 'start');
+      text.style.inlineSize = this.core.x_label_area.width + 'px';
       text.setAttribute('x', 0);
       text.setAttribute('y',cordinates[i]);
       text.setAttribute('dominant-baseline', baseline[i]);
       text.textContent = nr;
       this.svg.appendChild(text);
     });
+
+    // Y labels 
+    // Simple one for now
+    console.log(this.core.x_amount)
+    for (let i = 0; i < this.core.x_amount; i++) {
+      var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.textContent = i;
+      text.setAttribute('x', this.core.x_cordinates[i].x);
+      text.setAttribute('y', this.nodeData.height);
+      text.setAttribute('text-anchor', 'end');
+      text.setAttribute('dominant-baseline', 'auto');
+      this.svg.appendChild(text);
+    }
+
   }
 
   addCherries() {
@@ -523,6 +539,14 @@ class Infograph extends HTMLElement {
     var graphGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     graphGroup.id = 'graphGroup';
     this.core.data.forEach((dataObj,i) => graphGroup.append(...this.createPaths(dataObj,i)));
+    
+    // CLipping path
+    this.svg.innerHTML += `<clipPath id="graph-clip-path">
+      <rect y="0" x="${this.core.cordinates.x}" width="${this.nodeData.width - this.core.cordinates.x}" height="${this.core.cordinates.y}" />
+    </clipPath>`;
+
+    graphGroup.setAttribute('clip-path', 'url(#graph-clip-path)');
+
 
     this.addLabels();
     this.svg.append(this.buildGradients(), graphGroup);
