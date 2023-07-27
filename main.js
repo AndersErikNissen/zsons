@@ -40,7 +40,17 @@ class Infograph extends HTMLElement {
     return style;
   }
 
-  
+  /**
+   * total width/height
+   * graph x/y + width/height
+   *  - requires: injecting the svg
+   * 
+   * We have data
+   * We have a SVG
+   * 
+   * Verify data
+   * Upgrade data
+   */
   
   _template() {
     const template = document.createElement('template');
@@ -51,7 +61,7 @@ class Infograph extends HTMLElement {
         <slot id="json" name="json"></slot>
       </div>
       
-      <svg width="${this.dimensions.width}" height="${this.dimensions.height}" id="svg"></svg>
+      <svg width="${this.dimensions.width}" height="${this.getBoundingClientRect().height}" id="svg"></svg>
     `;
     
     return template;
