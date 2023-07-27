@@ -17,16 +17,22 @@ class Infograph extends HTMLElement {
           font-size: 12px;
         }
       </style>
+
+      <slot id="form" name="form"></slot>
+      <slot id="json" name="json"></slot>
     `;
   }
   
   connectedCallback() {
     this.mapAttributes = this.collectAllAttributes;
     console.log("Settings", this.settings)
-
     
+    // Maybe handle the data before doing anything with the SVG?
+    this.shadowRoot.innerHTML += `
+      <svg width="${this.dimensions.width}" height="${this.getBoundingClientRect().height}" id="svg"></svg>
+    `;
 
-    this.shadowRoot.appendChild(this._template().content.cloneNode(true));
+    //this.shadowRoot.appendChild(this._template().content.cloneNode(true));
     this.svg = this.shadowRoot.querySelector('#svg');
     this.coreData = this.data;
     this.upgradedData = this.data;
@@ -35,6 +41,12 @@ class Infograph extends HTMLElement {
 
     console.log("Core", this.core)
     console.log("Up Data", this.core.data)
+  }
+
+  round(nr) {
+    return Math.round(
+      (nr * Math.pow(10, 2)) * (1 + Number.EPSILON)
+    ) / Math.pow(10, 2);
   }
 
   /**
@@ -68,6 +80,9 @@ class Infograph extends HTMLElement {
   set mapAttributes(attributes) {
     var defaultSettings = {type: 'river', labels: true, aspect: false}
     for (const key in attributes) {if(!attributes[key]) attributes[key] = defaultSettings[key]};
+    var rect = this.getBoundingClientRect();
+    attributes.width = rect.width;
+    attributes.height = attributes.aspect ? rect.width * attributes.aspect : rect.height;
     this.settings = attributes;
   }
   
