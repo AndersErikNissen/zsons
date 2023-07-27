@@ -4,10 +4,28 @@ class Infograph extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
+
+    this.shadowRoot.innerHTML = `
+      <style>
+        :host {
+          width: 100%;
+          height: 100%;
+          display: block;
+        }
+
+        text {
+          font-size: 12px;
+        }
+      </style>
+    `;
   }
   
   connectedCallback() {
-    this.shadowRoot.appendChild(this._style());
+    this.mapAttributes = this.collectAllAttributes;
+    console.log("Settings", this.settings)
+
+    
+
     this.shadowRoot.appendChild(this._template().content.cloneNode(true));
     this.svg = this.shadowRoot.querySelector('#svg');
     this.coreData = this.data;
@@ -17,27 +35,6 @@ class Infograph extends HTMLElement {
 
     console.log("Core", this.core)
     console.log("Up Data", this.core.data)
-  }
-
-  _style() {
-    var style = document.createElement('style');
-    style.innerHTML = `
-      :host {
-        width: 100%;
-        height: 100%;
-        display: block;
-      }
-
-      #graphGroup {
-        overflow: hidden;
-      }
-
-      text {
-        font-size: 12px;
-      }
-    `;
-
-    return style;
   }
 
   /**
@@ -51,16 +48,35 @@ class Infograph extends HTMLElement {
    * Verify data
    * Upgrade data
    */
+
+  get collectAllAttributes() {
+    if (this.hasAttributes()) {
+      var allowedTypes = ['river','mountain','pancake'];
+
+      return {
+        type: allowedTypes.find(type => type === this.getAttribute('type')),
+        labels: this.hasAttribute('labels') ? true : false,
+        aspect: this.getAttribute('aspect')
+      }
+    }
+    return {};
+  }
+
+  /**
+   * @param {object} attributes - All the attributes from the element.
+   */
+  set mapAttributes(attributes) {
+    var defaultSettings = {type: 'river', labels: true, aspect: false}
+    for (const key in attributes) {if(!attributes[key]) attributes[key] = defaultSettings[key]};
+    this.settings = attributes;
+  }
   
   _template() {
     const template = document.createElement('template');
     
     template.innerHTML = `
-      <div class="hidden">
-        <slot id="form" name="form"></slot>
-        <slot id="json" name="json"></slot>
-      </div>
-      
+      <slot id="form" name="form"></slot>
+      <slot id="json" name="json"></slot>
       <svg width="${this.dimensions.width}" height="${this.getBoundingClientRect().height}" id="svg"></svg>
     `;
     
