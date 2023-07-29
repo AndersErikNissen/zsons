@@ -4,71 +4,41 @@ class Infograph extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
+    this.themes = { oldschool: ["#0c1618","#004643","#faf4d3","#d1ac00","#f6be9a","#f4d6cc","#004643","#f4b860","#922d50","#501537"], history: ["#04151f","#183a37","#efd6ac","#c44900","#432534","#cc5803", "#12100e", "#efd6ac", "#30321c", "#4a4b2f"], bubblegum: ["#8fbfe0","#7c77b9","#1d8a99","#0bc9cd","#14fff7","#8b80f9","#cfbff7","#dd7373","#0bc9cd","#f9f5e3"], wise: ["#5d737e","#55505c","#d4f4dd","#fe5f55","#fb5012","#f9ada0","#f9627d","#d4f4dd","#613f75","#426a5a"], default: ["#F0FAF0","#D1F0D1","#B2E6B2","#93DC93","#74D274","#56C856","#3CB93C","#329A32","#287B28","#1E5C1E"] };
+
 
     this.shadowRoot.innerHTML = `
       <style>
-        :host {
-          width: 100%;
-          height: 100%;
-          display: block;
-        }
-
-        text {
-          font-size: 12px;
-        }
+      :host {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+      
+      text {
+        font-size: 12px;
+      }
       </style>
-
+      
       <slot id="form" name="form"></slot>
       <slot id="json" name="json"></slot>
     `;
   }
-  
-  connectedCallback() {
-    this.mapAttributes = this.collectAllAttributes;
-    console.log("Settings", this.settings)
-    
-    // Maybe handle the data before doing anything with the SVG?
-    this.shadowRoot.innerHTML += `
-      <svg width="${this.dimensions.width}" height="${this.getBoundingClientRect().height}" id="svg"></svg>
-    `;
 
-    //this.shadowRoot.appendChild(this._template().content.cloneNode(true));
-    this.svg = this.shadowRoot.querySelector('#svg');
-    this.coreData = this.data;
-    this.upgradedData = this.data;
-
-    this.buildSVG();
-
-    console.log("Core", this.core)
-    console.log("Up Data", this.core.data)
-  }
-
-  round(nr) {
-    return Math.round(
-      (nr * Math.pow(10, 2)) * (1 + Number.EPSILON)
-    ) / Math.pow(10, 2);
-  }
-
-  /**
-   * total width/height
-   * graph x/y + width/height
-   *  - requires: injecting the svg
-   * 
-   * We have data
-   * We have a SVG
-   * 
-   * Verify data
-   * Upgrade data
-   */
+  round(nr) {return Math.round((nr * Math.pow(10, 2)) * (1 + Number.EPSILON)) / Math.pow(10, 2);}
 
   get collectAllAttributes() {
     if (this.hasAttributes()) {
-      var allowedTypes = ['river','mountain','pancake'];
+      var 
+        allowedTypes = ['river','mountain',''],
+        hasAllowedType = allowedTypes.find(type => type === this.getAttribute('type')),
+        hasAllowedTheme = this.hasAttribute('theme') && this.themes.hasOwnProperty((this.getAttribute('theme').toLowerCase()));
 
       return {
-        type: allowedTypes.find(type => type === this.getAttribute('type')),
+        ...(hasAllowedType && { type: this.getAttribute('type') }),
+        ...(hasAllowedTheme && { theme: this.getAttribute('theme').toLowerCase() }),
         labels: this.hasAttribute('labels') ? true : false,
-        aspect: this.getAttribute('aspect')
+        aspect: isNaN(Number(this.getAttribute('aspect'))) ? false : Number(this.getAttribute('aspect'))
       }
     }
     return {};
@@ -78,41 +48,29 @@ class Infograph extends HTMLElement {
    * @param {object} attributes - All the attributes from the element.
    */
   set mapAttributes(attributes) {
-    var defaultSettings = {type: 'river', labels: true, aspect: false}
-    for (const key in attributes) {if(!attributes[key]) attributes[key] = defaultSettings[key]};
+    // Add missing default settings
+    var defaultSettings = { type: 'river', labels: true, aspect: false, theme: 'default' }
+    for (const key in attributes) { if(!attributes[key]) attributes[key] = defaultSettings[key] };
+
+    // Info from Custom Element
     var rect = this.getBoundingClientRect();
     attributes.width = rect.width;
     attributes.height = attributes.aspect ? rect.width * attributes.aspect : rect.height;
+
     this.settings = attributes;
   }
   
+  /*
   _template() {
     const template = document.createElement('template');
     
     template.innerHTML = `
       <slot id="form" name="form"></slot>
       <slot id="json" name="json"></slot>
-      <svg width="${this.dimensions.width}" height="${this.getBoundingClientRect().height}" id="svg"></svg>
+      <svg width="${this.dimensions.width}" height="${this.dimensions.height}" id="svg"></svg>
     `;
     
     return template;
-  }
-  
-  get dimensions() {
-    var rect = this.getBoundingClientRect();
-    var height = rect.height;
-
-    if (this.hasAttribute('aspect')) {
-      var aspect = Number(this.getAttribute('aspect'));
-      if (!isNaN(aspect)) {
-        height = rect.width * aspect;
-      }
-    }
-
-    return {
-      width: rect.width,
-      height: height
-    }
   }
 
   get nodeData() {
@@ -124,26 +82,25 @@ class Infograph extends HTMLElement {
       height: height
     }
   }
-
   get layout() {
     var layoutTypes = ['wavy','buddy','towery','spikey'];
     var attributeLayout = this.getAttribute('layout');
     var check = layoutTypes.find(layout => layout === attributeLayout) ;
-
+ 
     return check ? check : 'towery';
   }
 
   get curveRatio() {
     var attribute = isNaN(Number(this.getAttribute('curve-level'))) ? 1 : Number(this.getAttribute('curve-level'));
     var ratio = 1;
-
+ 
     if (attribute === 1) ratio = 0.1;
     if (attribute === 2) ratio = 0.2;
     if (attribute === 3) ratio = 0.3;
     if (attribute === 4) ratio = 0.4;
     if (attribute === 5) ratio = 0.5;
     if (attribute === 6) ratio = 0.6;
-
+ 
     return ratio;
   }
 
@@ -156,29 +113,52 @@ class Infograph extends HTMLElement {
       wise: ["#5d737e","#55505c","#d4f4dd","#fe5f55","#fb5012","#f9ada0","#f9627d","#d4f4dd","#613f75","#426a5a"],
       default: ["#F0FAF0","#D1F0D1","#B2E6B2","#93DC93","#74D274","#56C856","#3CB93C","#329A32","#287B28","#1E5C1E"]
     };
-
-    var themeName = 'default';
+ 
+    //var themeName = 'default' && this.hasAttribute('theme') && themes.hasOwnProperty(this.getAttribute('theme').toLowerCase()) ? ;
     if (this.hasAttribute('theme')) {
       var attributeValue = this.getAttribute('theme').toLowerCase();
-
+ 
       if (themes.hasOwnProperty(attributeValue)) {
         themeName = attributeValue;
       }
     }
-
+ 
     return {
       outline: "#EEEEEE",
       fill: themes[themeName]
     }
   }
+  */
+
+  get JSONData() {
+    var 
+      JSONData = this.shadowRoot.querySelector('#json').assignedNodes()[0].tagName === 'SCRIPT' && this.shadowRoot.querySelector('#json').assignedNodes()[0],
+      parsedJSON = [];
+    try { parsedJSON = JSON.parse(JSONData.innerHTML); } catch(e) {};
+    if ( !Array.isArray(parsedJSON) ) parsedJSON = [];
+
+    var validate = (obj) => {
+      var values = obj.values && Array.isArray(obj.values) && obj.values;
+      if (values) {
+        values = values.map(value => )
+      }
+
+
+      return {
+        ...(values && { values: values })
+      }
+    }
+
+    parsedJSON.forEach(dataObj => validate(dataObj));
+
+    return parsedJSON;
+  }
 
   get data() {
     var data = [];
     var validJSON = false;
-    var formNode = this.shadowRoot.querySelector('#form').assignedNodes()[0];
+    
     var jsonNode = this.shadowRoot.querySelector('#json').assignedNodes()[0];
-
-    if (formNode && formNode.tagName !== 'FORM') formNode = false;
     if (jsonNode && jsonNode.tagName !== 'SCRIPT') jsonNode = false;
     
     if (jsonNode) {
@@ -258,27 +238,6 @@ class Infograph extends HTMLElement {
             }
           });
         }
-      }
-    }
-    
-    // If we have a <form> and no data have been added to our data-variable.
-    if (formNode && data.length === 0) {
-      var validForm = new FormData(formNode).entries();
-      
-      for (const [name, value] of validForm) {
-        var i = data.findIndex( existingObject => existingObject.name === name);
-        
-        // If the object doesn't exists then add it.
-        var obj = i === -1 
-        ? {
-          name: name,
-          label: name.charAt(0).toUpperCase() + name.slice(1),
-          values: []
-        }
-        : data[i];
-        
-        if(!isNaN(Number(value))) obj.values.push(Number(value));
-        if (i === -1) data.push(obj);
       }
     }
     
@@ -592,7 +551,25 @@ class Infograph extends HTMLElement {
     this.addLabels();
     this.svg.append(this.buildGradients(), graphGroup);
   }
+  
+  connectedCallback() {
+    // Startup
+    this.mapAttributes = this.collectAllAttributes;
+    this.shadowRoot.innerHTML += `
+      <svg viewBox="0 0 ${this.settings.width} ${this.settings.height}" xmlns="http://www.w3.org/2000/svg" width="${this.settings.width}" height="${this.settings.height}" id="svg"></svg>
+    `;
+    this.svg = this.shadowRoot.querySelector('#svg');
 
+    console.log(this.JSONData)
+    //this.shadowRoot.appendChild(this._template().content.cloneNode(true));
+    //this.coreData = this.data;
+    //this.upgradedData = this.data;
+
+    //this.buildSVG();
+
+    //console.log("Core", this.core)
+    //console.log("Up Data", this.core.data)
+  }
 }
 
 customElements.define('aenother-infograph', Infograph);
