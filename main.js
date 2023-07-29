@@ -140,18 +140,20 @@ class Infograph extends HTMLElement {
     var validate = (obj) => {
       var values = obj.values && Array.isArray(obj.values) && obj.values;
       if (values) {
-        values = values.map(value => )
+        values = values.filter(value => isNaN(Number(value)) ? false : Number(value));
       }
 
 
-      return {
-        ...(values && { values: values })
-      }
+      var validated = {
+        ...(values && { values: values }),
+      };
+
+      if (validated.entries().length > 0) return validated;
     }
 
-    parsedJSON.forEach(dataObj => validate(dataObj));
+    var validatedJSON = parsedJSON.filter(dataObj => validate(dataObj));
 
-    return parsedJSON;
+    return validatedJSON.length > 0 ? validatedJSON : [];
   }
 
   get data() {
