@@ -130,124 +130,41 @@ class Infograph extends HTMLElement {
   }
   */
 
+  validateData(obj) {
+    var 
+      label = obj.label && typeof obj.label === 'string' && obj.label,
+      values = obj.values && Array.isArray(obj.values) && obj.values;
+    if (values) {
+      values = values.filter(value => isNaN(Number(value)) ? false : Number(value));
+      var 
+        heighestValue = Math.max.apply(null, values),
+        combinedValues = values.reduce((accumulation, current) => accumulation + current),
+        amountOfValues = values.length;
+    }
+
+    var validated = {
+      ...(label && { label: label}),
+      ...(values && { values: values }),
+      ...(heighestValue && { heighest_value: heighestValue }),
+      ...(combinedValues && { heighest_combined_value: combinedValues }),
+      ...(amountOfValues && { amount_of_values: amountOfValues }),
+    };
+    
+    if (Object.entries(validated).length > 0) return validated;
+  }
+
   get JSONData() {
     var 
       JSONData = this.shadowRoot.querySelector('#json').assignedNodes()[0].tagName === 'SCRIPT' && this.shadowRoot.querySelector('#json').assignedNodes()[0],
       parsedJSON = [];
-    try { parsedJSON = JSON.parse(JSONData.innerHTML); } catch(e) {};
-    if ( !Array.isArray(parsedJSON) ) parsedJSON = [];
+    try { 
+      parsedJSON = JSON.parse(JSONData.innerHTML); 
+      if (!Array.isArray(parsedJSON)) parsedJSON = [];
+    } catch(e) {};
 
-    var validate = (obj) => {
-      var values = obj.values && Array.isArray(obj.values) && obj.values;
-      if (values) {
-        values = values.filter(value => isNaN(Number(value)) ? false : Number(value));
-      }
-
-
-      var validated = {
-        ...(values && { values: values }),
-      };
-
-      if (validated.entries().length > 0) return validated;
-    }
-
-    var validatedJSON = parsedJSON.filter(dataObj => validate(dataObj));
+    var validatedJSON = parsedJSON.filter(dataObj => this.validateData(dataObj));
 
     return validatedJSON.length > 0 ? validatedJSON : [];
-  }
-
-  get data() {
-    var data = [];
-    var validJSON = false;
-    
-    var jsonNode = this.shadowRoot.querySelector('#json').assignedNodes()[0];
-    if (jsonNode && jsonNode.tagName !== 'SCRIPT') jsonNode = false;
-    
-    if (jsonNode) {
-       try {
-        validJSON = JSON.parse(jsonNode.innerHTML);
-      } catch(e) {
-        console.error('The provided JSON is not valid', e);
-        jsonNode = false;
-      }
-      
-      if (validJSON) {
-        if (Array.isArray(validJSON)) {
-          validJSON.forEach(obj => {
-            if (typeof obj === 'object') {
-              if (!obj.hasOwnProperty('label')) return;
-              if (!obj.hasOwnProperty('values')) return;
-              if (!Array.isArray(obj.values)) return;
-              if (!obj.values.length > 0) return;
-
-              var returnObject = {
-                label: obj.label,
-                values: obj.values.filter(value => {
-                  if (!isNaN(Number(value))) {
-                    return Number(value);
-                  }
-                })
-              };
-
-              if (returnObject.values.length === 0) return;
-
-              // Validate the colors object
-              var validColorObj = {};
-
-              if (obj.hasOwnProperty('colors')) {
-                if (typeof obj.colors === 'object') {
-                  if (obj.colors.hasOwnProperty('outline')) {
-                    if (typeof obj.colors.outline === 'string') {
-                      if (obj.colors.outline.match(/^#?[a-fA-F0-9]{6}$/)) {
-                        validColorObj.outline = obj.colors.outline.charAt(0) === '#' 
-                          ? obj.colors.outline 
-                          : '#' + obj.colors.outline;;
-                      }
-                    }
-                  }
-                }
-
-                if (obj.colors.hasOwnProperty('fill')) {
-                  if (typeof obj.colors.fill === 'string') {
-                    if (obj.colors.fill.match(/^#?[a-fA-F0-9]{6}$/)) {
-                      validColorObj.fill = obj.colors.fill.charAt(0) === '#' 
-                        ? obj.colors.fill 
-                        : '#' + obj.colors.fill;
-                    };
-                  }
-
-                  if (Array.isArray(obj.colors.fill) && !validColorObj.hasOwnProperty('fill')) {
-                    var validatedColors = [];
-                    obj.colors.fill.forEach(color => {
-                      if (typeof color !== 'string') return;
-
-                      if (color.match(/^#?[a-fA-F0-9]{6}$/)) {
-                        validatedColors.push(color.charAt(0) === '#' 
-                          ? color 
-                          : "#" + color
-                        );
-                      }
-                    });
-                    if (validatedColors.length > 0) validColorObj.fill = validatedColors;
-                  }
-                }
-                if (validColorObj.hasOwnProperty('outline') || validColorObj.hasOwnProperty('fill')) {
-                  returnObject.colors = validColorObj;
-                }
-              };
-              
-              data.push(returnObject);
-            }
-          });
-        }
-      }
-    }
-    
-    return data.length > 0 ? data : false;
-  }
-
-  turnToTwoDigits(nr) {
-    return +(Math.round(nr + "e+2") + "e-2");
   }
 
   /**
