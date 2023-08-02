@@ -49,7 +49,7 @@ class Infograph extends HTMLElement {
    */
   set mapAttributes(attributes) {
     // Add missing default settings
-    var defaultSettings = { type: 'river', labels: true, aspect: false, theme: 'default' }
+    var defaultSettings = { type: 'river', labels: true, aspect: false, theme: 'default', label_format: false }
     for (const key in attributes) { if(!attributes[key]) attributes[key] = defaultSettings[key] };
 
     // Info from Custom Element
@@ -171,11 +171,26 @@ class Infograph extends HTMLElement {
    * @param {array} data - List of data to gather information from
    */
   set buildData(data) {
+    // Get heighest value and ceiling value
     var heighstValueName = this.settings.type && this.settings.type === 'tower' && 'heighest_combined_value' || 'heighest_value';
     var heighestValue = Math.max.apply(null,data.map(obj => obj[heighstValueName]))
     var aTenth = Math.pow(10, Number(String(heighestValue).length)) / 10;
+    var ceilingValue = aTenth;
+    while (ceilingValue % heighestValue === ceilingValue) {
+      ceilingValue += aTenth;
+    }
+    // Add overhead if too close
+    if (ceilingValue === heighestValue || (ceilingValue - (aTenth / 4)) <= heighestValue) ceilingValue += aTenth;
     
+    var amountOfValues = Math.max.apply(null, data.map(obj => obj.amountOfValues));
 
+    var labelsLeft = { heighest: heighestValue, middle: heighestValue / 2 }; 
+    if (this.settings.label_format) {
+      var formattedCeilingValue = Number(String(heighestValue).length) == 4 && ceilingValue / 1E3 + 'K' || Number(String(heighestValue).length) && ceilingValue / 1E6 + 'M' || Number(String(heighestValue).length) && ceilingValue / 1E9 + 'B';
+    }
+    
+    console.log(formattedCeilingValue)
+    console.log("buildData",ceilingValue)
   }
 
   /**
