@@ -30,7 +30,7 @@ class Infograph extends HTMLElement {
   get collectAllAttributes() {
     if (this.hasAttributes()) {
       var 
-        allowedTypes = ['river','mountain',''],
+        allowedTypes = ['river','mountain','tower'],
         hasAllowedType = allowedTypes.find(type => type === this.getAttribute('type')),
         hasAllowedTheme = this.hasAttribute('theme') && this.themes.hasOwnProperty((this.getAttribute('theme').toLowerCase()));
 
@@ -162,9 +162,20 @@ class Infograph extends HTMLElement {
       if (!Array.isArray(parsedJSON)) parsedJSON = [];
     } catch(e) {};
 
-    var validatedJSON = parsedJSON.filter(dataObj => this.validateData(dataObj));
+    var validatedJSON = parsedJSON.map(dataObj => this.validateData(dataObj));
 
     return validatedJSON.length > 0 ? validatedJSON : [];
+  }
+
+  /**
+   * @param {array} data - List of data to gather information from
+   */
+  set buildData(data) {
+    var heighstValueName = this.settings.type && this.settings.type === 'tower' && 'heighest_combined_value' || 'heighest_value';
+    var heighestValue = Math.max.apply(null,data.map(obj => obj[heighstValueName]))
+    var aTenth = Math.pow(10, Number(String(heighestValue).length)) / 10;
+    
+
   }
 
   /**
@@ -480,6 +491,7 @@ class Infograph extends HTMLElement {
     this.svg = this.shadowRoot.querySelector('#svg');
 
     console.log(this.JSONData)
+    this.buildData = this.JSONData;
     //this.shadowRoot.appendChild(this._template().content.cloneNode(true));
     //this.coreData = this.data;
     //this.upgradedData = this.data;
