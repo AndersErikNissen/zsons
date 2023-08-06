@@ -99,7 +99,9 @@ class Infograph extends HTMLElement {
   }
 
   buildSVGAreas(labels) {
-
+    var rulers = labels.map(label => this.svg.appendChild(Object.assign(document.createElementNS('http://www.w3.org/2000/svg','text'), { textContent: label })).getBBox());
+    
+    console.log("lr", rulers);
   }
 
   /**
@@ -127,7 +129,7 @@ class Infograph extends HTMLElement {
     };
 
     var labelsLeft = { heighest: valueFormatter(ceilingValue), middle: valueFormatter(ceilingValue / 2) }; 
-    
+    this.buildSVGAreas();
     this.data = labelsLeft;
   }
 
