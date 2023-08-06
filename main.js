@@ -37,7 +37,7 @@ class Infograph extends HTMLElement {
       return {
         ...(hasAllowedType && { type: this.getAttribute('type') }),
         ...(hasAllowedTheme && { theme: this.getAttribute('theme').toLowerCase() }),
-        labels: this.hasAttribute('labels') ? true : false,
+        use_labels: this.hasAttribute('use-labels') ? true : false,
         aspect: isNaN(Number(this.getAttribute('aspect'))) ? false : Number(this.getAttribute('aspect')),
         label_format: this.hasAttribute('label_format') ? true : false
       }
@@ -50,7 +50,7 @@ class Infograph extends HTMLElement {
    */
   set mapAttributes(attributes) {
     // Add missing default settings
-    var defaultSettings = { type: 'river', labels: true, aspect: false, theme: 'default', label_format: false }
+    var defaultSettings = { type: 'river', use_labels: true, aspect: false, theme: 'default', label_format: false }
     for (const key in defaultSettings) { if(attributes[key]) defaultSettings[key] = attributes[key] };
 
     // Info from Custom Element
@@ -64,7 +64,10 @@ class Infograph extends HTMLElement {
   validateData(obj) {
     var 
       label = obj.label && typeof obj.label === 'string' && obj.label,
+      labels = obj.labels && Array.isArray(obj.labels) && !obj.labels.some(label => typeof label !== 'string') && obj.labels,
       values = obj.values && Array.isArray(obj.values) && obj.values;
+    // Only allow one type of label/labels  
+    if (labels && label) label = false;
     if (values) {
       values = values.filter(value => isNaN(Number(value)) ? false : Number(value));
       var 
@@ -72,13 +75,18 @@ class Infograph extends HTMLElement {
         combinedValues = values.reduce((accumulation, current) => accumulation + current),
         amountOfValues = values.length;
     }
+    if (labels) {
+      var amountOfLabels = labels.length;
+    }
 
     var validated = {
       ...(label && { label: label}),
+      ...(labels && { labels: labels}),
       ...(values && { values: values }),
       ...(heighestValue && { heighest_value: heighestValue }),
       ...(combinedValues && { heighest_combined_value: combinedValues }),
       ...(amountOfValues && { amount_of_values: amountOfValues }),
+      ...(amountOfLabels && { amount_of_labels: amountOfLabels })
     };
     
     if (Object.entries(validated).length > 0) return validated;
@@ -98,10 +106,11 @@ class Infograph extends HTMLElement {
     return validatedJSON.length > 0 ? validatedJSON : [];
   }
 
-  buildSVGAreas(labels) {
-    var rulers = labels.map(label => this.svg.appendChild(Object.assign(document.createElementNS('http://www.w3.org/2000/svg','text'), { textContent: label })).getBBox());
-    
-    console.log("lr", rulers);
+  buildSVGAreas(leftLabels = [], bottomLabels = []) {
+    var leftRulers = leftLabels.map(label => this.svg.appendChild(Object.assign(document.createElementNS('http://www.w3.org/2000/svg','text'), { textContent: label })).getBBox());
+    var bottomRulers = bottomLabels.map(label => this.svg.appendChild(Object.assign(document.createElementNS('http://www.w3.org/2000/svg','text'), { textContent: label })).getBBox());
+
+    console.log("lr", leftRulers,bottomRulers);
   }
 
   /**
@@ -129,7 +138,9 @@ class Infograph extends HTMLElement {
     };
 
     var labelsLeft = { heighest: valueFormatter(ceilingValue), middle: valueFormatter(ceilingValue / 2) }; 
-    this.buildSVGAreas();
+    var heighestLabelAmount = Math.max.apply(null, data.map(obj => obj.amount_of_labels)); 
+    var bottomLabeling = 
+    this.buildSVGAreas([labelsLeft.heighest, labelsLeft.middle], );
     this.data = labelsLeft;
   }
 
