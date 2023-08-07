@@ -106,11 +106,32 @@ class Infograph extends HTMLElement {
     return validatedJSON.length > 0 ? validatedJSON : [];
   }
 
-  buildSVGAreas(leftLabels = [], bottomLabels = []) {
+  buildSVGAreas(leftLabels = [], bottomLabel = false) {
     var leftRulers = leftLabels.map(label => this.svg.appendChild(Object.assign(document.createElementNS('http://www.w3.org/2000/svg','text'), { textContent: label })).getBBox());
-    var bottomRulers = bottomLabels.map(label => this.svg.appendChild(Object.assign(document.createElementNS('http://www.w3.org/2000/svg','text'), { textContent: label })).getBBox());
+    var bottomRuler = bottomLabel && this.svg.appendChild(Object.assign(document.createElementNS('http://www.w3.org/2000/svg','text'), { textContent: bottomLabel })).getBBox() || {height: 0};
+    
+    // Build a graph
+    // Container padding
+    // Left labels
+    // Bottom labels
+    // Graph area
+    // Padding on graph area
+    var paddingAmount = 0.05;
+    var containerPadding = {x: this.settings.width * paddingAmount, y: this.settings.height * paddingAmount};
 
-    console.log("lr", leftRulers,bottomRulers);
+    // Left label area
+    var leftWidth = Math.ceil(Math.max.apply(null, leftRulers.map(rect => rect.width)));
+    var leftX = containerPadding.x;
+
+    // Bottom label area
+    var bottomHeight = Math.ceil(bottomRuler.height);
+    var bottomY = this.settings.height - bottomHeight - containerPadding.y;
+    
+    // Graph area
+    var graphX = containerPadding.x + leftWidth + containerPadding.x;
+    var graphWidth = this.settings.width - graphX - containerPadding.x;
+
+    console.log("lr", leftRulers,bottomRuler);
   }
 
   /**
@@ -127,7 +148,7 @@ class Infograph extends HTMLElement {
     // Add overhead if too close
     if (ceilingValue === heighestValue || (ceilingValue - (aTenth / 4)) <= heighestValue) ceilingValue += aTenth;
     
-    var amountOfValues = Math.max.apply(null, data.map(obj => obj.amountOfValues));
+    var amountOfValues = Math.max.apply(null, data.map(obj => obj.amount_of_values));
     
     var valueFormatter = nr => {
       if (this.settings.label_format) {
@@ -138,9 +159,12 @@ class Infograph extends HTMLElement {
     };
 
     var labelsLeft = { heighest: valueFormatter(ceilingValue), middle: valueFormatter(ceilingValue / 2) }; 
-    var heighestLabelAmount = Math.max.apply(null, data.map(obj => obj.amount_of_labels)); 
-    var bottomLabeling = 
-    this.buildSVGAreas([labelsLeft.heighest, labelsLeft.middle], );
+    // Longest bottom label 
+    var allBottomLabels = data.map(obj => obj.label ? obj.label.length : obj.labels).flat();
+    var longestBottomLabel = Math.max.apply(null, allBottomLabels);
+    var bottomLabel = allBottomLabels.find(label => label.length === longestBottomLabel);
+    
+    this.buildSVGAreas([labelsLeft.heighest, labelsLeft.middle], bottomLabel);
     this.data = labelsLeft;
   }
 
