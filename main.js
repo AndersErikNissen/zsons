@@ -65,19 +65,15 @@ class Infograph extends HTMLElement {
     var 
       label = obj.label && typeof obj.label === 'string' && obj.label,
       labels = obj.labels && Array.isArray(obj.labels) && !obj.labels.some(label => typeof label !== 'string') && obj.labels,
-      values = obj.values && Array.isArray(obj.values) && obj.values;
+      validatedValues = obj.values && obj.values.filter(value => isNaN(Number(value)) ? false : Number(value)),
+      values = validatedValues && Array.isArray(obj.values) && validatedValues.length > 0 && validatedValues,
+      heighestValue = values && Math.max.apply(null, values) || false,
+      combinedValues = values && values.reduce((accumulation, current) => accumulation + current) || false,
+      amountOfValues = values && values.length || false,
+      amountOfLabels = labels && labels.length || false;
+
     // Only allow one type of label/labels  
     if (labels && label) label = false;
-    if (values) {
-      values = values.filter(value => isNaN(Number(value)) ? false : Number(value));
-      var 
-        heighestValue = Math.max.apply(null, values),
-        combinedValues = values.reduce((accumulation, current) => accumulation + current),
-        amountOfValues = values.length;
-    }
-    if (labels) {
-      var amountOfLabels = labels.length;
-    }
 
     var validated = {
       ...(label && { label: label}),
@@ -108,30 +104,37 @@ class Infograph extends HTMLElement {
 
   buildSVGAreas(leftLabels = [], bottomLabel = false) {
     var leftRulers = leftLabels.map(label => this.svg.appendChild(Object.assign(document.createElementNS('http://www.w3.org/2000/svg','text'), { textContent: label })).getBBox());
-    var bottomRuler = bottomLabel && this.svg.appendChild(Object.assign(document.createElementNS('http://www.w3.org/2000/svg','text'), { textContent: bottomLabel })).getBBox() || {height: 0};
-    
-    // Build a graph
-    // Container padding
-    // Left labels
-    // Bottom labels
-    // Graph area
-    // Padding on graph area
+    var bottomRuler = bottomLabel && this.svg.appendChild(Object.assign(document.createElementNS('http://www.w3.org/2000/svg','text'), { textContent: bottomLabel })).getBBox() || { height: 0 };
+
+    // General rules
     var paddingAmount = 0.05;
     var containerPadding = {x: this.settings.width * paddingAmount, y: this.settings.height * paddingAmount};
 
     // Left label area
-    var leftWidth = Math.ceil(Math.max.apply(null, leftRulers.map(rect => rect.width)));
+    var leftWidth = this.settings.use_labels && Math.ceil(Math.max.apply(null, leftRulers.map(rect => rect.width))) || 0;
     var leftX = containerPadding.x;
-
+    var leftY = containerPadding.y;
+    
     // Bottom label area
-    var bottomHeight = Math.ceil(bottomRuler.height);
+    var bottomHeight = this.settings.use_labels && Math.ceil(bottomRuler.height) || 0;
+    var bottomWidth = this.settings.width - (containerPadding.x * 2);
     var bottomY = this.settings.height - bottomHeight - containerPadding.y;
+    var bottomX = containerPadding.x;
     
     // Graph area
-    var graphX = containerPadding.x + leftWidth + containerPadding.x;
+    var graphX = (containerPadding.x * 2) + leftWidth;
+    var graphY = containerPadding.y;
+    var graphYPaddings = this.settings.use_labels && containerPadding.y * 3 || containerPadding.y * 2;
     var graphWidth = this.settings.width - graphX - containerPadding.x;
+    var graphHeight = this.settings.height - bottomHeight - graphYPaddings;
 
-    console.log("lr", leftRulers,bottomRuler);
+    this.cordinates = {
+      left: { x: leftX, y: leftY, width: leftWidth, height: graphHeight },
+      bottom: { x: bottomX, y: bottomY, width: bottomWidth, height: bottomHeight },
+      graph: { x: graphX, y: graphY, width: graphWidth, height: graphHeight }
+    };
+
+    this.svg.innerHTML = ''; // Clean up the rulers
   }
 
   /**
@@ -160,12 +163,23 @@ class Infograph extends HTMLElement {
 
     var labelsLeft = { heighest: valueFormatter(ceilingValue), middle: valueFormatter(ceilingValue / 2) }; 
     // Longest bottom label 
-    var allBottomLabels = data.map(obj => obj.label ? obj.label.length : obj.labels).flat();
-    var longestBottomLabel = Math.max.apply(null, allBottomLabels);
-    var bottomLabel = allBottomLabels.find(label => label.length === longestBottomLabel);
+    var allBottomLabelLengths = data.map(obj => obj.label ? obj.label.length : obj.labels ? obj.labels.map(label => label.length) : []).flat();
+    var longestBottomLabel = Math.max.apply(null, allBottomLabelLengths);
+    var bottomLabel = allBottomLabelLengths.find(label => label.length === longestBottomLabel);
     
     this.buildSVGAreas([labelsLeft.heighest, labelsLeft.middle], bottomLabel);
-    this.data = labelsLeft;
+    this.data = data;
+
+    // Adding settings created from the data provided
+    Object.assign(this.settings, {
+      heighest_value: heighestValue,
+      amount_of_values: amountOfValues,
+      ceiling: ceilingValue,
+      labels: {
+        left: labelsLeft,
+        bottom: [...new Set(data.map(obj => obj.label || obj.labels || [] ).flat())]
+      }
+    });
   }
 
   /**
@@ -476,13 +490,14 @@ class Infograph extends HTMLElement {
     // Startup
     this.mapAttributes = this.collectAllAttributes;
     this.shadowRoot.innerHTML += `
-      <svg viewBox="0 0 ${this.settings.width} ${this.settings.height}" xmlns="http://www.w3.org/2000/svg" width="${this.settings.width}" height="${this.settings.height}" id="svg"></svg>
+      <svg id="svg" viewBox="0 0 ${this.settings.width} ${this.settings.height}" xmlns="http://www.w3.org/2000/svg" width="${this.settings.width}" height="${this.settings.height}"></svg>
     `;
     this.svg = this.shadowRoot.querySelector('#svg');
 
-    
     this.buildData = this.JSONData;
-    console.log("this.data",this.data)
+    
+    console.log("%c this.data ","color: blue; background-color: orange",this.data)
+    console.log("%c this.settings ","color: white; background-color: grey",this.settings)
     //this.shadowRoot.appendChild(this._template().content.cloneNode(true));
     //this.coreData = this.data;
     //this.upgradedData = this.data;
