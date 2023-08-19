@@ -6,7 +6,6 @@ class Infograph extends HTMLElement {
     this.attachShadow({ mode: 'open' });
     this.themes = { oldschool: ["#0c1618","#004643","#faf4d3","#d1ac00","#f6be9a","#f4d6cc","#004643","#f4b860","#922d50","#501537"], history: ["#04151f","#183a37","#efd6ac","#c44900","#432534","#cc5803", "#12100e", "#efd6ac", "#30321c", "#4a4b2f"], bubblegum: ["#8fbfe0","#7c77b9","#1d8a99","#0bc9cd","#14fff7","#8b80f9","#cfbff7","#dd7373","#0bc9cd","#f9f5e3"], wise: ["#5d737e","#55505c","#d4f4dd","#fe5f55","#fb5012","#f9ada0","#f9627d","#d4f4dd","#613f75","#426a5a"], default: ["#F0FAF0","#D1F0D1","#B2E6B2","#93DC93","#74D274","#56C856","#3CB93C","#329A32","#287B28","#1E5C1E"] };
 
-
     this.shadowRoot.innerHTML = `
       <style>
       :host {
@@ -25,21 +24,23 @@ class Infograph extends HTMLElement {
     `;
   }
 
+  // Utility functions
   round(nr) {return Math.round((nr * Math.pow(10, 2)) * (1 + Number.EPSILON)) / Math.pow(10, 2);}
+  setAttributes(el, attrs) { Object.keys(attrs).forEach(key => el.setAttribute(key, attrs[key])); }
 
   get collectAllAttributes() {
     if (this.hasAttributes()) {
       var 
         allowedTypes = ['river','mountain','tower'],
-        hasAllowedType = allowedTypes.find(type => type === this.getAttribute('type')),
+        hasAllowedType = allowedTypes.find(type => type === this.getAttribute('type').toLowerCase()),
         hasAllowedTheme = this.hasAttribute('theme') && this.themes.hasOwnProperty((this.getAttribute('theme').toLowerCase()));
 
       return {
         ...(hasAllowedType && { type: this.getAttribute('type') }),
         ...(hasAllowedTheme && { theme: this.getAttribute('theme').toLowerCase() }),
-        use_labels: this.hasAttribute('use-labels') ? true : false,
+        use_labels: this.hasAttribute('labels') ? this.getAttribute('labels').toLowerCase() : false,
         aspect: isNaN(Number(this.getAttribute('aspect'))) ? false : Number(this.getAttribute('aspect')),
-        label_format: this.hasAttribute('label_format') ? true : false
+        format_labels: this.hasAttribute('format-labels') ? true : false
       }
     }
     return {};
@@ -50,7 +51,7 @@ class Infograph extends HTMLElement {
    */
   set mapAttributes(attributes) {
     // Add missing default settings
-    var defaultSettings = { type: 'river', use_labels: true, aspect: false, theme: 'default', label_format: false }
+    var defaultSettings = { type: 'river', use_labels: false, aspect: false, theme: 'default', format_labels: false }
     for (const key in defaultSettings) { if(attributes[key]) defaultSettings[key] = attributes[key] };
 
     // Info from Custom Element
@@ -104,7 +105,7 @@ class Infograph extends HTMLElement {
 
   buildSVGAreas(leftLabels = [], bottomLabel = false) {
     var leftRulers = leftLabels.map(label => this.svg.appendChild(Object.assign(document.createElementNS('http://www.w3.org/2000/svg','text'), { textContent: label })).getBBox());
-    var bottomRuler = bottomLabel && this.svg.appendChild(Object.assign(document.createElementNS('http://www.w3.org/2000/svg','text'), { textContent: bottomLabel })).getBBox() || { height: 0 };
+    var bottomRuler = bottomLabel && this.svg.appendChild(Object.assign(document.createElementNS('http://www.w3.org/2000/svg','text'), { textContent: bottomLabel })).getBBox() || { width: 0, height: 0 };
 
     // General rules
     var paddingAmount = 0.05;
@@ -116,17 +117,16 @@ class Infograph extends HTMLElement {
     var leftY = containerPadding.y;
     
     // Bottom label area
-    var bottomHeight = this.settings.use_labels && Math.ceil(bottomRuler.height) || 0;
+    var bottomHeight = this.settings.use_labels && Math.ceil(bottomRuler[ this.settings.use_labels === 'vertical' ? 'width' : 'height' ]) || 0; // Use width if labels will be displayed vertically.
     var bottomWidth = this.settings.width - (containerPadding.x * 2);
     var bottomY = this.settings.height - bottomHeight - containerPadding.y;
     var bottomX = containerPadding.x;
     
     // Graph area
-    var graphX = (containerPadding.x * 2) + leftWidth;
+    var graphX = leftWidth + containerPadding.x + (leftWidth > 0 ? containerPadding.x : 0);
     var graphY = containerPadding.y;
-    var graphYPaddings = this.settings.use_labels && containerPadding.y * 3 || containerPadding.y * 2;
     var graphWidth = this.settings.width - graphX - containerPadding.x;
-    var graphHeight = this.settings.height - bottomHeight - graphYPaddings;
+    var graphHeight = this.settings.height - bottomHeight - (containerPadding.y * this.settings.use_labels ? 3 : 2);
 
     this.cordinates = {
       left: { x: leftX, y: leftY, width: leftWidth, height: graphHeight },
@@ -153,13 +153,8 @@ class Infograph extends HTMLElement {
     
     var amountOfValues = Math.max.apply(null, data.map(obj => obj.amount_of_values));
     
-    var valueFormatter = nr => {
-      if (this.settings.label_format) {
-        var formats = [{length: 4, letter: 'K', value: nr / 1E3}, {length: 7, letter: 'M', value: nr / 1E6}, {length: 10, letter: 'M', value: nr / 1E9}];
-        var match = formats.find(obj => obj.length === Number(String(nr).length));
-      }
-      return match ? match.value + match.letter : nr;
-    };
+    // Depending on length of label return a different format
+    var valueFormatter = nr => { switch(Number(String(nr).length)) { case 1: case 2: case 3: return nr; case 4: case 5: case 6: return nr / 1E3 + 'K'; case 7: case 8: case 9: return nr / 1E6 + 'M'; default: return nr / 1E9 + 'B' } };
 
     var labelsLeft = { heighest: valueFormatter(ceilingValue), middle: valueFormatter(ceilingValue / 2) }; 
     // Longest bottom label 
@@ -181,6 +176,7 @@ class Infograph extends HTMLElement {
       }
     });
   }
+
 
   /**
    * @param {array} array - Array of data to compare, to set the core values.
@@ -495,7 +491,7 @@ class Infograph extends HTMLElement {
     this.svg = this.shadowRoot.querySelector('#svg');
 
     this.buildData = this.JSONData;
-    
+
     console.log("%c this.data ","color: blue; background-color: orange",this.data)
     console.log("%c this.settings ","color: white; background-color: grey",this.settings)
     //this.shadowRoot.appendChild(this._template().content.cloneNode(true));
