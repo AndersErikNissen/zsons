@@ -16,6 +16,7 @@ class Infograph extends HTMLElement {
       
       text {
         font-size: 12px;
+        font-family: sans-serif;
       }
       </style>
       
@@ -31,7 +32,7 @@ class Infograph extends HTMLElement {
   get collectAllAttributes() {
     if (this.hasAttributes()) {
       var 
-        allowedTypes = ['river','mountain','tower'],
+        allowedTypes = ['river','mountain','tower','yarn'],
         hasAllowedType = allowedTypes.find(type => type === this.getAttribute('type').toLowerCase()),
         hasAllowedTheme = this.hasAttribute('theme') && this.themes.hasOwnProperty((this.getAttribute('theme').toLowerCase()));
 
@@ -129,6 +130,7 @@ class Infograph extends HTMLElement {
     var graphHeight = this.settings.height - bottomHeight - (containerPadding.y * this.settings.use_labels ? 3 : 2);
 
     this.cordinates = {
+      padding: containerPadding,
       left: { x: leftX, y: leftY, width: leftWidth, height: graphHeight },
       bottom: { x: bottomX, y: bottomY, width: bottomWidth, height: bottomHeight },
       graph: { x: graphX, y: graphY, width: graphWidth, height: graphHeight }
@@ -177,7 +179,32 @@ class Infograph extends HTMLElement {
     });
   }
 
+  buildYarn() {
+    /*
+      Loop
+        Areas
+        - Reserve space top (Based on longest value)
+        - Reserve space bottom (Based on longest label)
+        - Add padding between bottom and area
+        Value
+        - Get start x/y (Center on reserved retangle)
+        - Get end x/y
+        - Draw line
+        - Place circle on start point + Give sizing
+          - Increase radius on hover
+        Top labels
+        - Create <text>
+        - Rotate
+        - Place above circle
+          - Add padding between circle
+        - Hide unless hovered
+        Labels bottom
+        - Create <text>
+        - Rotate
+        - Place under line
 
+    */ 
+  }
   /**
    * @param {array} array - Array of data to compare, to set the core values.
    */
