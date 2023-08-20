@@ -145,13 +145,16 @@ class Infograph extends HTMLElement {
   set buildData(data) {
     // Get heighest value and ceiling value
     var heighstValueName = this.settings.type && this.settings.type === 'tower' && 'heighest_combined_value' || 'heighest_value';
-    var heighestValue = Math.max.apply(null,data.map(obj => obj[heighstValueName]))
+    var heighestValue = Math.max.apply(null,data.map(obj => obj[heighstValueName]));
     // Create ceilingValue
     var aTenth = Math.pow(10, Number(String(heighestValue).length)) / 10;
     var ceilingValue = aTenth;
     while (ceilingValue % heighestValue === ceilingValue) { ceilingValue += aTenth };
     // Add overhead if too close
     if (ceilingValue === heighestValue || (ceilingValue - (aTenth / 4)) <= heighestValue) ceilingValue += aTenth;
+
+    // For each value get the percentage based on the ceiling value
+    data.forEach(obj => obj.percentage_values = obj.values.map(value => this.round(ceilingValue / value)));
     
     var amountOfValues = Math.max.apply(null, data.map(obj => obj.amount_of_values));
     
@@ -179,7 +182,7 @@ class Infograph extends HTMLElement {
     });
   }
 
-  buildYarn() {
+  buildYarns() {
     /*
       Loop
         Areas
@@ -202,8 +205,23 @@ class Infograph extends HTMLElement {
         - Create <text>
         - Rotate
         - Place under line
-
     */ 
+    var data = this.data[0];
+    var graphY = this.cordinates.padding + this.cordinates.bottom.height + (this.cordinates.bottom.height > 0 ? this.cordinates.padding : 0);
+    var graphX = this.cordinates.padding;
+
+    var stripeWidth = (this.settings.width - this.cordinates.padding * 2) / this.settings.amount_of_values;
+    data.values.forEach((value,i) => {
+      var topY = grapY + (this.cordinates.graph.height - (this.cordinates.graph.height / 100 * data.percentage_values[i]));
+      this.svg.innerHTML += `
+        <g>
+          <circle cx="" cy="${topY}">
+          <path d="M ${} ${topY}">
+          <text>
+          <text>
+        </g>
+      `;
+    });
   }
   /**
    * @param {array} array - Array of data to compare, to set the core values.
