@@ -18,6 +18,15 @@ class Infograph extends HTMLElement {
         font-size: 12px;
         font-family: sans-serif;
       }
+
+      path {
+        stroke: 1px;
+      }
+
+      yarnGroup:hover circle {
+        transform: scale(1.1);
+      }
+
       </style>
       
       <slot id="form" name="form"></slot>
@@ -114,6 +123,7 @@ class Infograph extends HTMLElement {
 
     // Left label area
     var leftWidth = this.settings.use_labels && Math.ceil(Math.max.apply(null, leftRulers.map(rect => rect.width))) || 0;
+    var leftHeight = this.settings.use_labels && Math.ceil(Math.max.apply(null, leftRulers.map(rect => rect[ this.settings.use_labels === 'vertical' ? 'width' : 'height' ]))) || 0;
     var leftX = containerPadding.x;
     var leftY = containerPadding.y;
     
@@ -131,7 +141,7 @@ class Infograph extends HTMLElement {
 
     this.cordinates = {
       padding: containerPadding,
-      left: { x: leftX, y: leftY, width: leftWidth, height: graphHeight },
+      left: { x: leftX, y: leftY, width: leftWidth, height: leftHeight },
       bottom: { x: bottomX, y: bottomY, width: bottomWidth, height: bottomHeight },
       graph: { x: graphX, y: graphY, width: graphWidth, height: graphHeight }
     };
@@ -207,18 +217,21 @@ class Infograph extends HTMLElement {
         - Place under line
     */ 
     var data = this.data[0];
-    var graphY = this.cordinates.padding + this.cordinates.bottom.height + (this.cordinates.bottom.height > 0 ? this.cordinates.padding : 0);
+    var topHeight = this.cordinates.padding + this.cordinates.left.height;
     var graphX = this.cordinates.padding;
+    var graphBottom = topHeight + this.cordinates.graph.height;
 
     var stripeWidth = (this.settings.width - this.cordinates.padding * 2) / this.settings.amount_of_values;
     data.values.forEach((value,i) => {
-      var topY = grapY + (this.cordinates.graph.height - (this.cordinates.graph.height / 100 * data.percentage_values[i]));
+      var x = graphX + i === 0 ? stripeWidth / 2 : stripeWidth * i + (stripeWidth / 2);
+      var cordinateFromPercentage = (this.cordinates.graph.height - topHeight) / 100 * data.percentage_values[i];
+      var peakY = topHeight + cordinateFromPercentage;
       this.svg.innerHTML += `
-        <g>
-          <circle cx="" cy="${topY}">
-          <path d="M ${} ${topY}">
-          <text>
-          <text>
+        <g class="yarn-group">
+          <text x="${x}" y="${peakY - (this.cordinates.padding / 2)}" class="yarn-value">${value}</text>
+          <circle style="--yarn-peak:-${cordinateFromPercentage}px;" cx="${x}" cy="${graphBottom}">
+          <path d="M ${x} ${graphBottom} V ${peakY}" stroke-dasharray="100" stroke-dashoffset="50">
+          <text x="${x}" y="${graphBottom + this.cordinates.padding}" class="yarn-label">${this.settings.labels.bottom[i]}</text>
         </g>
       `;
     });
