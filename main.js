@@ -13,18 +13,33 @@ class Infograph extends HTMLElement {
         height: 100%;
         display: block;
       }
+
+      #svg {
+        background-color: red;
+      }
       
       text {
-        font-size: 12px;
+        font-size: 16px;
         font-family: sans-serif;
       }
 
       path {
-        stroke: 1px;
+        stroke-color: black;
       }
 
-      yarnGroup:hover circle {
-        transform: scale(1.1);
+      .yarn-group circle {
+        transition: r 0.3s ease-in, transform 0.3s ease-in;
+        transform: translateY(var(--yarn-peak));
+      }
+
+      .yarn-group:hover circle {
+        r: 12px;
+      }
+
+      .yarn-value,
+      .yarn-label {
+        transform: translate(100%, -50%) rotate(-90deg);
+        dominant-baseline: middle;
       }
 
       </style>
@@ -37,6 +52,28 @@ class Infograph extends HTMLElement {
   // Utility functions
   round(nr) {return Math.round((nr * Math.pow(10, 2)) * (1 + Number.EPSILON)) / Math.pow(10, 2);}
   setAttributes(el, attrs) { Object.keys(attrs).forEach(key => el.setAttribute(key, attrs[key])); }
+  valueFormatter = nr => { 
+    // Depending on length of label return a different format
+    if (!this.settings.format_labels) return nr;
+    switch(Number(String(nr).length)) { 
+      case 1: case 2: case 3: return nr; 
+      case 4: case 5: case 6: return nr / 1E3 + 'K'; 
+      case 7: case 8: case 9: return nr / 1E6 + 'M'; 
+      default: return nr / 1E9 + 'B' } 
+  };
+  getCeilingValue(data) {
+    // Get heighest value and ceiling value
+    var heighstValueName = this.settings.type && this.settings.type === 'tower' && 'heighest_combined_value' || 'heighest_value';
+    var heighestValue = Math.max.apply(null,data.map(obj => obj[heighstValueName]));
+    // Create ceilingValue
+    var aTenth = Math.pow(10, Number(String(heighestValue).length)) / 10;
+    var ceilingValue = aTenth;
+    while (ceilingValue % heighestValue === ceilingValue) { ceilingValue += aTenth };
+    // Add overhead if too close
+    if (ceilingValue === heighestValue || (ceilingValue - (aTenth / 4)) <= heighestValue) ceilingValue += aTenth;
+    
+    return { ceiling_value: ceilingValue, heighest_value: heighestValue };
+  }
 
   get collectAllAttributes() {
     if (this.hasAttributes()) {
@@ -116,7 +153,6 @@ class Infograph extends HTMLElement {
   buildSVGAreas(leftLabels = [], bottomLabel = false) {
     var leftRulers = leftLabels.map(label => this.svg.appendChild(Object.assign(document.createElementNS('http://www.w3.org/2000/svg','text'), { textContent: label })).getBBox());
     var bottomRuler = bottomLabel && this.svg.appendChild(Object.assign(document.createElementNS('http://www.w3.org/2000/svg','text'), { textContent: bottomLabel })).getBBox() || { width: 0, height: 0 };
-
     // General rules
     var paddingAmount = 0.05;
     var containerPadding = {x: this.settings.width * paddingAmount, y: this.settings.height * paddingAmount};
@@ -153,36 +189,26 @@ class Infograph extends HTMLElement {
    * @param {array} data - List of data to gather information from
    */
   set buildData(data) {
-    // Get heighest value and ceiling value
-    var heighstValueName = this.settings.type && this.settings.type === 'tower' && 'heighest_combined_value' || 'heighest_value';
-    var heighestValue = Math.max.apply(null,data.map(obj => obj[heighstValueName]));
-    // Create ceilingValue
-    var aTenth = Math.pow(10, Number(String(heighestValue).length)) / 10;
-    var ceilingValue = aTenth;
-    while (ceilingValue % heighestValue === ceilingValue) { ceilingValue += aTenth };
-    // Add overhead if too close
-    if (ceilingValue === heighestValue || (ceilingValue - (aTenth / 4)) <= heighestValue) ceilingValue += aTenth;
+    var ceilingValue = this.getCeilingValue(data).ceiling_value;
 
     // For each value get the percentage based on the ceiling value
-    data.forEach(obj => obj.percentage_values = obj.values.map(value => this.round(ceilingValue / value)));
+    data.forEach(obj => obj.percentage_values = obj.values.map(value => this.round((value / ceilingValue) * 100)));
     
     var amountOfValues = Math.max.apply(null, data.map(obj => obj.amount_of_values));
-    
-    // Depending on length of label return a different format
-    var valueFormatter = nr => { switch(Number(String(nr).length)) { case 1: case 2: case 3: return nr; case 4: case 5: case 6: return nr / 1E3 + 'K'; case 7: case 8: case 9: return nr / 1E6 + 'M'; default: return nr / 1E9 + 'B' } };
 
-    var labelsLeft = { heighest: valueFormatter(ceilingValue), middle: valueFormatter(ceilingValue / 2) }; 
+    var labelsLeft = { heighest: this.valueFormatter(ceilingValue), middle: this.valueFormatter(ceilingValue / 2) }; 
     // Longest bottom label 
     var allBottomLabelLengths = data.map(obj => obj.label ? obj.label.length : obj.labels ? obj.labels.map(label => label.length) : []).flat();
+    var allBottomLabels = data.map(obj => obj.label ? obj.label : obj.labels ? obj.labels.map(label => label) : []).flat();
     var longestBottomLabel = Math.max.apply(null, allBottomLabelLengths);
-    var bottomLabel = allBottomLabelLengths.find(label => label.length === longestBottomLabel);
+    var bottomLabel = allBottomLabels.find(label => label.length === longestBottomLabel);
     
     this.buildSVGAreas([labelsLeft.heighest, labelsLeft.middle], bottomLabel);
     this.data = data;
 
     // Adding settings created from the data provided
     Object.assign(this.settings, {
-      heighest_value: heighestValue,
+      heighest_value: this.getCeilingValue(data).heighest_value,
       amount_of_values: amountOfValues,
       ceiling: ceilingValue,
       labels: {
@@ -193,45 +219,38 @@ class Infograph extends HTMLElement {
   }
 
   buildYarns() {
-    /*
-      Loop
-        Areas
-        - Reserve space top (Based on longest value)
-        - Reserve space bottom (Based on longest label)
-        - Add padding between bottom and area
-        Value
-        - Get start x/y (Center on reserved retangle)
-        - Get end x/y
-        - Draw line
-        - Place circle on start point + Give sizing
-          - Increase radius on hover
-        Top labels
-        - Create <text>
-        - Rotate
-        - Place above circle
-          - Add padding between circle
-        - Hide unless hovered
-        Labels bottom
-        - Create <text>
-        - Rotate
-        - Place under line
-    */ 
     var data = this.data[0];
-    var topHeight = this.cordinates.padding + this.cordinates.left.height;
-    var graphX = this.cordinates.padding;
-    var graphBottom = topHeight + this.cordinates.graph.height;
+    var ceilingValue = this.getCeilingValue([data]).ceiling_value;
+    var percentageValues = data.values.map(value => (value / ceilingValue) * 100);
+    var topHeight = this.cordinates.padding.y + this.cordinates.left.height;
+    var graphHeight = this.settings.height - topHeight - this.cordinates.padding.y - this.cordinates.bottom.height;
+    var graphBottom = topHeight + graphHeight;
+    var stripeWidth = this.settings.width / data.amount_of_values;
 
-    var stripeWidth = (this.settings.width - this.cordinates.padding * 2) / this.settings.amount_of_values;
+    // For testing
+    this.svg.innerHTML = `
+      <rect y="${topHeight}" class="test" style="fill: pink; opacity: 0.5;" height="${graphHeight}" width="${this.settings.width}" />
+      <rect y="${this.cordinates.padding.y}" class="test" style="fill: green; opacity: 0.5;" height="${this.cordinates.left.height}" width="${this.settings.width}" />
+      <rect y="${graphBottom + this.cordinates.padding.y}" class="test" style="fill: purple; opacity: 0.5;" height="${this.cordinates.bottom.height}" width="${this.settings.width}" />
+    `;
+
     data.values.forEach((value,i) => {
-      var x = graphX + i === 0 ? stripeWidth / 2 : stripeWidth * i + (stripeWidth / 2);
-      var cordinateFromPercentage = (this.cordinates.graph.height - topHeight) / 100 * data.percentage_values[i];
+      var x = (stripeWidth * i) + (stripeWidth / 2);
+      var cordinateFromPercentage = (graphHeight / 100) * percentageValues[i];
       var peakY = topHeight + cordinateFromPercentage;
+      var bottomLabel = this.settings.use_labels && this.settings.labels.bottom[i];
+
       this.svg.innerHTML += `
         <g class="yarn-group">
-          <text x="${x}" y="${peakY - (this.cordinates.padding / 2)}" class="yarn-value">${value}</text>
-          <circle style="--yarn-peak:-${cordinateFromPercentage}px;" cx="${x}" cy="${graphBottom}">
-          <path d="M ${x} ${graphBottom} V ${peakY}" stroke-dasharray="100" stroke-dashoffset="50">
-          <text x="${x}" y="${graphBottom + this.cordinates.padding}" class="yarn-label">${this.settings.labels.bottom[i]}</text>
+          <text class="yarn-value" x="${x}" y="${peakY - (this.cordinates.padding.y / 2)}">${this.valueFormatter(value)}</text>
+          <circle style="--yarn-peak:-${cordinateFromPercentage}px;" cx="${x}" cy="${graphBottom}" r="8" />
+          <path d="M ${x} ${graphBottom} v -${cordinateFromPercentage}" 
+            stroke-dasharray="0%"
+            stroke-dashoffset="0%"
+            stroke-width="1"
+            stroke="black"
+          />
+          ${bottomLabel ? `<text class="yarn-label" x="${x}" y="${graphBottom + this.cordinates.padding.y}">${bottomLabel}</text>` : ''}
         </g>
       `;
     });
@@ -549,6 +568,8 @@ class Infograph extends HTMLElement {
     this.svg = this.shadowRoot.querySelector('#svg');
 
     this.buildData = this.JSONData;
+
+    this.buildYarns();
 
     console.log("%c this.data ","color: blue; background-color: orange",this.data)
     console.log("%c this.settings ","color: white; background-color: grey",this.settings)
