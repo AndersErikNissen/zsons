@@ -261,13 +261,6 @@ class Infograph extends HTMLElement {
         text-anchor="middle"
       `;
       
-      if (this.settings.vertical_labels) {
-        valueLabelStyling = `
-          dominant-baseline="central"
-          transform="rotate(-90 ${x} ${valueLabelY})"
-        `;
-      }
-      
       var group = this.createElement('g', { 'class': 'yarn-group' });
       if (this.settings.vertical_labels) {
         // Bottom label
@@ -278,7 +271,9 @@ class Infograph extends HTMLElement {
         group.append(this.createElementStack(['text'], [{ 'dominant-baseline': 'central', 'transform': `rotate( -90 ${x} ${valueLabelY})`, 'x': x, 'y': valueLabelY }], [this.valueFormatter(value)]));
       }
       
-      
+      // #######################
+      // ADD HOW ELEMENTS SHOUD LOOK IF NOT VERTICAL!!!
+      // #######################
       
       this.svg.innerHTML += `
           
