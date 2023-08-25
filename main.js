@@ -35,13 +35,7 @@ class Infograph extends HTMLElement {
       .yarn-group:hover circle {
         r: 12px;
       }
-
-      .yarn-value,
-      .yarn-label {
-        transform: translate(100%, -50%) rotate(-90deg);
-        dominant-baseline: middle;
-      }
-
+      
       </style>
       
       <slot id="form" name="form"></slot>
@@ -52,6 +46,23 @@ class Infograph extends HTMLElement {
   // Utility functions
   round(nr) {return Math.round((nr * Math.pow(10, 2)) * (1 + Number.EPSILON)) / Math.pow(10, 2);}
   setAttributes(el, attrs) { Object.keys(attrs).forEach(key => el.setAttribute(key, attrs[key])); }
+  createElement(elementType, attrs) {
+    var element = document.createElementNS('http://www.w3.org/2000/svg', elementType);
+    this.setAttributes(element, attrs);
+    return element;
+  }
+  createElementStack(elementTypeArray, attributeObjectArray, contentArray = []) {
+    var elementArray = [];
+    // Create backwards array of elements (Setting all the given attributes)
+    for(let i = (elementTypeArray.length - 1); i > -1; i--) { 
+      var element = document.createElementNS('http://www.w3.org/2000/svg', elementTypeArray[i]); 
+      element.textContent = contentArray[i];
+      Object.keys(attributeObjectArray[i]).forEach(key => element.setAttribute(key, attributeObjectArray[i][key])); 
+      elementArray.push(element); }
+    // Append element 1 to 2, 2 to 3 etc
+    elementArray.forEach((element,i) => { if (i !== (elementArray.length - 1)) elementArray[i + 1].appendChild(element) }); 
+    return elementArray[elementArray.length - 1]; // Return the furthest out element
+  }
   valueFormatter = nr => { 
     // Depending on length of label return a different format
     if (!this.settings.format_labels) return nr;
@@ -86,6 +97,7 @@ class Infograph extends HTMLElement {
         ...(hasAllowedType && { type: this.getAttribute('type') }),
         ...(hasAllowedTheme && { theme: this.getAttribute('theme').toLowerCase() }),
         use_labels: this.hasAttribute('labels') ? this.getAttribute('labels').toLowerCase() : false,
+        vertical_labels: this.getAttribute('labels').toLowerCase() === 'vertical' ? true : false,
         aspect: isNaN(Number(this.getAttribute('aspect'))) ? false : Number(this.getAttribute('aspect')),
         format_labels: this.hasAttribute('format-labels') ? true : false
       }
@@ -98,7 +110,7 @@ class Infograph extends HTMLElement {
    */
   set mapAttributes(attributes) {
     // Add missing default settings
-    var defaultSettings = { type: 'river', use_labels: false, aspect: false, theme: 'default', format_labels: false }
+    var defaultSettings = { type: 'river', use_labels: false, vertical_labels: false, aspect: false, theme: 'default', format_labels: false }
     for (const key in defaultSettings) { if(attributes[key]) defaultSettings[key] = attributes[key] };
 
     // Info from Custom Element
@@ -159,12 +171,12 @@ class Infograph extends HTMLElement {
 
     // Left label area
     var leftWidth = this.settings.use_labels && Math.ceil(Math.max.apply(null, leftRulers.map(rect => rect.width))) || 0;
-    var leftHeight = this.settings.use_labels && Math.ceil(Math.max.apply(null, leftRulers.map(rect => rect[ this.settings.use_labels === 'vertical' ? 'width' : 'height' ]))) || 0;
+    var leftHeight = this.settings.use_labels && Math.ceil(Math.max.apply(null, leftRulers.map(rect => rect[ this.settings.vertical_labels ? 'width' : 'height' ]))) || 0;
     var leftX = containerPadding.x;
     var leftY = containerPadding.y;
     
     // Bottom label area
-    var bottomHeight = this.settings.use_labels && Math.ceil(bottomRuler[ this.settings.use_labels === 'vertical' ? 'width' : 'height' ]) || 0; // Use width if labels will be displayed vertically.
+    var bottomHeight = this.settings.use_labels && Math.ceil(bottomRuler[ this.settings.vertical_labels ? 'width' : 'height' ]) || 0; // Use width if labels will be displayed vertically.
     var bottomWidth = this.settings.width - (containerPadding.x * 2);
     var bottomY = this.settings.height - bottomHeight - containerPadding.y;
     var bottomX = containerPadding.x;
@@ -237,22 +249,65 @@ class Infograph extends HTMLElement {
     data.values.forEach((value,i) => {
       var x = (stripeWidth * i) + (stripeWidth / 2);
       var cordinateFromPercentage = (graphHeight / 100) * percentageValues[i];
-      var peakY = topHeight + cordinateFromPercentage;
+      var valueLabelY = graphBottom - cordinateFromPercentage - (this.cordinates.padding.y / 1.5);
       var bottomLabel = this.settings.use_labels && this.settings.labels.bottom[i];
-
+      var bottomLabelY = graphBottom + this.cordinates.padding.y;
+      
+      var valueLabelStyling = `
+        
+      `;
+      var bottomLabelStyling = `
+        dominant-baseline="hanging"
+        text-anchor="middle"
+      `;
+      
+      if (this.settings.vertical_labels) {
+        valueLabelStyling = `
+          dominant-baseline="central"
+          transform="rotate(-90 ${x} ${valueLabelY})"
+        `;
+      }
+      
+      var group = this.createElement('g', { 'class': 'yarn-group' });
+      if (this.settings.vertical_labels) {
+        // Bottom label
+        group.append(this.createElementStack(['defs','path'], [{},{ 'd': `M ${x} ${this.settings.height} V ${bottomLabelY}`, 'id': 'label-path-' + i}]));
+        group.append(this.createElementStack(['text','textPath'], [{},{ 'dominant-baseline': 'central', 'text-anchor': 'end', 'startOffset': '100%', 'href': '#label-path-' + i }], ['', bottomLabel]));
+        
+        // Value label
+        group.append(this.createElementStack(['text'], [{ 'dominant-baseline': 'central', 'transform': `rotate( -90 ${x} ${valueLabelY})`, 'x': x, 'y': valueLabelY }], [this.valueFormatter(value)]));
+      }
+      
+      
+      
       this.svg.innerHTML += `
-        <g class="yarn-group">
-          <text class="yarn-value" x="${x}" y="${peakY - (this.cordinates.padding.y / 2)}">${this.valueFormatter(value)}</text>
+          
           <circle style="--yarn-peak:-${cordinateFromPercentage}px;" cx="${x}" cy="${graphBottom}" r="8" />
           <path d="M ${x} ${graphBottom} v -${cordinateFromPercentage}" 
             stroke-dasharray="0%"
             stroke-dashoffset="0%"
             stroke-width="1"
             stroke="black"
+            fill="none"
           />
-          ${bottomLabel ? `<text class="yarn-label" x="${x}" y="${graphBottom + this.cordinates.padding.y}">${bottomLabel}</text>` : ''}
-        </g>
+
+          `;
+      var old = `
+      <defs>
+      <path d="M ${x} ${this.settings.height} V ${bottomLabelY}" 
+        id="label-path-${i}"
+        stroke-width="1"
+        stroke="none"
+      />
+    </defs>
+    <text>
+      <textPath dominant-baseline="central" text-anchor="end" startOffset="100%" href="#label-path-${i}">${bottomLabel}</textPath>
+    </text>
+    <text ${valueLabelStyling} x="${x}" y="${valueLabelY}">${this.valueFormatter(value)}</text>
+          ${bottomLabel ? `<text ${bottomLabelStyling} x="${x}" y="${bottomLabelY}">${bottomLabel}</text>` : ''}
+          
       `;
+      this.svg.appendChild(group);
     });
   }
   /**
