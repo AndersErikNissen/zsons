@@ -135,6 +135,7 @@ class Infograph extends HTMLElement {
       return {
         ...(hasAllowedType && { type: this.getAttribute('type') }),
         use_labels: this.hasAttribute('labels') ? true : false,
+        value_label: this.hasAttribute('value-label') ? this.getAttribute('value-label') : '',
         vertical_labels: this.getAttribute('labels').toLowerCase() === 'vertical' ? true : false,
         aspect: isNaN(Number(this.getAttribute('aspect'))) ? false : Number(this.getAttribute('aspect')),
         format_labels: this.hasAttribute('format-labels') ? true : false,
@@ -148,7 +149,7 @@ class Infograph extends HTMLElement {
    */
   set mapAttributes(attributes) {
     // Add missing default settings
-    var defaultSettings = { type: 'river', use_labels: false, vertical_labels: false, aspect: false, theme: 'default', format_labels: false }
+    var defaultSettings = { type: 'river', use_labels: false, vertical_labels: false, aspect: false, theme: 'default', format_labels: false, value_label: '' }
     for (const key in defaultSettings) { if(attributes[key]) defaultSettings[key] = attributes[key] };
 
     // Info from Custom Element
@@ -230,7 +231,7 @@ class Infograph extends HTMLElement {
       graph: { x: graphX, y: graphY, width: graphWidth, height: graphHeight }
     };
 
-    this.svg.innerHTML = ''; // Clean up the rulers
+    /* Clean up the rulers */ this.svg.innerHTML = '';
   }
 
   /** @param {array} data - List of data to gather information from */
@@ -242,7 +243,7 @@ class Infograph extends HTMLElement {
     
     var amountOfValues = Math.max.apply(null, data.map(obj => obj.amount_of_values));
 
-    var labelsLeft = { heighest: this.valueFormatter(ceilingValue), middle: this.valueFormatter(ceilingValue / 2) }; 
+    var labelsLeft = { heighest: this.valueFormatter(ceilingValue) + ' ' + this.settings.value_label, middle: this.valueFormatter(ceilingValue / 2) + ' ' + this.settings.value_label }; 
     // Longest bottom label 
     var allBottomLabelLengths = data.map(obj => obj.label ? obj.label.length : obj.labels ? obj.labels.map(label => label.length) : []).flat();
     var allBottomLabels = data.map(obj => obj.label ? obj.label : obj.labels ? obj.labels.map(label => label) : []).flat();
@@ -273,9 +274,17 @@ class Infograph extends HTMLElement {
     var graphBottom = topHeight + graphHeight;
     var stripeWidth = this.settings.width / data.amount_of_values;
 
+
+    /**
+     * #######################
+     * LAV STOR TOTAL VALUE!!!
+     * #######################
+     */
+
     data.values.forEach((value,i) => {
       var x = (stripeWidth * i) + (stripeWidth / 2);
       var cordinateFromPercentage = (graphHeight / 100) * percentageValues[i];
+      var valueLabel = this.valueFormatter(value) + ' ' + this.settings.value_label;
       var valueLabelY = graphBottom - cordinateFromPercentage - this.cordinates.padding.y;
       var bottomLabel = this.settings.use_labels && this.settings.labels.bottom[i];
       var bottomLabelY = graphBottom + this.cordinates.padding.y;
@@ -289,10 +298,10 @@ class Infograph extends HTMLElement {
         group.append(this.createElementStack(['text','textPath'], [{},{ 'fill': this.core.colors.main, 'dominant-baseline': 'central', 'text-anchor': 'end', 'startOffset': '100%', 'href': '#label-path-' + i }], ['', bottomLabel]));
         
         // Value label
-        group.append(this.createElement('text', { 'class': 'yarn-valueLabel', 'fill': this.core.colors.main, 'dominant-baseline': 'central', 'transform': `rotate( -90 ${x} ${valueLabelY})`, 'x': x, 'y': valueLabelY }, this.valueFormatter(value)));
+        group.append(this.createElement('text', { 'class': 'yarn-valueLabel', 'fill': this.core.colors.main, 'dominant-baseline': 'central', 'transform': `rotate( -90 ${x} ${valueLabelY})`, 'x': x, 'y': valueLabelY }, valueLabel));
       } else if (this.settings.use_labels) {
         /* Bottom label */ group.append(this.createElement('text', { 'fill': this.core.colors.main, 'x': x, 'y': bottomLabelY, 'text-anchor': 'middle', 'dominant-baseline': 'hanging' }, bottomLabel))
-        /* Value label */ group.append(this.createElement('text', { 'class': 'yarn-valueLabel', 'fill': this.core.colors.main, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'x': x, 'y': valueLabelY }, this.valueFormatter(value)));
+        /* Value label */ group.append(this.createElement('text', { 'class': 'yarn-valueLabel', 'fill': this.core.colors.main, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'x': x, 'y': valueLabelY }, valueLabel));
       }
 
       group.appendChild(this.createElement('circle', { 'fill': this.core.colors.secondary, 'style': '--yarn-peak:-' + cordinateFromPercentage + 'px;--hover-circle:' + (this.core.sizes.details * 1.2) + 'px;', 'cx': x, 'cy': graphBottom, 'r': this.core.sizes.details }))
