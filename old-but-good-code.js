@@ -1,3 +1,7 @@
+// Colors
+this.themes = { oldschool: ["#0c1618","#004643","#faf4d3","#d1ac00","#f6be9a","#f4d6cc","#004643","#f4b860","#922d50","#501537"], history: ["#04151f","#183a37","#efd6ac","#c44900","#432534","#cc5803", "#12100e", "#efd6ac", "#30321c", "#4a4b2f"], bubblegum: ["#8fbfe0","#7c77b9","#1d8a99","#0bc9cd","#14fff7","#8b80f9","#cfbff7","#dd7373","#0bc9cd","#f9f5e3"], wise: ["#5d737e","#55505c","#d4f4dd","#fe5f55","#fb5012","#f9ada0","#f9627d","#d4f4dd","#613f75","#426a5a"] };
+
+
 // Create data from <form>
 var formNode = this.shadowRoot.querySelector('#form').assignedNodes()[0];
 if (formNode && formNode.tagName !== 'FORM') formNode = false;
@@ -418,3 +422,26 @@ if (formNode && data.length === 0) {
       this.addLabels();
       this.svg.append(this.buildGradients(), graphGroup);
     }
+
+    /**
+     *      <!--
+        <form slot="form">
+          <input type="hidden" name="january" value="100">
+          <input type="hidden" name="january" value="50">
+          <input type="hidden" name="january" value="100">
+          <input type="hidden" name="january" value="50">
+          <input type="hidden" name="february" value="25">
+          <input type="hidden" name="february" value="150">
+          <input type="hidden" name="february" value="25">
+          <input type="hidden" name="february" value="150">
+          <input type="hidden" name="february" value="25">
+          <input type="hidden" name="february" value="150">
+          <input type="hidden" name="march" value="75">
+          <input type="hidden" name="march" value="15">
+          <input type="hidden" name="march" value="75">
+          <input type="hidden" name="march" value="15">
+          <input type="hidden" name="march" value="75">
+          <input type="hidden" name="march" value="15">
+        </form>
+      -->
+     */
