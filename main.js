@@ -19,10 +19,16 @@ class Infograph extends HTMLElement {
       #svg {
         
       }
-      
+
       text {
-        font-size: 16px;
+        font-size: 12px;
         font-family: sans-serif;
+      }
+
+      @media (min-width: 1024px) {
+        text {
+          font-size: 16px;
+        }
       }
 
       path {
@@ -113,11 +119,11 @@ class Infograph extends HTMLElement {
       default: {
         sizes: {
           details: /** Used for visual elements like circles */ 10,
-          dynamicSpacing: /** Use static/dynamic spacing */ 0.05,
+          dynamicSpacing: /** Use static/dynamic spacing */ 0.03,
         },
         colors: {
           main: /** Used for things like fonts */ '#000',
-          secondary: '#D90368',
+          secondary: '#F18F01',
           list: ["#F0FAF0","#D1F0D1","#B2E6B2","#93DC93","#74D274","#56C856","#3CB93C","#329A32","#287B28","#1E5C1E"],
         },
       }
@@ -179,7 +185,7 @@ class Infograph extends HTMLElement {
       ...(labels && { labels: labels}),
       ...(values && { values: values }),
       ...(heighestValue && { heighest_value: heighestValue }),
-      ...(combinedValues && { heighest_combined_value: combinedValues }),
+      ...(combinedValues && { combined_value: combinedValues }),
       ...(amountOfValues && { amount_of_values: amountOfValues }),
       ...(amountOfLabels && { amount_of_labels: amountOfLabels })
     };
@@ -201,10 +207,16 @@ class Infograph extends HTMLElement {
     return validatedJSON.length > 0 ? validatedJSON : [];
   }
 
-  buildSVGAreas(leftLabels = [], bottomLabel = false) {
+  buildSVGAreas(leftLabels = [], bottomLabel = false, combinedValue) {
     var leftRulers = leftLabels.map(label => this.svg.appendChild(Object.assign(document.createElementNS('http://www.w3.org/2000/svg','text'), { textContent: label })).getBBox());
     var bottomRuler = bottomLabel && this.svg.appendChild(Object.assign(document.createElementNS('http://www.w3.org/2000/svg','text'), { textContent: bottomLabel })).getBBox() || { width: 0, height: 0 };
     var containerPadding = this.core.sizes.staticSpacing && {x: this.core.sizes.staticSpacing, y: this.core.sizes.staticSpacing } || this.core.sizes.dynamicSpacing && {x: this.settings.width * this.core.sizes.dynamicSpacing, y: this.settings.height * this.core.sizes.dynamicSpacing } || {x: 0, y: 0};
+    
+    var combinedValueRuler = this.svg.appendChild( this.createElement('text', { 'style': 'font-size: 12px;' }, combinedValue));
+    var combinedValueFontSize = 12;
+    
+    /* Get the font-size to get the combined value to take up 1/3 of the given space */ 
+    while(combinedValueRuler.getBBox().width < (this.settings.width / 3)) { combinedValueFontSize++; combinedValueRuler.style.fontSize = combinedValueFontSize + 'px'; }
 
     // Left label area
     var leftWidth = this.settings.use_labels && Math.ceil(Math.max.apply(null, leftRulers.map(rect => rect.width))) || 0;
@@ -225,6 +237,7 @@ class Infograph extends HTMLElement {
     var graphHeight = this.settings.height - bottomHeight - (containerPadding.y * this.settings.use_labels ? 3 : 2);
 
     this.cordinates = {
+      combined_value: { font: combinedValueFontSize, width: combinedValueRuler.getBBox().width, height: combinedValueRuler.getBBox().height },
       padding: containerPadding,
       left: { x: leftX, y: leftY, width: leftWidth, height: leftHeight },
       bottom: { x: bottomX, y: bottomY, width: bottomWidth, height: bottomHeight },
@@ -241,6 +254,7 @@ class Infograph extends HTMLElement {
     // For each value get the percentage based on the ceiling value
     data.forEach(obj => obj.percentage_values = obj.values.map(value => this.round((value / ceilingValue) * 100)));
     
+    var combinedValue = data.map(obj => obj.combined_value).reduce((accumulation, current) =>  accumulation + current );
     var amountOfValues = Math.max.apply(null, data.map(obj => obj.amount_of_values));
 
     var labelsLeft = { heighest: this.valueFormatter(ceilingValue) + ' ' + this.settings.value_label, middle: this.valueFormatter(ceilingValue / 2) + ' ' + this.settings.value_label }; 
@@ -250,12 +264,13 @@ class Infograph extends HTMLElement {
     var longestBottomLabel = Math.max.apply(null, allBottomLabelLengths);
     var bottomLabel = allBottomLabels.find(label => label.length === longestBottomLabel);
     
-    this.buildSVGAreas([labelsLeft.heighest, labelsLeft.middle], bottomLabel);
+    this.buildSVGAreas([labelsLeft.heighest, labelsLeft.middle], bottomLabel, combinedValue);
     this.data = data;
 
     // Adding settings created from the data provided
     Object.assign(this.settings, {
       heighest_value: this.getCeilingValue(data).heighest_value,
+      combined_value: combinedValue,
       amount_of_values: amountOfValues,
       ceiling: ceilingValue,
       labels: {
@@ -269,18 +284,19 @@ class Infograph extends HTMLElement {
     var data = this.data[0];
     var ceilingValue = this.getCeilingValue([data]).ceiling_value;
     var percentageValues = data.values.map(value => (value / ceilingValue) * 100);
-    var topHeight = this.cordinates.padding.y + this.cordinates.left.height;
-    var graphHeight = this.settings.height - topHeight - this.cordinates.padding.y - this.cordinates.bottom.height - this.cordinates.padding.y;
-    var graphBottom = topHeight + graphHeight;
+    var combinedValueHeight = this.cordinates.padding.y + this.cordinates.combined_value.height;
+    var graphHeight = this.settings.height - this.cordinates.left.height - combinedValueHeight - this.cordinates.padding.y - this.cordinates.bottom.height - this.cordinates.padding.y;
+    var graphBottom = this.cordinates.left.height  + combinedValueHeight + graphHeight;
     var stripeWidth = this.settings.width / data.amount_of_values;
 
+    var combineValueDefs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    var combineValueY = combinedValueHeight * 0.75;
+    combineValueDefs.append(this.createElement('path', { 'd': `M 0 ${combineValueY} H ${this.cordinates.combined_value.width} ${combineValueY}`, 'id': 'yarnPath-combinedValue' }), 
+      this.createElement('path', { 'd': `M ${this.cordinates.combined_value.width + this.cordinates.padding.x} ${combineValueY} H ${this.settings.width} ${combineValueY}`, 'id': 'yarnPath-valueLabel' }));
+    this.svg.appendChild(combineValueDefs);
 
-    /**
-     * #######################
-     * LAV STOR TOTAL VALUE!!!
-     * #######################
-     */
-
+    /* Combined value */ this.svg.append(this.createElementStack(['text','textPath'], [{},{ 'style': 'font-size: ' + this.cordinates.combined_value.font + 'px;', 'fill': this.core.colors.main, 'href': '#yarnPath-combinedValue' }], ['', this.settings.combined_value]));
+    /* Combined value label */this.svg.append(this.createElementStack(['text','textPath'], [{},{ 'style': 'font-size: ' + (this.cordinates.combined_value.font / 3) + 'px;', 'fill': this.core.colors.main, 'href': '#yarnPath-valueLabel' }], ['', this.settings.value_label]));
     data.values.forEach((value,i) => {
       var x = (stripeWidth * i) + (stripeWidth / 2);
       var cordinateFromPercentage = (graphHeight / 100) * percentageValues[i];
@@ -303,7 +319,7 @@ class Infograph extends HTMLElement {
         /* Bottom label */ group.append(this.createElement('text', { 'fill': this.core.colors.main, 'x': x, 'y': bottomLabelY, 'text-anchor': 'middle', 'dominant-baseline': 'hanging' }, bottomLabel))
         /* Value label */ group.append(this.createElement('text', { 'class': 'yarn-valueLabel', 'fill': this.core.colors.main, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'x': x, 'y': valueLabelY }, valueLabel));
       }
-
+      
       group.appendChild(this.createElement('circle', { 'fill': this.core.colors.secondary, 'style': '--yarn-peak:-' + cordinateFromPercentage + 'px;--hover-circle:' + (this.core.sizes.details * 1.2) + 'px;', 'cx': x, 'cy': graphBottom, 'r': this.core.sizes.details }))
       group.appendChild(this.createElement('path', { 'stroke': this.core.colors.secondary, 'd': 'M ' + x + ' ' +graphBottom + ' v -' + cordinateFromPercentage, 'stroke-dasharray': '0%', 'stroke-dashoffset': '0%', 'stroke-width': '1', 'fill': 'none' }));
 
