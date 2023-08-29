@@ -13,7 +13,7 @@ class Infograph extends HTMLElement {
         display: block;
 
         /* Variables */
-        --animation-timing: 0.3s ease-in;
+        --animation-timing: 0.5s ease-in;
       }
 
       #svg {
@@ -37,19 +37,22 @@ class Infograph extends HTMLElement {
 
       .yarn-group circle {
         transition: r var(--animation-timing), transform var(--animation-timing);
-        transform: translateY(var(--yarn-peak));
       }
 
+      :host([running]) .yarn-group circle {
+        transform: translateY(var(--yarn-peak));
+      }
+      
       .yarn-group circle,
       .yarn-group text,
       .yarn-group path {
         pointer-events: none;
       }
-
+      
       .yarn-hoverStripe {
         cursor: pointer;
       }
-
+      
       .yarn-hoverStripe:hover ~ circle {
         r: var(--hover-circle);
       }
@@ -58,9 +61,17 @@ class Infograph extends HTMLElement {
         opacity: 0;
         transition: opacity var(--animation-timing);
       }
-
+      
       .yarn-hoverStripe:hover ~ .yarn-valueLabel {
         opacity: 1;
+      }
+      
+      .yarnLine {
+        transition: stroke-dashoffset var(--animation-timing);
+      }
+      
+      :host([running]) .yarnLine {
+        stroke-dashoffset: 0;
       }
       
       </style>
@@ -291,8 +302,10 @@ class Infograph extends HTMLElement {
 
     var combineValueDefs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
     var combineValueY = combinedValueHeight * 0.75;
-    combineValueDefs.append(this.createElement('path', { 'd': `M 0 ${combineValueY} H ${this.cordinates.combined_value.width} ${combineValueY}`, 'id': 'yarnPath-combinedValue' }), 
-      this.createElement('path', { 'd': `M ${this.cordinates.combined_value.width + this.cordinates.padding.x} ${combineValueY} H ${this.settings.width} ${combineValueY}`, 'id': 'yarnPath-valueLabel' }));
+    combineValueDefs.append(
+      this.createElement('path', { 'd': `M 0 ${combineValueY} H ${this.cordinates.combined_value.width} ${combineValueY}`, 'id': 'yarnPath-combinedValue' }), 
+      this.createElement('path', { 'd': `M ${this.cordinates.combined_value.width + this.cordinates.padding.x} ${combineValueY} H ${this.settings.width} ${combineValueY}`, 'id': 'yarnPath-valueLabel' })
+    );
     this.svg.appendChild(combineValueDefs);
 
     /* Combined value */ this.svg.append(this.createElementStack(['text','textPath'], [{},{ 'style': 'font-size: ' + this.cordinates.combined_value.font + 'px;', 'fill': this.core.colors.main, 'href': '#yarnPath-combinedValue' }], ['', this.settings.combined_value]));
@@ -301,12 +314,12 @@ class Infograph extends HTMLElement {
       var x = (stripeWidth * i) + (stripeWidth / 2);
       var cordinateFromPercentage = (graphHeight / 100) * percentageValues[i];
       var valueLabel = this.valueFormatter(value) + ' ' + this.settings.value_label;
-      var valueLabelY = graphBottom - cordinateFromPercentage - this.cordinates.padding.y;
+      var valueLabelY = graphBottom - cordinateFromPercentage - this.core.sizes.details - this.cordinates.padding.y;
       var bottomLabel = this.settings.use_labels && this.settings.labels.bottom[i];
       var bottomLabelY = graphBottom + this.cordinates.padding.y;
       
       var group = this.createElement('g', { 'class': 'yarn-group' });
-      /* Hover stripe */ group.appendChild(this.createElement('rect', { 'class': 'yarn-hoverStripe', 'fill': 'transparent', 'y': 0, 'x': x - this.core.sizes.details, 'width': this.core.sizes.details * 2, 'height': this.settings.height }));
+      /* Hover stripe */ group.appendChild(this.createElement('rect', { 'class': 'yarn-hoverStripe', 'fill': 'transparent', 'y': combinedValueHeight, 'x': x - this.core.sizes.details, 'width': this.core.sizes.details * 2, 'height': graphHeight + this.cordinates.left.height + this.cordinates.padding.y + this.cordinates.bottom.height }));
       
       if (this.settings.vertical_labels && this.settings.use_labels) {
         // Bottom label
@@ -320,11 +333,24 @@ class Infograph extends HTMLElement {
         /* Value label */ group.append(this.createElement('text', { 'class': 'yarn-valueLabel', 'fill': this.core.colors.main, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'x': x, 'y': valueLabelY }, valueLabel));
       }
       
+      // Graph elements
       group.appendChild(this.createElement('circle', { 'fill': this.core.colors.secondary, 'style': '--yarn-peak:-' + cordinateFromPercentage + 'px;--hover-circle:' + (this.core.sizes.details * 1.2) + 'px;', 'cx': x, 'cy': graphBottom, 'r': this.core.sizes.details }))
-      group.appendChild(this.createElement('path', { 'stroke': this.core.colors.secondary, 'd': 'M ' + x + ' ' +graphBottom + ' v -' + cordinateFromPercentage, 'stroke-dasharray': '0%', 'stroke-dashoffset': '0%', 'stroke-width': '1', 'fill': 'none' }));
+      group.appendChild(this.createElement('path', { 'class': 'yarnLine', 'stroke': this.core.colors.secondary, 'd': 'M ' + x + ' ' + graphBottom + ' v -' + cordinateFromPercentage, 'stroke-dasharray': cordinateFromPercentage, 'stroke-dashoffset': cordinateFromPercentage, 'stroke-width': '1', 'fill': 'none' }));
 
       this.svg.appendChild(group);
     });
+  }
+
+  renderSVGContent() {
+    switch(this.settings.type) {
+      case 'yarn':
+        this.buildYarns()
+        break;
+    }
+
+    this.setAttribute('running','');
+    setTimeout(()=> {
+    }, 5000)
   }
   
   connectedCallback() {
@@ -338,7 +364,7 @@ class Infograph extends HTMLElement {
 
     this.buildData = this.JSONData;
 
-    this.buildYarns();
+    this.renderSVGContent();
 
     console.log("%c this.data ","color: blue; background-color: orange",this.data)
     console.log("%c this.settings ","color: white; background-color: grey",this.settings)
