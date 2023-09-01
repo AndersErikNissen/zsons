@@ -24,16 +24,7 @@ class Infograph extends HTMLElement {
         font-size: 12px;
         font-family: sans-serif;
       }
-
-      @media (min-width: 1024px) {
-        text {
-          font-size: 16px;
-        }
-      }
-
-      path {
-        stroke-color: black;
-      }
+      @media (min-width: 1024px) {text { font-size: 16px; }}
 
       .yarn-group circle {
         transition: r var(--animation-timing), transform var(--animation-timing);
@@ -72,6 +63,12 @@ class Infograph extends HTMLElement {
       
       :host([running]) .yarnLine {
         stroke-dashoffset: 0;
+      }
+
+      /* Skyline */
+      .blink {
+        fill: cyan;
+        transition: fill 300ms linear;
       }
       
       </style>
@@ -146,7 +143,7 @@ class Infograph extends HTMLElement {
   get collectAllAttributes() {
     if (this.hasAttributes()) {
       var 
-        allowedTypes = ['river','mountain','tower','yarn'],
+        allowedTypes = ['river','mountain','tower','yarn','skyline'],
         hasAllowedType = allowedTypes.find(type => type === this.getAttribute('type').toLowerCase());
 
       return {
@@ -341,10 +338,44 @@ class Infograph extends HTMLElement {
     });
   }
 
+  buildSkyline() {
+    var data = this.data[0];
+    // data.heighest_value;
+    var labelY = this.cordinates.left.height * 1.1;
+    var graphHeight = this.settings.height - labelY - (this.cordinates.padding.y * 2);
+    var groove = (this.settings.width - (this.cordinates.padding.x * 2)) / data.amount_of_values;
+
+    var testValue = 1;
+    var train = Promise.resolve();
+
+    var trainCart = async (target) => {
+      target.classList.add('blink')
+      await new Promise( res => setTimeout(() => {target.classList.remove('blink'); res()}, 3000));
+      console.log(target)
+      
+    }
+
+    var svgPart = (value, index) => {
+      var testColor = index % 2 === 1 ? '#e6e6e6' : '#767676';
+
+      var parentGroup = this.createElement('g', {});
+      var interactionRect = this.createElement('rect', { 'id': 'iR-' + index, 'fill': testColor, 'y': labelY, 'x': groove * index, 'height': graphHeight, 'width': groove });
+      interactionRect.addEventListener('mouseover', function() {train = train.then(() => trainCart(this))});
+
+      parentGroup.append(interactionRect);
+      return parentGroup;
+    }
+
+    data.values.forEach((value, index) => this.svg.appendChild(svgPart(value, index)));
+  }
+
   renderSVGContent() {
     switch(this.settings.type) {
       case 'yarn':
         this.buildYarns()
+        break;
+      case 'skyline':
+        this.buildSkyline()
         break;
     }
 
@@ -368,14 +399,6 @@ class Infograph extends HTMLElement {
 
     console.log("%c this.data ","color: blue; background-color: orange",this.data)
     console.log("%c this.settings ","color: white; background-color: grey",this.settings)
-    //this.shadowRoot.appendChild(this._template().content.cloneNode(true));
-    //this.coreData = this.data;
-    //this.upgradedData = this.data;
-
-    //this.buildSVG();
-
-    //console.log("Core", this.core)
-    //console.log("Up Data", this.core.data)
   }
 }
 
