@@ -340,18 +340,19 @@ class Infograph extends HTMLElement {
 
   buildSkyline() {
     var data = this.data[0];
+    let animationTiming = 3000;
     // data.heighest_value;
     var labelY = this.cordinates.left.height * 1.1;
     var graphHeight = this.settings.height - labelY - (this.cordinates.padding.y * 2);
     var groove = (this.settings.width - (this.cordinates.padding.x * 2)) / data.amount_of_values;
 
-    var testValue = 1;
+    let eventArea = this.createElement('rect', { 'fill': 'none',  });
+    
     var train = Promise.resolve();
-
     var trainCart = async (target) => {
       target.classList.add('blink')
-      await new Promise( res => setTimeout(() => {target.classList.remove('blink'); res()}, 3000));
-      console.log(target)
+      await new Promise( res => setTimeout(() => {target.classList.remove('blink'); res()}, animationTiming));
+      
       
     }
 
@@ -359,7 +360,7 @@ class Infograph extends HTMLElement {
       var testColor = index % 2 === 1 ? '#e6e6e6' : '#767676';
 
       var parentGroup = this.createElement('g', {});
-      var interactionRect = this.createElement('rect', { 'id': 'iR-' + index, 'fill': testColor, 'y': labelY, 'x': groove * index, 'height': graphHeight, 'width': groove });
+      var interactionRect = this.createElement('rect', { 'id': 'iR-' + index, 'fill': testColor, 'y': labelY, 'x': this.cordinates.padding.x + (groove * index), 'height': graphHeight, 'width': groove });
       interactionRect.addEventListener('mouseover', function() {train = train.then(() => trainCart(this))});
 
       parentGroup.append(interactionRect);
