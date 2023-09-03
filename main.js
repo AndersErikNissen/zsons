@@ -344,10 +344,52 @@ class Infograph extends HTMLElement {
     // data.heighest_value;
     var labelY = this.cordinates.left.height * 1.1;
     var graphHeight = this.settings.height - labelY - (this.cordinates.padding.y * 2);
+    var graphWidth = this.settings.width - (this.cordinates.padding.x * 2);
     var groove = (this.settings.width - (this.cordinates.padding.x * 2)) / data.amount_of_values;
 
-    let eventArea = this.createElement('rect', { 'fill': 'none',  });
-    
+    // Event Area
+    let firstTimeEntry = false;
+    let eventArea = this.createElement('rect', { 'fill': 'none', 'x': this.cordinates.padding.x, 'y': labelY, 'width': graphWidth, 'height': graphHeight  });
+    this.svg.appendChild(eventArea);
+    eventArea.addEventListener('mouseenter', () => firstTimeEntry = true);
+    eventArea.addEventListener('mouseleave', () => firstTimeEntry = false);
+
+
+    /*
+      Plan for animation
+
+      Tools: 
+      - requestAnimationFrame() - https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
+      - getPointAtLength() - https://developer.mozilla.org/en-US/docs/Web/API/SVGGeometryElement/getPointAtLength
+
+      Animation (Runs at screen refresh rate)
+      Info: Total length/ length of the path cutout, progress, timing
+        Example: 100 length, 3s timing
+        
+    */
+
+    // Test timing
+    var distance /* in px */ = 1000;
+    var travelDistance = 0;
+    var timing /* in ms */ = 1000;
+    let previousTimeStamp = 0;
+
+    var step = (timeStamp) => {
+      var perOfTiming = ((timeStamp - previousTimeStamp) / timing) * 100;
+      var perOfDistance = (perOfTiming / 100) * distance;
+      travelDistance += perOfDistance;
+
+      console.log("Distance",travelDistance);
+      //console.log("Time stamps",previousTimeStamp, timeStamp);
+
+
+      previousTimeStamp = timeStamp;
+      if (previousTimeStamp < timing) {
+        window.requestAnimationFrame(step)
+      }
+    }
+    window.requestAnimationFrame(step);
+
     var train = Promise.resolve();
     var trainCart = async (target) => {
       target.classList.add('blink')
