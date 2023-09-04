@@ -355,41 +355,38 @@ class Infograph extends HTMLElement {
     eventArea.addEventListener('mouseleave', () => firstTimeEntry = false);
 
 
-    /*
-      Plan for animation
-
-      Tools: 
-      - requestAnimationFrame() - https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
-      - getPointAtLength() - https://developer.mozilla.org/en-US/docs/Web/API/SVGGeometryElement/getPointAtLength
-
-      Animation (Runs at screen refresh rate)
-      Info: Total length/ length of the path cutout, progress, timing
-        Example: 100 length, 3s timing
-        
-    */
-
-    // Test timing
-    var distance /* in px */ = 1000;
-    var travelDistance = 0;
-    var timing /* in ms */ = 1000;
-    let previousTimeStamp = 0;
-
-    var step = (timeStamp) => {
-      var perOfTiming = ((timeStamp - previousTimeStamp) / timing) * 100;
-      var perOfDistance = (perOfTiming / 100) * distance;
-      travelDistance += perOfDistance;
-
-      console.log("Distance",travelDistance);
-      //console.log("Time stamps",previousTimeStamp, timeStamp);
 
 
-      previousTimeStamp = timeStamp;
-      if (previousTimeStamp < timing) {
-        window.requestAnimationFrame(step)
-      }
+
+
+    var testPath = this.createElement('path', { 'stroke': 'red', 'd': `M 0 ${this.settings.height} L ${this.settings.width} 0` });
+    var testCircle = this.createElement('circle', { 'cx': 0, 'cy': this.settings.height, 'r': 10, 'fill': 'blue' });
+    this.svg.append(testPath, testCircle);
+
+    let animationDuration = 300;
+    let totalPathDistance = testPath.getTotalLength();
+    let partOfPathDistance = totalPathDistance / data.amount_of_values;
+    let distancePerMs = partOfPathDistance / animationDuration;
+    let distanceProgress = 0;
+    
+    const animationFrame = timeStamp => {
+      let newProgress = Math.min(distancePerMs * timeStamp, partOfPathDistance);
+      let newCordinates = testPath.getPointAtLength(newProgress + distanceProgress);
+      
+      testCircle.setAttribute('cx', newCordinates.x);
+      testCircle.setAttribute('cy', newCordinates.y);
+
+      if (newProgress !== partOfPathDistance) { 
+        window.requestAnimationFrame(animationFrame);
+      } else {
+        window.cancelAnimationFrame(animationFrame);
+        distanceProgress = newProgress + distanceProgress;
+      };
+
     }
-    window.requestAnimationFrame(step);
-
+    window.requestAnimationFrame(animationFrame);
+    
+    
     var train = Promise.resolve();
     var trainCart = async (target) => {
       target.classList.add('blink')
@@ -409,7 +406,7 @@ class Infograph extends HTMLElement {
       return parentGroup;
     }
 
-    data.values.forEach((value, index) => this.svg.appendChild(svgPart(value, index)));
+   // data.values.forEach((value, index) => this.svg.appendChild(svgPart(value, index)));
   }
 
   renderSVGContent() {
