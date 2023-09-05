@@ -143,7 +143,7 @@ class Infograph extends HTMLElement {
   get collectAllAttributes() {
     if (this.hasAttributes()) {
       var 
-        allowedTypes = ['river','mountain','tower','yarn','skyline'],
+        allowedTypes = ['river','mountain','tower','yarn'],
         hasAllowedType = allowedTypes.find(type => type === this.getAttribute('type').toLowerCase());
 
       return {
@@ -338,14 +338,42 @@ class Infograph extends HTMLElement {
     });
   }
 
-  buildSkyline() {
+  buildPath(type) {
     var data = this.data[0];
+    var ceilingValue = this.getCeilingValue([data]).ceiling_value;
+    //var percentageValues = data.values.map(value => (value / ceilingValue) * 100);
     let animationTiming = 3000;
     // data.heighest_value;
     var labelY = this.cordinates.left.height * 1.1;
     var graphHeight = this.settings.height - labelY - (this.cordinates.padding.y * 2);
     var graphWidth = this.settings.width - (this.cordinates.padding.x * 2);
+    var graphBottom = labelY + graphHeight;
     var groove = (this.settings.width - (this.cordinates.padding.x * 2)) / data.amount_of_values;
+
+    var cordinates = data.values.map((value,i) => {
+      var adjustedGroove = groove * i;
+      var halfGroove = groove / 2;
+      var x = this.cordinates.padding.x + adjustedGroove + /* Start at 0 if first index */(groove / i === 0 ? 0 : 2); 
+      var y = graphBottom - (/* 1% of graph in px */(graphHeight / 100) * /* value % of ceiling */((value / ceilingValue) * 100));
+      return {
+        x: x,
+        x1: x + halfGroove,
+        y: y,
+        y1: y - (groove * i),
+      }
+    })
+
+    console.log(this.settings.width,this.cordinates.padding.x,"cordinates",cordinates)
+    
+    //var pathString = data.values.map((value,i) => { x:groove / 2 * i, y: }).join();
+    
+    switch(type) {
+      case 'river':
+
+        break;
+      case 'mountain':
+        break;
+    }
 
     // Event Area
     let firstTimeEntry = false;
@@ -353,9 +381,6 @@ class Infograph extends HTMLElement {
     this.svg.appendChild(eventArea);
     eventArea.addEventListener('mouseenter', () => firstTimeEntry = true);
     eventArea.addEventListener('mouseleave', () => firstTimeEntry = false);
-
-
-
 
 
 
@@ -385,6 +410,10 @@ class Infograph extends HTMLElement {
 
     }
     window.requestAnimationFrame(animationFrame);
+
+    /**
+     * Each inter
+     */
     
     
     var train = Promise.resolve();
@@ -396,17 +425,15 @@ class Infograph extends HTMLElement {
     }
 
     var svgPart = (value, index) => {
-      var testColor = index % 2 === 1 ? '#e6e6e6' : '#767676';
-
       var parentGroup = this.createElement('g', {});
-      var interactionRect = this.createElement('rect', { 'id': 'iR-' + index, 'fill': testColor, 'y': labelY, 'x': this.cordinates.padding.x + (groove * index), 'height': graphHeight, 'width': groove });
+      var interactionRect = this.createElement('rect', { 'id': 'interaction-' + index, 'fill': 'none', 'y': labelY, 'x': this.cordinates.padding.x + (groove * index), 'height': graphHeight, 'width': groove });
       interactionRect.addEventListener('mouseover', function() {train = train.then(() => trainCart(this))});
 
       parentGroup.append(interactionRect);
       return parentGroup;
     }
 
-   // data.values.forEach((value, index) => this.svg.appendChild(svgPart(value, index)));
+    data.values.forEach((value, index) => this.svg.appendChild(svgPart(value, index)));
   }
 
   renderSVGContent() {
@@ -414,8 +441,9 @@ class Infograph extends HTMLElement {
       case 'yarn':
         this.buildYarns()
         break;
-      case 'skyline':
-        this.buildSkyline()
+      case 'river':
+      case 'mountain':
+        this.buildPath(this.settings.type)
         break;
     }
 
