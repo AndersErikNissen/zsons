@@ -65,12 +65,14 @@ class Infograph extends HTMLElement {
         stroke-dashoffset: 0;
       }
 
-      /* Skyline */
+      /* Paths */
       .blink {
         fill: cyan;
         transition: fill 300ms linear;
       }
       
+
+
       </style>
       
       <slot id="form" name="form"></slot>
@@ -348,38 +350,29 @@ class Infograph extends HTMLElement {
     var graphHeight = this.settings.height - labelY - (this.cordinates.padding.y * 2);
     var graphWidth = this.settings.width - (this.cordinates.padding.x * 2);
     var graphBottom = labelY + graphHeight;
-    var groove = this.settings.width / (data.amount_of_values -2);
-    // [0,0,0.5,1.5]
+    var groove = this.settings.width / (data.amount_of_values - 1);
+    
     var cordinates = data.values.map((value,i,arr) => { 
-      let x = groove * (Math.min(i,0.5) + Math.max(i - 1,0));  
-      // FIX MEEEE!!!
-      let x1 = groove * (Math.max(i - 1,0.5) + Math.min(i - 1, 0.5));
       let y = graphBottom - ((graphHeight / 100) * ((value / ceilingValue) * 100)); 
-      return { x: x, x1: x1, x2: x * 0.9, y: y, y1: "", y2: y }
+      return { 
+        x: i * groove, 
+        x1: (Math.max(0, (i - 1)) + 0.4) * groove, 
+        x2: Math.max(0, i - 0.4) * groove,
+        y: y, y1: graphBottom - ((graphHeight / 100) * ((arr[Math.max(0, i - 1)] / ceilingValue) * 100)), y2: y }
     });
+    
     console.log(this.settings.width,this.cordinates.padding.x,"cordinates",cordinates)
 
-    var visualPathString = cordinates.map((cordinates,i) => [
-        i === 0 && 'M' || type === 'river' && 'S' || /* Default: Is mountain */ 'L',
-        ...(i !== 0 && type === 'river' && [cordinates.x2, cordinates.y2 + ','] || []),
-        cordinates.x,
-        cordinates.y
-    ].join(" ")).join(" ");
-    console.log(visualPathString)
+    var mainPath = cordinates.map((cordinates,i) => [
+        i === 0 && 'M' || i === 1 && type === 'river' && 'C' || type === 'river' && 'S' || 'L',
+        ...(i == 1 && type === 'river' && [cordinates.x1 + ',' + cordinates.y1] || []),
+        ...(i !== 0 && type === 'river' && [cordinates.x2 + ',' + cordinates.y2] || []),
+        cordinates.x + ',' + cordinates.y
+      ].join(" "))
+    .join(" ");
     
-    this.svg.append(this.createElement('path', { d: visualPathString, stroke: 'red', fill: 'none' }))
-    var animationPaths = "";
+    this.svg.append(this.createElement('path', { d: mainPath, stroke: 'red', fill: 'none' }))
 
-    
-    //var pathString = data.values.map((value,i) => { x:groove / 2 * i, y: }).join();
-    
-    switch(type) {
-      case 'river':
-
-        break;
-      case 'mountain':
-        break;
-    }
 
     // Event Area
     let firstTimeEntry = false;
@@ -416,12 +409,6 @@ class Infograph extends HTMLElement {
 
     }
     window.requestAnimationFrame(animationFrame);
-
-    /**
-     * Each inter
-     */
-    
-    
     var train = Promise.resolve();
     var trainCart = async (target) => {
       target.classList.add('blink')
@@ -430,16 +417,21 @@ class Infograph extends HTMLElement {
       
     }
 
-    var svgPart = (value, index) => {
-      var parentGroup = this.createElement('g', {});
-      var interactionRect = this.createElement('rect', { 'id': 'interaction-' + index, 'fill': index % 2 === 1 ? 'rgba(0,100,100,0.5)' : 'rgba(50,100,00,0.5)', 'y': labelY, 'x': groove * index, 'height': graphHeight, 'width': groove });
+    var svgPart = (value, index, arr) => {
+      let x = groove * index - (groove / 2);
+      let width = groove;
+      if (index === 0) x = 0;
+      if (index === 0 || index === arr.length - 1) width = groove / 2;
+
+      var parentGroup = this.createElement('g', { class: 'pathGroup'});
+      var interactionRect = this.createElement('rect', { 'id': 'interaction-' + index, 'fill': index % 2 === 1 ? 'rgba(0,100,100,0.5)' : 'rgba(50,100,00,0.5)', 'y': labelY, 'x': x, 'height': graphHeight, 'width': width });
       interactionRect.addEventListener('mouseover', function() {train = train.then(() => trainCart(this))});
 
       parentGroup.append(interactionRect);
       return parentGroup;
     }
 
-    data.values.forEach((value, index) => this.svg.appendChild(svgPart(value, index)));
+    data.values.forEach((value, index, arr) => this.svg.appendChild(svgPart(value, index, arr)));
   }
 
   renderSVGContent() {

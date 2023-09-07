@@ -445,3 +445,13 @@ if (formNode && data.length === 0) {
         </form>
       -->
      */
+
+
+
+// Old cordinate calculation
+return { 
+  x: timesX * groove, 
+  x1: (Math.max(0, timesX - 1) + 0.4) * groove, 
+  x2: Math.max(0, timesX - 0.4) * groove,
+  y: y, y1: graphBottom - ((graphHeight / 100) * ((arr[Math.max(0, i - 1)] / ceilingValue) * 100)), y2: y 
+}
