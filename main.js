@@ -348,22 +348,28 @@ class Infograph extends HTMLElement {
     var graphHeight = this.settings.height - labelY - (this.cordinates.padding.y * 2);
     var graphWidth = this.settings.width - (this.cordinates.padding.x * 2);
     var graphBottom = labelY + graphHeight;
-    var groove = (this.settings.width - (this.cordinates.padding.x * 2)) / data.amount_of_values;
-
-    var cordinates = data.values.map((value,i) => {
-      var adjustedGroove = groove * i;
-      var halfGroove = groove / 2;
-      var x = this.cordinates.padding.x + adjustedGroove + /* Start at 0 if first index */(groove / i === 0 ? 0 : 2); 
-      var y = graphBottom - (/* 1% of graph in px */(graphHeight / 100) * /* value % of ceiling */((value / ceilingValue) * 100));
-      return {
-        x: x,
-        x1: x + halfGroove,
-        y: y,
-        y1: y - (groove * i),
-      }
-    })
-
+    var groove = this.settings.width / (data.amount_of_values -2);
+    // [0,0,0.5,1.5]
+    var cordinates = data.values.map((value,i,arr) => { 
+      let x = groove * (Math.min(i,0.5) + Math.max(i - 1,0));  
+      // FIX MEEEE!!!
+      let x1 = groove * (Math.max(i - 1,0.5) + Math.min(i - 1, 0.5));
+      let y = graphBottom - ((graphHeight / 100) * ((value / ceilingValue) * 100)); 
+      return { x: x, x1: x1, x2: x * 0.9, y: y, y1: "", y2: y }
+    });
     console.log(this.settings.width,this.cordinates.padding.x,"cordinates",cordinates)
+
+    var visualPathString = cordinates.map((cordinates,i) => [
+        i === 0 && 'M' || type === 'river' && 'S' || /* Default: Is mountain */ 'L',
+        ...(i !== 0 && type === 'river' && [cordinates.x2, cordinates.y2 + ','] || []),
+        cordinates.x,
+        cordinates.y
+    ].join(" ")).join(" ");
+    console.log(visualPathString)
+    
+    this.svg.append(this.createElement('path', { d: visualPathString, stroke: 'red', fill: 'none' }))
+    var animationPaths = "";
+
     
     //var pathString = data.values.map((value,i) => { x:groove / 2 * i, y: }).join();
     
@@ -426,7 +432,7 @@ class Infograph extends HTMLElement {
 
     var svgPart = (value, index) => {
       var parentGroup = this.createElement('g', {});
-      var interactionRect = this.createElement('rect', { 'id': 'interaction-' + index, 'fill': 'none', 'y': labelY, 'x': this.cordinates.padding.x + (groove * index), 'height': graphHeight, 'width': groove });
+      var interactionRect = this.createElement('rect', { 'id': 'interaction-' + index, 'fill': index % 2 === 1 ? 'rgba(0,100,100,0.5)' : 'rgba(50,100,00,0.5)', 'y': labelY, 'x': groove * index, 'height': graphHeight, 'width': groove });
       interactionRect.addEventListener('mouseover', function() {train = train.then(() => trainCart(this))});
 
       parentGroup.append(interactionRect);
