@@ -347,7 +347,7 @@ class Infograph extends HTMLElement {
     let animationTiming = 3000;
     // data.heighest_value;
     var labelY = this.cordinates.left.height * 1.1;
-    var graphHeight = this.settings.height - labelY - (this.cordinates.padding.y * 2);
+    var graphHeight = this.settings.height - labelY;
     var graphWidth = this.settings.width - (this.cordinates.padding.x * 2);
     var graphBottom = labelY + graphHeight;
     var groove = this.settings.width / (data.amount_of_values - 1);
@@ -355,13 +355,10 @@ class Infograph extends HTMLElement {
     var cordinates = data.values.map((value,i,arr) => { 
       let y = graphBottom - ((graphHeight / 100) * ((value / ceilingValue) * 100)); 
       return { 
-        x: i * groove, 
-        x1: (Math.max(0, (i - 1)) + 0.4) * groove, 
-        x2: Math.max(0, i - 0.4) * groove,
-        y: y, y1: graphBottom - ((graphHeight / 100) * ((arr[Math.max(0, i - 1)] / ceilingValue) * 100)), y2: y }
+        x: i * groove, x1: (Math.max(0, (i - 1)) + 0.4) * groove, x2: Math.max(0, i - 0.4) * groove,
+        y: y, y1: graphBottom - ((graphHeight / 100) * ((arr[Math.max(0, i - 1)] / ceilingValue) * 100)), y2: y 
+      }
     });
-    
-    console.log(this.settings.width,this.cordinates.padding.x,"cordinates",cordinates)
 
     var mainPath = cordinates.map((cordinates,i) => [
         i === 0 && 'M' || i === 1 && type === 'river' && 'C' || type === 'river' && 'S' || 'L',
@@ -371,7 +368,23 @@ class Infograph extends HTMLElement {
       ].join(" "))
     .join(" ");
     
-    this.svg.append(this.createElement('path', { d: mainPath, stroke: 'red', fill: 'none' }))
+    let animationPaths = [];
+    for(let i = 0; i < (data.amount_of_values -1); i++) {
+      let currentCordinates = cordinates[i];
+      let nextCordinates = cordinates[i + 1];
+      
+      let startAt = 'M ' + currentCordinates.x + ',' + currentCordinates.y;
+      let moveTo = ` L ${nextCordinates.x},${nextCordinates.y}`;
+      if (type === 'river') moveTo = ` C ${nextCordinates.x1},${nextCordinates.y1} ${nextCordinates.x2},${nextCordinates.y2} ${nextCordinates.x},${nextCordinates.y}`;
+      animationPaths.push(this.createElement('path', { d: startAt + moveTo, fill: 'none', stroke: 'green' }));
+    }
+    
+    this.svg.append(...animationPaths);
+    //this.svg.append(this.createElement('path', { d: mainPath, stroke: 'red', fill: 'none' }), ...animationPaths);
+    let animationPathLengths = animationPaths.map(path => path.getTotalLength());
+    
+    // For each - Create path + append, link path to rects (+/- sides), get path length
+
 
 
     // Event Area
@@ -409,10 +422,19 @@ class Infograph extends HTMLElement {
 
     }
     window.requestAnimationFrame(animationFrame);
-    var train = Promise.resolve();
-    var trainCart = async (target) => {
-      target.classList.add('blink')
-      await new Promise( res => setTimeout(() => {target.classList.remove('blink'); res()}, animationTiming));
+
+    let train = Promise.resolve();
+    var lastTrainCart;
+    var trainCart = async (target, pathIndexs) => {
+      let paths = pathIndexs.map(i => animationPaths[i]);
+      paths.forEach(path => path.setAttribute('stroke', 'orange'));
+      //target.classList.add('blink');
+      
+      await new Promise( res => setTimeout(() => {
+        paths.forEach(path => path.setAttribute('stroke', 'red'));
+        //target.classList.remove('blink'); 
+        res();
+      }, animationTiming));
       
       
     }
@@ -425,7 +447,14 @@ class Infograph extends HTMLElement {
 
       var parentGroup = this.createElement('g', { class: 'pathGroup'});
       var interactionRect = this.createElement('rect', { 'id': 'interaction-' + index, 'fill': index % 2 === 1 ? 'rgba(0,100,100,0.5)' : 'rgba(50,100,00,0.5)', 'y': labelY, 'x': x, 'height': graphHeight, 'width': width });
-      interactionRect.addEventListener('mouseover', function() {train = train.then(() => trainCart(this))});
+      
+      // Get the animation path indexs
+      let relatedPathIndexs = [
+        ...(index !== arr.length - 1 && [index] || []),
+        ...(index !== 0 && [index -1] || [])
+      ];
+
+      interactionRect.addEventListener('mouseover', function() {train = train.then(() => trainCart(this, relatedPathIndexs))});
 
       parentGroup.append(interactionRect);
       return parentGroup;
