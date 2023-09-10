@@ -387,6 +387,8 @@ class Infograph extends HTMLElement {
     let mainCircle = this.createElement('circle', { x: 0, y: 0, r: this.core.sizes.details / 2 });
     this.svg.appendChild(mainCircle);
 
+    //  use top or bottom as exit/enter of each hoverArea
+
     // Enter/exit hover area
     let activeHoverArea = false;
     this.addEventListener('mouseenter', (e) => console.log(e));
