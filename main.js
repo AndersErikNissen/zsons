@@ -380,13 +380,62 @@ class Infograph extends HTMLElement {
     }
     
     this.svg.append(...animationPaths);
-    //this.svg.append(this.createElement('path', { d: mainPath, stroke: 'red', fill: 'none' }), ...animationPaths);
+
     let animationPathLengths = animationPaths.map(path => path.getTotalLength());
+    let animationObjects = animationPaths.map((path,i) => Object.assign({},{ node: path, pathLength: animationPathLengths[i] }));
+
+    let mainCircle = this.createElement('circle', { x: 0, y: 0, r: this.core.sizes.details / 2 });
+    this.svg.appendChild(mainCircle);
+
+    // Enter/exit hover area
+    let activeHoverArea = false;
+    this.addEventListener('mouseenter', (e) => console.log(e));
+    this.addEventListener('mouseleave', (e) => console.log(e));
+
+    let train = Promise.resolve();
+    let trainCart = async (crds) => {
+      mainCircle.setAttribute('cx', crds.x);
+      mainCircle.setAttribute('cy', crds.y);
     
-    // For each - Create path + append, link path to rects (+/- sides), get path length
+      await new Promise(res => {
+        setTimeout(()=> {
 
+          res();
+        }, 300)
+      });
+    }
 
+    this.svg.append(
+      ...cordinates.map((crds, i, arr) => {
+        let hoverArea = this.createElement('rect', {
+          class: 'hoverArea',
+          x: i === 0 ? 0 : groove * i - (groove / 2),
+          y: labelY,
+          width: groove / (i === 0 && 2 || i === arr.length - 1 && 2 || 1),
+          height: graphHeight,
+          fill: 'transparent',
+        });
 
+        hoverArea.addEventListener('mouseover', () => train = train.then(trainCart(crds)));
+
+        return hoverArea;
+      })
+    );
+/*
+    var trainCart = async (target, pathObjects) => {
+      
+      pathObjects.forEach(path => path.node.setAttribute('stroke', 'orange'));
+      //target.classList.add('blink');
+      
+      await new Promise( res => setTimeout(() => {
+        pathObjects.forEach(path => path.node.setAttribute('stroke', 'red'));
+        //target.classList.remove('blink'); 
+        res();
+      }, animationTiming));
+      
+      
+    }
+*/
     // Event Area
     let firstTimeEntry = false;
     let eventArea = this.createElement('rect', { 'fill': 'none', 'x': this.cordinates.padding.x, 'y': labelY, 'width': graphWidth, 'height': graphHeight  });
@@ -422,45 +471,53 @@ class Infograph extends HTMLElement {
 
     }
     window.requestAnimationFrame(animationFrame);
-
+/*
     let train = Promise.resolve();
     var lastTrainCart;
-    var trainCart = async (target, pathIndexs) => {
-      let paths = pathIndexs.map(i => animationPaths[i]);
-      paths.forEach(path => path.setAttribute('stroke', 'orange'));
+
+    var trainCart = async (target, pathObjects) => {
+      
+      pathObjects.forEach(path => path.node.setAttribute('stroke', 'orange'));
       //target.classList.add('blink');
       
       await new Promise( res => setTimeout(() => {
-        paths.forEach(path => path.setAttribute('stroke', 'red'));
+        pathObjects.forEach(path => path.node.setAttribute('stroke', 'red'));
         //target.classList.remove('blink'); 
         res();
       }, animationTiming));
       
       
     }
+    */
 
-    var svgPart = (value, index, arr) => {
+
+    var svgPart = (cordinateObject, index, arr) => {
       let x = groove * index - (groove / 2);
       let width = groove;
       if (index === 0) x = 0;
       if (index === 0 || index === arr.length - 1) width = groove / 2;
 
+      // First time placement of mainCircle
+      mainCircle.setAttribute('cx', cordinateObject.x);
+      mainCircle.setAttribute('cy', cordinateObject.y);
+
       var parentGroup = this.createElement('g', { class: 'pathGroup'});
       var interactionRect = this.createElement('rect', { 'id': 'interaction-' + index, 'fill': index % 2 === 1 ? 'rgba(0,100,100,0.5)' : 'rgba(50,100,00,0.5)', 'y': labelY, 'x': x, 'height': graphHeight, 'width': width });
       
-      // Get the animation path indexs
+      /* Match animationObjects with the correct indexs */
       let relatedPathIndexs = [
         ...(index !== arr.length - 1 && [index] || []),
         ...(index !== 0 && [index -1] || [])
       ];
 
-      interactionRect.addEventListener('mouseover', function() {train = train.then(() => trainCart(this, relatedPathIndexs))});
-
+      let pathObjects = relatedPathIndexs.map(index => animationObjects[index]);
+      interactionRect.addEventListener('mouseover', function() {train = train.then(() => trainCart(this, pathObjects))});
+    
       parentGroup.append(interactionRect);
       return parentGroup;
     }
 
-    data.values.forEach((value, index, arr) => this.svg.appendChild(svgPart(value, index, arr)));
+    //cordinates.forEach((obj, index, arr) => this.svg.appendChild(svgPart(obj, index, arr)));
   }
 
   renderSVGContent() {
