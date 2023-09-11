@@ -344,18 +344,19 @@ class Infograph extends HTMLElement {
     var data = this.data[0];
     var ceilingValue = this.getCeilingValue([data]).ceiling_value;
     //var percentageValues = data.values.map(value => (value / ceilingValue) * 100);
-    let animationTiming = 3000;
+    let animationTiming = 300;
     // data.heighest_value;
     var labelY = this.cordinates.left.height * 1.1;
-    var graphHeight = this.settings.height - labelY;
+    var graphHeight = this.settings.height - labelY - this.cordinates.padding.y;
     var graphWidth = this.settings.width - (this.cordinates.padding.x * 2);
-    var graphBottom = labelY + graphHeight;
-    var groove = this.settings.width / (data.amount_of_values - 1);
+    var graphXOffset = this.cordinates.padding.x;
+    var graphBottom = labelY + graphHeight - this.cordinates.padding.y;
+    var groove = graphWidth / (data.amount_of_values - 1);
     
     var cordinates = data.values.map((value,i,arr) => { 
       let y = graphBottom - ((graphHeight / 100) * ((value / ceilingValue) * 100)); 
       return { 
-        x: i * groove, x1: (Math.max(0, (i - 1)) + 0.4) * groove, x2: Math.max(0, i - 0.4) * groove,
+        x: (i * groove) + graphXOffset, x1: ((Math.max(0, (i - 1)) + 0.4) * groove) + graphXOffset, x2: (Math.max(0, i - 0.4) * groove) + graphXOffset,
         y: y, y1: graphBottom - ((graphHeight / 100) * ((arr[Math.max(0, i - 1)] / ceilingValue) * 100)), y2: y 
       }
     });
@@ -387,57 +388,103 @@ class Infograph extends HTMLElement {
     let mainCircle = this.createElement('circle', { x: 0, y: 0, r: this.core.sizes.details / 2 });
     this.svg.appendChild(mainCircle);
 
-    //  use top or bottom as exit/enter of each hoverArea
-
-    // Enter/exit hover area
-    let activeHoverArea = false;
-    this.addEventListener('mouseenter', (e) => console.log(e));
-    this.addEventListener('mouseleave', (e) => console.log(e));
-
+    let previousGrooveIndex = 0;
     let train = Promise.resolve();
-    let trainCart = async (crds) => {
-      mainCircle.setAttribute('cx', crds.x);
-      mainCircle.setAttribute('cy', crds.y);
-    
-      await new Promise(res => {
-        setTimeout(()=> {
+    let trainCart = async (crds, index) => {
+      /* Ignore if groove have not changed */ if (index === previousGrooveIndex) return;
+      let pathIndex = index < previousGrooveIndex && index - 1 || index > previousGrooveIndex && index;
+      let matchingPathObject = animationObjects[pathIndex];
+      let pathDistance = matchingPathObject.node.getTotalLength();
+      let distancePerMs = pathDistance / animationDuration;
+      let distanceProgress = 0;
+      
+      // Animation frame
+      let pathAnimationFrame = timestamp => {
+        console.log("timestamp",timestamp)
+        let newProgress = Math.min(distancePerMs * timestamp, pathDistance);
+        let newCordinates = matchingPathObject.node.getPointAtLength(newProgress + distanceProgress);
 
-          res();
-        }, 300)
+        mainCircle.setAttribute('cx', newCordinates.x);
+        mainCircle.setAttribute('cy', newCordinates.y);
+
+        if (newProgress !== pathDistance) {
+          window.requestAnimationFrame(pathAnimationFrame);
+        } else {
+          window.cancelAnimationFrame(pathAnimationFrame);
+
+        }
+      }
+
+      await new Promise(res => {
+        console.log("promise")
+        window.requestAnimationFrame(pathAnimationFrame);
       });
+      
+      previousGrooveIndex = index;
     }
 
-    this.svg.append(
+    /* start
+    let animationDuration = 300;
+    let totalPathDistance = testPath.getTotalLength();
+    let partOfPathDistance = totalPathDistance / data.amount_of_values;
+    let distancePerMs = partOfPathDistance / animationDuration;
+    let distanceProgress = 0;
+    
+    const animationFrame = timeStamp => {
+      let newProgress = Math.min(distancePerMs * timeStamp, partOfPathDistance);
+      let newCordinates = testPath.getPointAtLength(newProgress + distanceProgress);
+      
+      testCircle.setAttribute('cx', newCordinates.x);
+      testCircle.setAttribute('cy', newCordinates.y);
+
+      if (newProgress !== partOfPathDistance) { 
+        window.requestAnimationFrame(animationFrame);
+      } else {
+        window.cancelAnimationFrame(animationFrame);
+        distanceProgress = newProgress + distanceProgress;
+      };
+
+    }
+    window.requestAnimationFrame(animationFrame);
+    end */
+
+    let hoverArea = this.createElement('rect', { 
+      fill: 'transparent', 
+      x: 0, y: labelY - this.cordinates.padding.y, 
+      width: this.settings.width, height: graphHeight + (this.cordinates.padding.y * 2) 
+    });
+    hoverArea.addEventListener('mouseleave', () => activeHoverArea = false );
+
+    let activeHoverArea = false;
+    let allHoverGrooves = this.createElement('g', { fill: 'transparent' });
+    allHoverGrooves.append(
       ...cordinates.map((crds, i, arr) => {
-        let hoverArea = this.createElement('rect', {
-          class: 'hoverArea',
-          x: i === 0 ? 0 : groove * i - (groove / 2),
+        let hoverGroove = this.createElement('rect', {
+          class: 'hoverGroove',
+          x: graphXOffset + (i === 0 ? 0 : groove * i - (groove / 2)),
           y: labelY,
           width: groove / (i === 0 && 2 || i === arr.length - 1 && 2 || 1),
           height: graphHeight,
           fill: 'transparent',
         });
 
-        hoverArea.addEventListener('mouseover', () => train = train.then(trainCart(crds)));
+        hoverGroove.addEventListener('mouseover', () => {
+          /* On first hover - Place circle */ 
+          if (!activeHoverArea) {
+            mainCircle.setAttribute('cx', crds.x);
+            mainCircle.setAttribute('cy', crds.y);
+            previousGrooveIndex = i;
+            activeHoverArea = true;
+          }
+        });
 
-        return hoverArea;
+        hoverGroove.addEventListener('mouseover', () => train = train.then(trainCart(crds,i)));
+        return hoverGroove;
       })
     );
-/*
-    var trainCart = async (target, pathObjects) => {
-      
-      pathObjects.forEach(path => path.node.setAttribute('stroke', 'orange'));
-      //target.classList.add('blink');
-      
-      await new Promise( res => setTimeout(() => {
-        pathObjects.forEach(path => path.node.setAttribute('stroke', 'red'));
-        //target.classList.remove('blink'); 
-        res();
-      }, animationTiming));
-      
-      
-    }
-*/
+
+    this.svg.append(hoverArea, allHoverGrooves);
+
     // Event Area
     let firstTimeEntry = false;
     let eventArea = this.createElement('rect', { 'fill': 'none', 'x': this.cordinates.padding.x, 'y': labelY, 'width': graphWidth, 'height': graphHeight  });
