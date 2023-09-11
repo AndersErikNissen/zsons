@@ -388,36 +388,43 @@ class Infograph extends HTMLElement {
     let mainCircle = this.createElement('circle', { x: 0, y: 0, r: this.core.sizes.details / 2 });
     this.svg.appendChild(mainCircle);
 
+    // Animation frame
+    let pathDistancePerMs = 0;
+    let pathDistanceProgress = 0;
+    let pathDistance = 0;
+    let matchingPathNode = null;
+
+    let pathAnimationFrame = timestamp => {
+      console.log("timestamp",timestamp)
+      let newProgress = Math.min(pathDistancePerMs * timestamp, pathDistance);
+      let newCordinates = matchingPathNode.getPointAtLength(newProgress + pathDistanceProgress);
+
+      mainCircle.setAttribute('cx', newCordinates.x);
+      mainCircle.setAttribute('cy', newCordinates.y);
+
+      if (newProgress !== pathDistance) {
+        window.requestAnimationFrame(pathAnimationFrame);
+      } else {
+        window.cancelAnimationFrame(pathAnimationFrame);
+
+      }
+    }
+
     let previousGrooveIndex = 0;
     let train = Promise.resolve();
     let trainCart = async (crds, index) => {
       /* Ignore if groove have not changed */ if (index === previousGrooveIndex) return;
       let pathIndex = index < previousGrooveIndex && index - 1 || index > previousGrooveIndex && index;
-      let matchingPathObject = animationObjects[pathIndex];
-      let pathDistance = matchingPathObject.node.getTotalLength();
-      let distancePerMs = pathDistance / animationDuration;
-      let distanceProgress = 0;
+      matchingPathNode = animationObjects[pathIndex].node;
+      pathDistance = matchingPathNode.getTotalLength();
+      distancePerMs = pathDistance / animationDuration;
+      distanceProgress = 0;
       
-      // Animation frame
-      let pathAnimationFrame = timestamp => {
-        console.log("timestamp",timestamp)
-        let newProgress = Math.min(distancePerMs * timestamp, pathDistance);
-        let newCordinates = matchingPathObject.node.getPointAtLength(newProgress + distanceProgress);
-
-        mainCircle.setAttribute('cx', newCordinates.x);
-        mainCircle.setAttribute('cy', newCordinates.y);
-
-        if (newProgress !== pathDistance) {
-          window.requestAnimationFrame(pathAnimationFrame);
-        } else {
-          window.cancelAnimationFrame(pathAnimationFrame);
-
-        }
-      }
 
       await new Promise(res => {
         console.log("promise")
         window.requestAnimationFrame(pathAnimationFrame);
+        res();
       });
       
       previousGrooveIndex = index;
