@@ -410,24 +410,40 @@ class Infograph extends HTMLElement {
       }
     }
 
+    let lastTimestamp = 0;
     let previousGrooveIndex = 0;
-    let train = Promise.resolve();
-    let trainCart = async (crds, index) => {
-      /* Ignore if groove have not changed */ if (index === previousGrooveIndex) return;
-      let pathIndex = index < previousGrooveIndex && index - 1 || index > previousGrooveIndex && index;
-      matchingPathNode = animationObjects[pathIndex].node;
-      pathDistance = matchingPathNode.getTotalLength();
-      distancePerMs = pathDistance / animationDuration;
-      distanceProgress = 0;
-      
 
-      await new Promise(res => {
-        console.log("promise")
-        window.requestAnimationFrame(pathAnimationFrame);
-        res();
+    let train = Promise.resolve();
+
+    let trainCart = async (path, index) => {
+      let totalPathDistance = path.node.getTotalLength();
+      let msDistance = totalPathDistance / animationDuration;
+      let traversedDistance = 0;
+
+      await new Promise(resolve => {
+        let animateItems = timestamp => {
+          if (lastTimestamp === 0) {
+            lastTimestamp = timestamp;
+            window.requestAnimationFrame(animateItems);
+          }
+
+          let elapsedTime = timestamp - lastTimestamp;
+          
+          if (elapsedTime !== animationDuration) {
+
+            window.requestAnimationFrame(animateItems);
+
+          } else {
+            resolve();
+          };
+        }
+        
+        window.requestAnimationFrame(animateItems);
+      }).then(() => {
+        /* Reset timestamp and prepare for next animation */
+        lastTimestamp = 0
+        previousGrooveIndex = index;
       });
-      
-      previousGrooveIndex = index;
     }
 
     /* start
@@ -475,17 +491,26 @@ class Infograph extends HTMLElement {
           fill: 'transparent',
         });
 
+        /* On first hover - Place circle */ 
         hoverGroove.addEventListener('mouseover', () => {
-          /* On first hover - Place circle */ 
           if (!activeHoverArea) {
             mainCircle.setAttribute('cx', crds.x);
             mainCircle.setAttribute('cy', crds.y);
-            previousGrooveIndex = i;
             activeHoverArea = true;
+            previousGrooveIndex = i;
           }
+
+          /* Find matching pathObject */
+          let matchingPathIndex = i < previousGrooveIndex && Math.max(i - 1, 0) || i > previousGrooveIndex && Math.min(i, animationObjects.length - 1);        
+          let matchingAnimationObject = animationObjects[matchingPathIndex];
+  
+          if (i !== previousGrooveIndex) train = train.then(trainCart(matchingAnimationObject,i));
         });
 
-        hoverGroove.addEventListener('mouseover', () => train = train.then(trainCart(crds,i)));
+        
+        hoverGroove.addEventListener('mouseover', () => {
+        });
+
         return hoverGroove;
       })
     );
