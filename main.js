@@ -410,66 +410,85 @@ class Infograph extends HTMLElement {
       }
     }
 
-    let lastTimestamp = 0;
     let previousGrooveIndex = 0;
-
-    let train = Promise.resolve();
-
-    let trainCart = async (path, index) => {
-      let totalPathDistance = path.node.getTotalLength();
-      let msDistance = totalPathDistance / animationDuration;
-      let traversedDistance = 0;
-
-      await new Promise(resolve => {
-        let animateItems = timestamp => {
-          if (lastTimestamp === 0) {
-            lastTimestamp = timestamp;
-            window.requestAnimationFrame(animateItems);
-          }
-
-          let elapsedTime = timestamp - lastTimestamp;
-          
-          if (elapsedTime !== animationDuration) {
-
-            window.requestAnimationFrame(animateItems);
-
-          } else {
-            resolve();
-          };
-        }
-        
-        window.requestAnimationFrame(animateItems);
-      }).then(() => {
-        /* Reset timestamp and prepare for next animation */
-        lastTimestamp = 0
-        previousGrooveIndex = index;
-      });
-    }
-
-    /* start
-    let animationDuration = 300;
-    let totalPathDistance = testPath.getTotalLength();
-    let partOfPathDistance = totalPathDistance / data.amount_of_values;
-    let distancePerMs = partOfPathDistance / animationDuration;
-    let distanceProgress = 0;
     
-    const animationFrame = timeStamp => {
-      let newProgress = Math.min(distancePerMs * timeStamp, partOfPathDistance);
-      let newCordinates = testPath.getPointAtLength(newProgress + distanceProgress);
+    let train = Promise.resolve();
+    
+    let trainCart = async (pathObject, index) => {
+      let lastTimestamp = 0;
+      let msDistance = pathObject.pathLength / animationDuration;
+      let traversedDistance = 0;
+      let animationId;
       
-      testCircle.setAttribute('cx', newCordinates.x);
-      testCircle.setAttribute('cy', newCordinates.y);
+      // await new Promise (resolve => {
+      //   let animation = timestamp => {
+      //     if (traversedDistance === pathObject.pathLength) {
+      //       lastTimestamp = 0;
+      //       previousGrooveIndex = index;
+      //       cancelAnimationFrame(animationId);
+      //       resolve();
+      //     } else {
+      //       if (lastTimestamp === 0) lastTimestamp = timestamp;
+      //       let elapsedTime = timestamp - lastTimestamp;
+      //       let distance = traversedDistance + (elapsedTime * msDistance);
+      //       let cordinates = pathObject.node.getPointAtLength(pathObject.polar === 'minus' ? Math.max(pathObject.pathLength - distance,0) : Math.min(distance, pathObject.pathLength));
+            
+      //       mainCircle.setAttribute('cx', cordinates.x);
+      //       mainCircle.setAttribute('cy', cordinates.y);
+  
+      //       traversedDistance = Math.min(distance, pathObject.pathLength);
+      //       lastTimestamp = timestamp;
+            
+      //       animationId = window.requestAnimationFrame(animation);
+      //     }
+      //   }
 
-      if (newProgress !== partOfPathDistance) { 
-        window.requestAnimationFrame(animationFrame);
-      } else {
-        window.cancelAnimationFrame(animationFrame);
-        distanceProgress = newProgress + distanceProgress;
-      };
+      //   window.requestAnimationFrame(animation);
+      // });
+    };
+    
+    // let trainCart = async (path, index, polar) => {
+    //   let promise = await new Promise(resolve => {
+    //     let totalPathDistance = path.node.getTotalLength();
+    //     let msDistance = totalPathDistance / animationDuration;
+    //     let traversedDistance = 0;
+        
+    //     let animateItems = timestamp => {
+    //       if (lastTimestamp === 0) {
+    //         lastTimestamp = timestamp;
+    //         console.log("1",lastTimestamp)
+    //       }
+          
+    //       if (totalPathDistance !== traversedDistance) {
+    //         console.log("2",lastTimestamp)
+    //         let elapsedTime = timestamp - lastTimestamp;
+    //         let newDistance = traversedDistance + (elapsedTime * msDistance);
+    //         let polarDistance = polar === 'minus' && Math.max(totalPathDistance - newDistance,0) || Math.min(newDistance, totalPathDistance);
+    //         let newCordinates = path.node.getPointAtLength(polarDistance);
+    //         console.log(newCordinates)
 
-    }
-    window.requestAnimationFrame(animationFrame);
-    end */
+    //         mainCircle.setAttribute('cx', newCordinates.x);
+    //         mainCircle.setAttribute('cy', newCordinates.y);
+
+    //         traversedDistance = Math.min(newDistance, totalPathDistance);
+    //         lastTimestamp = timestamp;
+
+    //       } else { 
+    //         console.log("3",lastTimestamp)
+    //         resolve(true); 
+    //       }
+
+    //       window.requestAnimationFrame(animateItems);
+    //     }
+        
+    //     window.requestAnimationFrame(animateItems);
+    //   });
+
+    //   /* Reset timestamp and prepare for next animation */
+    //   lastTimestamp = 0;
+    //   console.log("4",lastTimestamp)
+    //   previousGrooveIndex = index;
+    // } 
 
     let hoverArea = this.createElement('rect', { 
       fill: 'transparent', 
@@ -501,10 +520,13 @@ class Infograph extends HTMLElement {
           }
 
           /* Find matching pathObject */
-          let matchingPathIndex = i < previousGrooveIndex && Math.max(i - 1, 0) || i > previousGrooveIndex && Math.min(i, animationObjects.length - 1);        
-          let matchingAnimationObject = animationObjects[matchingPathIndex];
-  
-          if (i !== previousGrooveIndex) train = train.then(trainCart(matchingAnimationObject,i));
+          if (i !== previousGrooveIndex) {
+            let polar = i < previousGrooveIndex ? 'minus' : 'plus';
+            let pathIndex = polar === 'minus' ? Math.max(i - 1, 0) : Math.min(i, animationObjects.length - 1);        
+            let matchingAnimationObject = animationObjects[pathIndex];
+            
+            train = train.then(trainCart(Object.assign(matchingAnimationObject, { polar: polar }, i)));
+          }
         });
 
         
