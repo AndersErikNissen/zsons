@@ -81,14 +81,17 @@ class Infograph extends HTMLElement {
   }
 
   // Utility functions
-  round(nr) {return Math.round((nr * Math.pow(10, 2)) * (1 + Number.EPSILON)) / Math.pow(10, 2);}
-  setAttributes(el, attrs) { Object.keys(attrs).forEach(key => el.setAttribute(key, attrs[key])); }
+  round(nr) {return Math.round((nr * Math.pow(10, 2)) * (1 + Number.EPSILON)) / Math.pow(10, 2);};
+
+  setAttributes(el, attrs) { Object.keys(attrs).forEach(key => el.setAttribute(key, attrs[key])); };
+
   createElement(elementType, attrs = {}, content) {
     var element = document.createElementNS('http://www.w3.org/2000/svg', elementType);
     this.setAttributes(element, attrs);
     if (content) element.textContent = content;
     return element;
-  }
+  };
+
   createElementStack(elementTypeArray, attributeObjectArray, contentArray = []) {
     var elementArray = [];
     // Create backwards array of elements (Setting all the given attributes)
@@ -100,7 +103,8 @@ class Infograph extends HTMLElement {
     // Append element 1 to 2, 2 to 3 etc
     elementArray.forEach((element,i) => { if (i !== (elementArray.length - 1)) elementArray[i + 1].appendChild(element) }); 
     return elementArray[elementArray.length - 1]; // Return the furthest out element
-  }
+  };
+
   valueFormatter = nr => { 
     // Depending on length of label return a different format
     if (!this.settings.format_labels) return nr;
@@ -110,6 +114,7 @@ class Infograph extends HTMLElement {
       case 7: case 8: case 9: return nr / 1E6 + 'M'; 
       default: return nr / 1E9 + 'B' } 
   };
+
   getCeilingValue(data) {
     // Get heighest value and ceiling value
     var heighstValueName = this.settings.type && this.settings.type === 'tower' && 'heighest_combined_value' || 'heighest_value';
@@ -119,9 +124,17 @@ class Infograph extends HTMLElement {
     var ceilingValue = aTenth;
     while (ceilingValue % heighestValue === ceilingValue) { ceilingValue += aTenth };
     // Add overhead if too close
-    if (ceilingValue === heighestValue || (ceilingValue - (aTenth / 4)) <= heighestValue) ceilingValue += aTenth;
+    if (ceilingValue === heighestValue || aTenth * 8 <= heighestValue) ceilingValue += aTenth * 2;
     
     return { ceiling_value: ceilingValue, heighest_value: heighestValue };
+  }
+
+  createGradient = (gradientArray, gradientName) => {
+    let gradientElement = this.createElement('linearGradient', {});
+    this.setAttributes(gradientElement, {x1:0, x2:0, y1:0, y2:1, id: 'gradientColor-' + gradientName});
+
+    gradientElement.append(gradientArray.map(gradientObject => this.createElement('stop', gradientObject)));
+    return gradientElement;
   }
 
   get getCore() {
@@ -134,6 +147,8 @@ class Infograph extends HTMLElement {
         colors: {
           main: /** Used for things like fonts */ '#000',
           secondary: '#F18F01',
+          gradient: [{'stop-color':'#93DC93', 'offset': '0%'},{'stop-color':'#93DC93', 'offset': '100%', 'stop-offset': 0}],
+          gradientName: 'mainGradient',
           list: ["#F0FAF0","#D1F0D1","#B2E6B2","#93DC93","#74D274","#56C856","#3CB93C","#329A32","#287B28","#1E5C1E"],
         },
       }
@@ -341,33 +356,43 @@ class Infograph extends HTMLElement {
   }
 
   buildPath(type) {
-    var data = this.data[0];
-    var ceilingValue = this.getCeilingValue([data]).ceiling_value;
-    //var percentageValues = data.values.map(value => (value / ceilingValue) * 100);
-    let animationTiming = 100;
-    // data.heighest_value;
-    var labelY = this.cordinates.left.height * 1.1;
-    var graphHeight = this.settings.height - labelY - this.cordinates.padding.y;
-    var graphWidth = this.settings.width - (this.cordinates.padding.x * 2);
-    var graphXOffset = this.cordinates.padding.x;
-    var graphBottom = labelY + graphHeight - this.cordinates.padding.y;
-    var groove = graphWidth / (data.amount_of_values - 1);
+    let 
+      animationTiming = 100,
+      data = this.data[0],
+      ceilingValue = this.getCeilingValue([data]).ceiling_value,
+      labelY = this.cordinates.left.height * 1.1,
+      graphHeight = this.settings.height - labelY - this.cordinates.padding.y,
+      graphWidth = this.settings.width - (this.core.sizes.details * 2),
+      graphXOffset = this.core.sizes.details,
+      graphBottom = labelY + graphHeight - this.core.sizes.details,
+      groove = graphWidth / (data.amount_of_values - 1),
     
-    var cordinates = data.values.map((value,i,arr) => { 
-      let y = graphBottom - ((graphHeight / 100) * ((value / ceilingValue) * 100)); 
-      return { 
-        x: (i * groove) + graphXOffset, x1: ((Math.max(0, (i - 1)) + 0.4) * groove) + graphXOffset, x2: (Math.max(0, i - 0.4) * groove) + graphXOffset,
-        y: y, y1: graphBottom - ((graphHeight / 100) * ((arr[Math.max(0, i - 1)] / ceilingValue) * 100)), y2: y 
-      }
-    });
+      cordinates = data.values.map((value,i,arr) => { 
+        let y = graphBottom - ((graphHeight / 100) * ((value / ceilingValue) * 100)); 
+        return { 
+          x: (i * groove) + graphXOffset, x1: ((Math.max(0, (i - 1)) + 0.4) * groove) + graphXOffset, x2: (Math.max(0, i - 0.4) * groove) + graphXOffset,
+          y: y, y1: graphBottom - ((graphHeight / 100) * ((arr[Math.max(0, i - 1)] / ceilingValue) * 100)), y2: y 
+        }
+      }),
 
-    var mainPath = cordinates.map((cordinates,i) => [
+      mainPathString = cordinates.map((cordinates,i) => [
         i === 0 && 'M' || i === 1 && type === 'river' && 'C' || type === 'river' && 'S' || 'L',
         ...(i == 1 && type === 'river' && [cordinates.x1 + ',' + cordinates.y1] || []),
         ...(i !== 0 && type === 'river' && [cordinates.x2 + ',' + cordinates.y2] || []),
         cordinates.x + ',' + cordinates.y
-      ].join(" "))
-    .join(" ");
+      ].join(" ")).join(" "),
+
+      mainPathBackgroundString = mainPathString + `L ${graphXOffset + graphWidth},${labelY + graphHeight} L ${graphXOffset},${labelY + graphHeight} Z`; 
+    
+    this.svg.append(
+      this.createElement('path', { d: mainPathString, stroke: this.core.colors.main, fill: 'none' }),
+      this.createElement('path', { d: mainPathBackgroundString, stroke: 'none', fill: `url(#gradientColor-${this.core.colors.gradientName})` }),
+    );
+    var defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+
+    defs.appendChild(this.createGradient(this.core.colors.gradient, this.core.colors.gradientName));
+
+
     
     let animationPaths = [];
     for(let i = 0; i < (data.amount_of_values -1); i++) {
@@ -377,22 +402,20 @@ class Infograph extends HTMLElement {
       let startAt = 'M ' + currentCordinates.x + ',' + currentCordinates.y;
       let moveTo = ` L ${nextCordinates.x},${nextCordinates.y}`;
       if (type === 'river') moveTo = ` C ${nextCordinates.x1},${nextCordinates.y1} ${nextCordinates.x2},${nextCordinates.y2} ${nextCordinates.x},${nextCordinates.y}`;
-      animationPaths.push(this.createElement('path', { d: startAt + moveTo, fill: 'none', stroke: 'green' }));
+      animationPaths.push(this.createElement('path', { d: startAt + moveTo, fill: 'none', stroke: 'none' }));
     }
     
-    this.svg.append(...animationPaths);
-
+    
     let animationPathLengths = animationPaths.map(path => path.getTotalLength());
     let animationObjects = animationPaths.map((path,i) => Object.assign({},{ node: path, pathLength: animationPathLengths[i] }));
-
-    let mainCircle = this.createElement('circle', { x: 0, y: 0, r: this.core.sizes.details / 2 });
-    this.svg.appendChild(mainCircle);
-
+    
+    let mainCircle = this.createElement('circle', { x: 0, y: 0, r: this.core.sizes.details / 2, fill: 'transparent' });
+    
+    this.svg.append(mainCircle, ...animationPaths, defs);
+    
+    /* Train station */
     let previousHoverIndex = 0;
-    
     let train = Promise.resolve();
-    
-    //let trainCart = async (pathObject, index) => {
     let trainCart = async (currentIndex) => {
       if (currentIndex === previousHoverIndex) return currentIndex;
       let animateLeft = currentIndex < previousHoverIndex;
@@ -471,7 +494,7 @@ class Infograph extends HTMLElement {
         return hoverGroove;
       })
     );
-
+    
     this.svg.append(hoverArea, allHoverGrooves);
   }
 
@@ -506,6 +529,7 @@ class Infograph extends HTMLElement {
 
     console.log("%c this.data ","color: blue; background-color: orange",this.data)
     console.log("%c this.settings ","color: white; background-color: grey",this.settings)
+    console.log("%c this.core ","color: white; background-color: red",this.core)
   }
 }
 
