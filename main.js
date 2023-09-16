@@ -132,8 +132,7 @@ class Infograph extends HTMLElement {
   createGradient = (gradientArray, gradientName) => {
     let gradientElement = this.createElement('linearGradient', {});
     this.setAttributes(gradientElement, {x1:0, x2:0, y1:0, y2:1, id: 'gradientColor-' + gradientName});
-
-    gradientElement.append(gradientArray.map(gradientObject => this.createElement('stop', gradientObject)));
+    gradientArray.forEach(gradientObject => gradientElement.appendChild(this.createElement('stop', gradientObject)));
     return gradientElement;
   }
 
@@ -147,7 +146,7 @@ class Infograph extends HTMLElement {
         colors: {
           main: /** Used for things like fonts */ '#000',
           secondary: '#F18F01',
-          gradient: [{'stop-color':'#93DC93', 'offset': '0%'},{'stop-color':'#93DC93', 'offset': '100%', 'stop-offset': 0}],
+          gradient: [{'stop-color':'#93DC93', 'offset': '0%'},{'stop-color':'#93DC93', 'offset': '100%', 'stop-opacity': 0}],
           gradientName: 'mainGradient',
           list: ["#F0FAF0","#D1F0D1","#B2E6B2","#93DC93","#74D274","#56C856","#3CB93C","#329A32","#287B28","#1E5C1E"],
         },
@@ -474,7 +473,7 @@ class Infograph extends HTMLElement {
           y: labelY,
           width: groove / (i === 0 && 2 || i === arr.length - 1 && 2 || 1),
           height: graphHeight,
-          fill: i % 2 == 0 ? 'rgba(80,100,233,0.3)' : 'rgba(50,160,23,0.3)',
+          fill: 'transparent',
         });
 
         /* On first hover - Place circle */ 
