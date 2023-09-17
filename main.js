@@ -130,8 +130,7 @@ class Infograph extends HTMLElement {
   }
 
   createGradient = (gradientArray, gradientName) => {
-    let gradientElement = this.createElement('linearGradient', {});
-    this.setAttributes(gradientElement, {x1:0, x2:0, y1:0, y2:1, id: 'gradientColor-' + gradientName});
+    let gradientElement = this.createElement('linearGradient', {x1:0, x2:0, y1:0, y2:1, id: 'gradientColor-' + gradientName});
     gradientArray.forEach(gradientObject => gradientElement.appendChild(this.createElement('stop', gradientObject)));
     return gradientElement;
   }
@@ -365,12 +364,12 @@ class Infograph extends HTMLElement {
       graphXOffset = this.core.sizes.details,
       graphBottom = labelY + graphHeight - this.core.sizes.details,
       groove = graphWidth / (data.amount_of_values - 1),
+      getY = value => graphBottom - ((graphHeight / 100) * ((value / ceilingValue) * 100)),
     
-      cordinates = data.values.map((value,i,arr) => { 
-        let y = graphBottom - ((graphHeight / 100) * ((value / ceilingValue) * 100)); 
+      cordinates = data.values.map((value,i,arr) => {  
         return { 
           x: (i * groove) + graphXOffset, x1: ((Math.max(0, (i - 1)) + 0.4) * groove) + graphXOffset, x2: (Math.max(0, i - 0.4) * groove) + graphXOffset,
-          y: y, y1: graphBottom - ((graphHeight / 100) * ((arr[Math.max(0, i - 1)] / ceilingValue) * 100)), y2: y 
+          y: getY(value), y1: graphBottom - ((graphHeight / 100) * ((arr[Math.max(0, i - 1)] / ceilingValue) * 100)), y2: getY(value) 
         }
       }),
 
@@ -391,8 +390,6 @@ class Infograph extends HTMLElement {
 
     defs.appendChild(this.createGradient(this.core.colors.gradient, this.core.colors.gradientName));
 
-
-    
     let animationPaths = [];
     for(let i = 0; i < (data.amount_of_values -1); i++) {
       let currentCordinates = cordinates[i];
@@ -410,7 +407,17 @@ class Infograph extends HTMLElement {
     
     let mainCircle = this.createElement('circle', { x: 0, y: 0, r: this.core.sizes.details / 2, fill: 'transparent' });
     
-    this.svg.append(mainCircle, ...animationPaths, defs);
+    let
+      mainStickString = `M 0,${labelY + graphHeight} L 0,${labelY}`,
+      mainStick = this.createElement('path', { d: mainStickString, id: 'mainStick', 'stroke-width': 2, stroke: 'transparent', fill: 'none' });
+    defs.innerHTML += `
+      <linearGradient id="gradientColor-mainStick" x1="0" y1="0" x2="0" y2="100%" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stop-color="${this.core.colors.main}" stop-opacity="1" />
+        <stop offset="90%" stop-color="${this.core.colors.main}" stop-opacity="0" />
+      </linearGradient>
+    `;
+
+    this.svg.append(mainCircle, ...animationPaths, defs, mainStick,);
     
     /* Train station */
     let previousHoverIndex = 0;
@@ -439,6 +446,7 @@ class Infograph extends HTMLElement {
   
             mainCircle.setAttribute('cx', cordinates.x);
             mainCircle.setAttribute('cy', cordinates.y);
+            mainStick.setAttribute('d', `M ${cordinates.x},${labelY + graphHeight} L ${cordinates.x},${cordinates.y}`)
   
             traversedDistance = Math.min(distance, pathLength);
             lastTimestamp = timestamp;
@@ -461,6 +469,7 @@ class Infograph extends HTMLElement {
       activeHoverArea = false;
       previousHoverIndex = 0;
       mainCircle.setAttribute('fill', 'transparent');
+      mainStick.setAttribute('stroke', 'transparent');
     });
 
     let activeHoverArea = false;
@@ -480,7 +489,10 @@ class Infograph extends HTMLElement {
         hoverGroove.addEventListener('mouseover', () => {
           if (!activeHoverArea) {
             activeHoverArea = true;
-            mainCircle.setAttribute('fill',"red");
+            mainStick.setAttribute('d', `M ${crds.x},${labelY + graphHeight} L ${crds.x},${crds.y}`);
+            mainStick.setAttribute('stroke', 'url(#gradientColor-mainStick)');
+
+            mainCircle.setAttribute('fill', this.core.colors.main);
             mainCircle.setAttribute('cx', crds.x);
             mainCircle.setAttribute('cy', crds.y);
             previousHoverIndex = i;
@@ -493,7 +505,6 @@ class Infograph extends HTMLElement {
         return hoverGroove;
       })
     );
-    
     this.svg.append(hoverArea, allHoverGrooves);
   }
 
