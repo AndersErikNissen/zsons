@@ -129,8 +129,9 @@ class Infograph extends HTMLElement {
     return { ceiling_value: ceilingValue, heighest_value: heighestValue };
   }
 
-  createGradient = (gradientArray, gradientName) => {
-    let gradientElement = this.createElement('linearGradient', {x1:0, x2:0, y1:0, y2:1, id: 'gradientColor-' + gradientName});
+  createGradient = (gradientArray, gradientName, userSpace = false) => {
+    let gradientElement = this.createElement('linearGradient', {x1:0, x2:0, y1:0, y2: '100%', id: 'gradientColor-' + gradientName});
+    if (userSpace) gradientElement.setAttribute('gradientUnits', 'userSpaceOnUse');
     gradientArray.forEach(gradientObject => gradientElement.appendChild(this.createElement('stop', gradientObject)));
     return gradientElement;
   }
@@ -139,12 +140,12 @@ class Infograph extends HTMLElement {
     const LIST_OF_CORES = {
       default: {
         sizes: {
-          details: /** Used for visual elements like circles */ 10,
+          details: /** Used for visual elements like circles */ 9,
           dynamicSpacing: /** Use static/dynamic spacing */ 0.03,
         },
         colors: {
           main: /** Used for things like fonts */ '#000',
-          secondary: '#F18F01',
+          secondary: '#93DC93',
           gradient: [{'stop-color':'#93DC93', 'offset': '0%'},{'stop-color':'#93DC93', 'offset': '100%', 'stop-opacity': 0}],
           gradientName: 'mainGradient',
           list: ["#F0FAF0","#D1F0D1","#B2E6B2","#93DC93","#74D274","#56C856","#3CB93C","#329A32","#287B28","#1E5C1E"],
@@ -358,6 +359,7 @@ class Infograph extends HTMLElement {
       animationTiming = 100,
       data = this.data[0],
       ceilingValue = this.getCeilingValue([data]).ceiling_value,
+      strokeWidth = 3,
       labelY = this.cordinates.left.height * 1.1,
       graphHeight = this.settings.height - labelY - this.cordinates.padding.y,
       graphWidth = this.settings.width - (this.core.sizes.details * 2),
@@ -379,16 +381,18 @@ class Infograph extends HTMLElement {
         ...(i !== 0 && type === 'river' && [cordinates.x2 + ',' + cordinates.y2] || []),
         cordinates.x + ',' + cordinates.y
       ].join(" ")).join(" "),
-
       mainPathBackgroundString = mainPathString + `L ${graphXOffset + graphWidth},${labelY + graphHeight} L ${graphXOffset},${labelY + graphHeight} Z`; 
     
     this.svg.append(
-      this.createElement('path', { d: mainPathString, stroke: this.core.colors.main, fill: 'none' }),
-      this.createElement('path', { d: mainPathBackgroundString, stroke: 'none', fill: `url(#gradientColor-${this.core.colors.gradientName})` }),
+      this.createElement('path', { d: mainPathBackgroundString, stroke: 'transparent', 'stroke-width': strokeWidth, fill: `url(#gradientColor-${this.core.colors.gradientName})` }),
+      this.createElement('path', { d: mainPathString, stroke: this.core.colors.secondary, fill: 'none', 'stroke-width': strokeWidth }),
     );
     var defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
 
-    defs.appendChild(this.createGradient(this.core.colors.gradient, this.core.colors.gradientName));
+    defs.append(
+      this.createGradient(this.core.colors.gradient, this.core.colors.gradientName),
+      this.createGradient([{'stop-color': this.core.colors.main, offset: '0%', 'stop-opacity': 1},{'stop-color': this.core.colors.main, offset: '95%', 'stop-opacity': 0}], 'mainStick', true),
+    );
 
     let animationPaths = [];
     for(let i = 0; i < (data.amount_of_values -1); i++) {
@@ -401,64 +405,67 @@ class Infograph extends HTMLElement {
       animationPaths.push(this.createElement('path', { d: startAt + moveTo, fill: 'none', stroke: 'none' }));
     }
     
-    
-    let animationPathLengths = animationPaths.map(path => path.getTotalLength());
-    let animationObjects = animationPaths.map((path,i) => Object.assign({},{ node: path, pathLength: animationPathLengths[i] }));
-    
-    let mainCircle = this.createElement('circle', { x: 0, y: 0, r: this.core.sizes.details / 2, fill: 'transparent' });
-    
-    let
+    let 
+      animationPathLengths = animationPaths.map(path => path.getTotalLength()),
+      animationObjects = animationPaths.map((path,i) => Object.assign({},{ node: path, pathLength: animationPathLengths[i] })),
+      mainCircle = this.createElement('circle', { x: 0, y: 0, r: this.core.sizes.details / 2, fill: 'transparent' }),
+      secondaryCircle = this.createElement('circle', { x: 0, y: 0, r: (strokeWidth + 1) / 2, fill: 'transparent' }),
       mainStickString = `M 0,${labelY + graphHeight} L 0,${labelY}`,
       mainStick = this.createElement('path', { d: mainStickString, id: 'mainStick', 'stroke-width': 2, stroke: 'transparent', fill: 'none' });
-    defs.innerHTML += `
-      <linearGradient id="gradientColor-mainStick" x1="0" y1="0" x2="0" y2="100%" gradientUnits="userSpaceOnUse">
-        <stop offset="0%" stop-color="${this.core.colors.main}" stop-opacity="1" />
-        <stop offset="90%" stop-color="${this.core.colors.main}" stop-opacity="0" />
-      </linearGradient>
-    `;
 
-    this.svg.append(mainCircle, ...animationPaths, defs, mainStick,);
-    
+      /* Value hover elements */
+    let valueTextElements = data.values.map(value => {
+      let text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.textContent = value;
+      return text;
+    });
+    defs.append(valueTextElements);
+    console.log("test",valueTextElements[0].getBBox());
+      
+      this.svg.append(mainStick, mainCircle, secondaryCircle, ...animationPaths, defs);
     /* Train station */
-    let previousHoverIndex = 0;
-    let train = Promise.resolve();
-    let trainCart = async (currentIndex) => {
-      if (currentIndex === previousHoverIndex) return currentIndex;
-      let animateLeft = currentIndex < previousHoverIndex;
-      let matchingIndex = animateLeft ? currentIndex : currentIndex - 1;
-      let { pathLength, node } = animationObjects[matchingIndex];
+    let 
+      previousHoverIndex = 0,
+      train = Promise.resolve(),
+      trainCart = async (currentIndex) => {
+        if (currentIndex === previousHoverIndex) return currentIndex;
+        let animateLeft = currentIndex < previousHoverIndex;
+        let matchingIndex = animateLeft ? currentIndex : currentIndex - 1;
+        let { pathLength, node } = animationObjects[matchingIndex];
 
-      let lastTimestamp, animationId;
-      let msDistance = pathLength / animationTiming;
-      let traversedDistance = 0;
+        let lastTimestamp, animationId;
+        let msDistance = pathLength / animationTiming;
+        let traversedDistance = 0;
 
-      return await new Promise (resolve => {
-        let animation = timestamp => {
-          if (traversedDistance === pathLength) {
-            cancelAnimationFrame(animationId);
-            previousHoverIndex = currentIndex;
-            resolve();
-          } else {
-            if (lastTimestamp === undefined) lastTimestamp = timestamp; /* Set the first timestamp */
-            let elapsedTime = timestamp - lastTimestamp;
-            let distance = traversedDistance + (elapsedTime * msDistance);
-            let cordinates = node.getPointAtLength(animateLeft ? Math.max(0, pathLength - distance) : Math.min(pathLength, distance));
-  
-            mainCircle.setAttribute('cx', cordinates.x);
-            mainCircle.setAttribute('cy', cordinates.y);
-            mainStick.setAttribute('d', `M ${cordinates.x},${labelY + graphHeight} L ${cordinates.x},${cordinates.y}`)
-  
-            traversedDistance = Math.min(distance, pathLength);
-            lastTimestamp = timestamp;
-  
-            animationId = window.requestAnimationFrame(animation);
+        return await new Promise (resolve => {
+          let animation = timestamp => {
+            if (traversedDistance === pathLength) {
+              cancelAnimationFrame(animationId);
+              previousHoverIndex = currentIndex;
+              resolve();
+            } else {
+              if (lastTimestamp === undefined) lastTimestamp = timestamp; /* Set the first timestamp */
+              let elapsedTime = timestamp - lastTimestamp;
+              let distance = traversedDistance + (elapsedTime * msDistance);
+              let cordinates = node.getPointAtLength(animateLeft ? Math.max(0, pathLength - distance) : Math.min(pathLength, distance));
+    
+              mainCircle.setAttribute('cx', cordinates.x);
+              mainCircle.setAttribute('cy', cordinates.y);
+              secondaryCircle.setAttribute('cx', cordinates.x);
+              secondaryCircle.setAttribute('cy', cordinates.y);
+              mainStick.setAttribute('d', `M ${cordinates.x},${labelY + graphHeight} L ${cordinates.x},${cordinates.y}`)
+    
+              traversedDistance = Math.min(distance, pathLength);
+              lastTimestamp = timestamp;
+    
+              animationId = window.requestAnimationFrame(animation);
 
+            }
           }
-        }
 
-        window.requestAnimationFrame(animation);
-      });
-    };
+          window.requestAnimationFrame(animation);
+        });
+      };
 
     let hoverArea = this.createElement('rect', { 
       fill: 'transparent', 
@@ -495,6 +502,10 @@ class Infograph extends HTMLElement {
             mainCircle.setAttribute('fill', this.core.colors.main);
             mainCircle.setAttribute('cx', crds.x);
             mainCircle.setAttribute('cy', crds.y);
+
+            secondaryCircle.setAttribute('fill', this.core.colors.secondary);
+            secondaryCircle.setAttribute('cx', crds.x);
+            secondaryCircle.setAttribute('cy', crds.y);
             previousHoverIndex = i;
             return;
           }
