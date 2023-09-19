@@ -413,16 +413,33 @@ class Infograph extends HTMLElement {
       mainStickString = `M 0,${labelY + graphHeight} L 0,${labelY}`,
       mainStick = this.createElement('path', { d: mainStickString, id: 'mainStick', 'stroke-width': 2, stroke: 'transparent', fill: 'none' });
 
-      /* Value hover elements */
-    let valueTextElements = data.values.map(value => {
-      let text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      text.textContent = value;
-      return text;
+    /* Value hover elements */
+    let 
+      valueTextElements = data.values.map(value => {
+        let text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.textContent = value;
+        return text;
+      }),
+      valueTextGroup = this.createElement('g', { style: 'opacity: 0;' })
+    valueTextGroup.append(...valueTextElements);
+    this.svg.appendChild(valueTextGroup);
+    let valueLabelObjects = valueTextElements.map((ele, i) => {
+      return {
+        value: data.values[i],
+        height: Math.ceil(ele.getBBox().height) + 10,
+        width: Math.ceil(ele.getBBox().width) + 20,
+      }
     });
-    defs.append(valueTextElements);
-    console.log("test",valueTextElements[0].getBBox());
+    valueTextGroup.remove();
+
+    /* Main valueLabel */
+    let
+      mainLabelText = this.createElement('text', { x: 0, y: 0, fill: 'transparent', 'text-anchor': 'middle', 'dominant-baseline': 'central' }),
+      mainLabelRect = this.createElement('rect', { x: 0, y: 0, width: 0, height: 0, fill: 'transparent' }),
+      mainLabelTriangle = this.createElement('path', { fill: 'transparent' });
       
-      this.svg.append(mainStick, mainCircle, secondaryCircle, ...animationPaths, defs);
+    this.svg.append(mainStick, mainCircle, secondaryCircle, ...animationPaths, defs, mainLabelRect, mainLabelText);
+
     /* Train station */
     let 
       previousHoverIndex = 0,
@@ -453,7 +470,13 @@ class Infograph extends HTMLElement {
               mainCircle.setAttribute('cy', cordinates.y);
               secondaryCircle.setAttribute('cx', cordinates.x);
               secondaryCircle.setAttribute('cy', cordinates.y);
-              mainStick.setAttribute('d', `M ${cordinates.x},${labelY + graphHeight} L ${cordinates.x},${cordinates.y}`)
+              mainStick.setAttribute('d', `M ${cordinates.x},${labelY + graphHeight} L ${cordinates.x},${cordinates.y}`);
+
+              let valueLabelObject = valueLabelObjects[currentIndex];
+              mainLabelText.textContent = valueLabelObject.value;
+              
+              this.setAttributes(mainLabelText, { x: cordinates.x, y: cordinates.y - (valueLabelObject.height / 2) - 20, fill: this.core.colors.secondary });
+              this.setAttributes(mainLabelRect, { x: cordinates.x - (valueLabelObject.width / 2), y: cordinates.y - valueLabelObject.height - 20, ry: valueLabelObject.height / 2, width: valueLabelObject.width, height: valueLabelObject.height, fill: this.core.colors.main });
     
               traversedDistance = Math.min(distance, pathLength);
               lastTimestamp = timestamp;
