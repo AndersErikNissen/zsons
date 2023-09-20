@@ -434,11 +434,15 @@ class Infograph extends HTMLElement {
 
     /* Main valueLabel */
     let
+      createTriangleD = (degs,height,x,y) => {
+        let corner = Math.tan(degs * (Math.PI / 180)) * height;
+        return `M ${x},${y} L ${x - corner},${y - height} L ${x + corner},${y - height} Z`;
+      },
       mainLabelText = this.createElement('text', { x: 0, y: 0, fill: 'transparent', 'text-anchor': 'middle', 'dominant-baseline': 'central' }),
       mainLabelRect = this.createElement('rect', { x: 0, y: 0, width: 0, height: 0, fill: 'transparent' }),
       mainLabelTriangle = this.createElement('path', { fill: 'transparent' });
       
-    this.svg.append(mainStick, mainCircle, secondaryCircle, ...animationPaths, defs, mainLabelRect, mainLabelText);
+    this.svg.append(mainStick, mainCircle, secondaryCircle, ...animationPaths, defs, mainLabelRect, mainLabelTriangle, mainLabelText);
 
     /* Train station */
     let 
@@ -474,9 +478,9 @@ class Infograph extends HTMLElement {
 
               let valueLabelObject = valueLabelObjects[currentIndex];
               mainLabelText.textContent = valueLabelObject.value;
-              
-              this.setAttributes(mainLabelText, { x: cordinates.x, y: cordinates.y - (valueLabelObject.height / 2) - 20, fill: this.core.colors.secondary });
-              this.setAttributes(mainLabelRect, { x: cordinates.x - (valueLabelObject.width / 2), y: cordinates.y - valueLabelObject.height - 20, ry: valueLabelObject.height / 2, width: valueLabelObject.width, height: valueLabelObject.height, fill: this.core.colors.main });
+              this.setAttributes(mainLabelText, { x: cordinates.x, y: cordinates.y - (valueLabelObject.height / 2) - 15 });
+              this.setAttributes(mainLabelRect, { x: cordinates.x - (valueLabelObject.width / 2), y: cordinates.y - valueLabelObject.height - 15, ry: valueLabelObject.height / 2, width: valueLabelObject.width, height: valueLabelObject.height });
+              mainLabelTriangle.setAttribute('d', createTriangleD(45, 6, cordinates.x,cordinates.y - 10));
     
               traversedDistance = Math.min(distance, pathLength);
               lastTimestamp = timestamp;
@@ -500,6 +504,9 @@ class Infograph extends HTMLElement {
       previousHoverIndex = 0;
       mainCircle.setAttribute('fill', 'transparent');
       mainStick.setAttribute('stroke', 'transparent');
+      mainLabelRect.setAttribute('fill', 'transparent');
+      mainLabelText.setAttribute('fill', 'transparent');
+      mainLabelTriangle.setAttribute('fill', 'transparent');
     });
 
     let activeHoverArea = false;
@@ -525,10 +532,19 @@ class Infograph extends HTMLElement {
             mainCircle.setAttribute('fill', this.core.colors.main);
             mainCircle.setAttribute('cx', crds.x);
             mainCircle.setAttribute('cy', crds.y);
-
             secondaryCircle.setAttribute('fill', this.core.colors.secondary);
             secondaryCircle.setAttribute('cx', crds.x);
             secondaryCircle.setAttribute('cy', crds.y);
+            mainLabelRect.setAttribute('fill', this.core.colors.main);
+            mainLabelText.setAttribute('fill', this.core.colors.secondary);
+            
+            let valueLabelObject = valueLabelObjects[i];
+            mainLabelText.textContent = valueLabelObject.value;
+            this.setAttributes(mainLabelText, { fill: this.core.colors.secondary, x: crds.x, y: crds.y - (valueLabelObject.height / 2) - 15 });
+            this.setAttributes(mainLabelRect, { fill: this.core.colors.main, x: crds.x - (valueLabelObject.width / 2), y: crds.y - valueLabelObject.height - 15, ry: valueLabelObject.height / 2, width: valueLabelObject.width, height: valueLabelObject.height });
+            mainLabelTriangle.setAttribute('fill', this.core.colors.main);
+            mainLabelTriangle.setAttribute('d', createTriangleD(45,6,crds.x, crds.y - 10 ));
+
             previousHoverIndex = i;
             return;
           }
