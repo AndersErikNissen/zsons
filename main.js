@@ -359,11 +359,34 @@ class Infograph extends HTMLElement {
       animationTiming = 100,
       data = this.data[0],
       ceilingValue = this.getCeilingValue([data]).ceiling_value,
-      strokeWidth = 3,
+      strokeWidth = 3;
+    
+      /* Value hover elements */
+    let 
+      valueTextElements = data.values.map(value => {
+        let text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.textContent = value;
+        return text;
+      }),
+      valueTextGroup = this.createElement('g', { style: 'opacity: 0;' })
+    valueTextGroup.append(...valueTextElements);
+    this.svg.appendChild(valueTextGroup);
+    let valueLabelObjects = valueTextElements.map((ele, i) => {
+      return {
+        value: data.values[i],
+        height: Math.ceil(ele.getBBox().height) + 10,
+        width: Math.ceil(ele.getBBox().width) + 20,
+      }
+    });
+    valueTextGroup.remove();
+
+    let reserveXSpace = Math.ceil(Math.max.apply(null,valueLabelObjects.map(obj => obj.width)) / 2);
+
+    let
       labelY = this.cordinates.left.height * 1.1,
       graphHeight = this.settings.height - labelY - this.cordinates.padding.y,
-      graphWidth = this.settings.width - (this.core.sizes.details * 2),
-      graphXOffset = this.core.sizes.details,
+      graphWidth = this.settings.width - (reserveXSpace * 2),
+      graphXOffset = reserveXSpace,
       graphBottom = labelY + graphHeight - this.core.sizes.details,
       groove = graphWidth / (data.amount_of_values - 1),
       getY = value => graphBottom - ((graphHeight / 100) * ((value / ceilingValue) * 100)),
@@ -412,25 +435,6 @@ class Infograph extends HTMLElement {
       secondaryCircle = this.createElement('circle', { x: 0, y: 0, r: (strokeWidth + 1) / 2, fill: 'transparent' }),
       mainStickString = `M 0,${labelY + graphHeight} L 0,${labelY}`,
       mainStick = this.createElement('path', { d: mainStickString, id: 'mainStick', 'stroke-width': 2, stroke: 'transparent', fill: 'none' });
-
-    /* Value hover elements */
-    let 
-      valueTextElements = data.values.map(value => {
-        let text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        text.textContent = value;
-        return text;
-      }),
-      valueTextGroup = this.createElement('g', { style: 'opacity: 0;' })
-    valueTextGroup.append(...valueTextElements);
-    this.svg.appendChild(valueTextGroup);
-    let valueLabelObjects = valueTextElements.map((ele, i) => {
-      return {
-        value: data.values[i],
-        height: Math.ceil(ele.getBBox().height) + 10,
-        width: Math.ceil(ele.getBBox().width) + 20,
-      }
-    });
-    valueTextGroup.remove();
 
     /* Main valueLabel */
     let
