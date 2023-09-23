@@ -158,6 +158,11 @@ class Infograph extends HTMLElement {
     return Object.entries(LIST_OF_CORES).find(key => key === coreAttribute) ? LIST_OF_CORES[coreAttribute] : LIST_OF_CORES.default;
   }
 
+  get isDesktop() {
+    let windowWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+    return windowWidth > 1023 ? true : false;
+  }
+
   get collectAllAttributes() {
     if (this.hasAttributes()) {
       var 
@@ -436,8 +441,7 @@ class Infograph extends HTMLElement {
       animationObjects = animationPaths.map((path,i) => Object.assign({},{ node: path, pathLength: animationPathLengths[i] })),
       mainCircle = this.createElement('circle', { x: 0, y: 0, r: this.core.sizes.details / 2, fill: 'transparent' }),
       secondaryCircle = this.createElement('circle', { x: 0, y: 0, r: (strokeWidth + 1) / 2, fill: 'transparent' }),
-      mainStickString = `M 0,${labelY + graphHeight} L 0,${labelY}`,
-      mainStick = this.createElement('path', { d: mainStickString, id: 'mainStick', 'stroke-width': 2, stroke: 'transparent', fill: 'none' }),
+      mainStick = this.createElement('path', { d: `M 0,${labelY + graphHeight} L 0,${labelY}`, id: 'mainStick', 'stroke-width': 2, stroke: 'transparent', fill: 'none', 'stroke-dasharray': '7 3' }),
       mainLabelText = this.createElement('text', { x: 0, y: 0, fill: 'transparent', 'text-anchor': 'middle', 'dominant-baseline': 'central' }),
       mainLabelRect = this.createElement('rect', { x: 0, y: 0, width: 0, height: 0, fill: 'transparent' }),
       mainLabelTriangle = this.createElement('path', { fill: 'transparent' }),
@@ -463,6 +467,7 @@ class Infograph extends HTMLElement {
         if (fillInColors) {
           mainCircle.setAttribute('fill', this.core.colors.main);
           secondaryCircle.setAttribute('fill', this.core.colors.secondary);
+          mainStick.setAttribute('stroke', 'url(#gradientColor-mainStick)');
           mainLabelRect.setAttribute('fill', this.core.colors.main);
           mainLabelText.setAttribute('fill', this.core.colors.main2);
           mainLabelTriangle.setAttribute('fill', this.core.colors.main);
@@ -532,15 +537,21 @@ class Infograph extends HTMLElement {
           fill: 'transparent',
         });
 
-        hoverGroove.addEventListener('mouseover', () => {
-          if (!activeHoverArea) {
-            activeHoverArea = true;
-            drawMovingParts(crds, i, true);
-            previousHoverIndex = i;
-            return;
-          }
-          train = train.then(() => trainCart(i));
-        });
+        if (this.isDesktop) {
+          hoverGroove.addEventListener('mouseover', () => {
+            if (!activeHoverArea) {
+              activeHoverArea = true;
+              drawMovingParts(crds, i, true);
+              previousHoverIndex = i;
+              return;
+            }
+            train = train.then(() => trainCart(i));
+          });
+        } else {
+          hoverGroove.addEventListener('click', () => {
+            drawMovingParts(crds,i,true);
+          });
+        }
 
         return hoverGroove;
       })
