@@ -117,8 +117,9 @@ class Infograph extends HTMLElement {
 
   getCeilingValue(data) {
     // Get heighest value and ceiling value
-    var heighstValueName = this.settings.type && this.settings.type === 'tower' && 'heighest_combined_value' || 'heighest_value';
+    var heighstValueName = this.settings.type && this.settings.type === 'tower' && 'combined_value' || 'heighest_value';
     var heighestValue = Math.max.apply(null,data.map(obj => obj[heighstValueName]));
+    var heighestSingleValue = Math.max.apply(null,data.map(obj => obj.heighest_value ));
     // Create ceilingValue
     var aTenth = Math.pow(10, Number(String(heighestValue).length)) / 10;
     var ceilingValue = aTenth;
@@ -126,7 +127,7 @@ class Infograph extends HTMLElement {
     // Add overhead if too close
     if (ceilingValue === heighestValue || aTenth * 8 <= heighestValue) ceilingValue += aTenth * 2;
     
-    return { ceiling_value: ceilingValue, heighest_value: heighestValue };
+    return { ceiling_value: ceilingValue, heighest_value: heighestSingleValue };
   }
 
   createGradient = (gradientArray, gradientName, userSpace = false) => {
@@ -140,6 +141,7 @@ class Infograph extends HTMLElement {
     const LIST_OF_CORES = {
       default: {
         sizes: {
+          font: 12,
           details: /** Used for visual elements like circles */ 9,
           detailSpacing: 12,
           dynamicSpacing: /** Use static/dynamic spacing */ 0.03,
@@ -205,6 +207,7 @@ class Infograph extends HTMLElement {
       values = validatedValues && Array.isArray(obj.values) && validatedValues.length > 0 && validatedValues,
       heighestValue = values && Math.max.apply(null, values) || false,
       combinedValues = values && values.reduce((accumulation, current) => accumulation + current) || false,
+      percentageValuesOfTotalCombined = values && combinedValues && values.map(value => ((value / combinedValues) * 100)) || false,
       amountOfValues = values && values.length || false,
       amountOfLabels = labels && labels.length || false;
 
@@ -217,6 +220,7 @@ class Infograph extends HTMLElement {
       ...(values && { values: values }),
       ...(heighestValue && { heighest_value: heighestValue }),
       ...(combinedValues && { combined_value: combinedValues }),
+      ...(percentageValuesOfTotalCombined && { percentage_values_of_combined: percentageValuesOfTotalCombined }),
       ...(amountOfValues && { amount_of_values: amountOfValues }),
       ...(amountOfLabels && { amount_of_labels: amountOfLabels })
     };
@@ -242,9 +246,8 @@ class Infograph extends HTMLElement {
     var leftRulers = leftLabels.map(label => this.svg.appendChild(Object.assign(document.createElementNS('http://www.w3.org/2000/svg','text'), { textContent: label })).getBBox());
     var bottomRuler = bottomLabel && this.svg.appendChild(Object.assign(document.createElementNS('http://www.w3.org/2000/svg','text'), { textContent: bottomLabel })).getBBox() || { width: 0, height: 0 };
     var containerPadding = this.core.sizes.staticSpacing && {x: this.core.sizes.staticSpacing, y: this.core.sizes.staticSpacing } || this.core.sizes.dynamicSpacing && {x: this.settings.width * this.core.sizes.dynamicSpacing, y: this.settings.height * this.core.sizes.dynamicSpacing } || {x: 0, y: 0};
-    
-    var combinedValueRuler = this.svg.appendChild( this.createElement('text', { 'style': 'font-size: 12px;' }, combinedValue));
-    var combinedValueFontSize = 12;
+    var combinedValueRuler = this.svg.appendChild( this.createElement('text', { 'font-size': this.core.sizes.font + 'px' }, combinedValue));
+    var combinedValueFontSize = this.core.sizes.font;
     
     /* Get the font-size to get the combined value to take up 1/3 of the given space */ 
     while(combinedValueRuler.getBBox().width < (this.settings.width / 3)) { combinedValueFontSize++; combinedValueRuler.style.fontSize = combinedValueFontSize + 'px'; }
@@ -282,7 +285,7 @@ class Infograph extends HTMLElement {
   set buildData(data) {
     var ceilingValue = this.getCeilingValue(data).ceiling_value;
 
-    // For each value get the percentage based on the ceiling value
+    // For each value get the percentage based on the ceiling value)
     data.forEach(obj => obj.percentage_values = obj.values.map(value => this.round((value / ceilingValue) * 100)));
     
     var combinedValue = data.map(obj => obj.combined_value).reduce((accumulation, current) =>  accumulation + current );
@@ -559,6 +562,24 @@ class Infograph extends HTMLElement {
     this.svg.append(hoverArea, allHoverGrooves);
   }
 
+  buildBlocks(type) {
+    /* Tower is the default type - City will overwrite it */
+    let blockAmount = this.data.length;
+    if (type === 'city') blockAmount = this.settings.amount_of_values;
+    let reservedSpacing = this.cordinates.padding.x * (blockAmount - 1);
+    if (type === 'city') reservedSpacing = reservedSpacing + ((this.data.length - 1) * (this.cordinates.padding.x * 2));
+    let grooveWidth = (this.cordinates.graph.width - reservedSpacing) / this.data.length;
+
+    const buildTower = (dataObject) => {
+      let reservedBlockSpacing = (dataObject.amount_of_values - 1) * (this.cordinates.padding.y / 2);
+      let towerHeight = (this.cordinates.graph.height / 100) * ((dataObject.combined_value / this.settings.ceiling) * 100);
+      
+    }
+    this.data.forEach(obj => {
+      buildTower(obj);
+    });
+  }
+
   renderSVGContent() {
     switch(this.settings.type) {
       case 'yarn':
@@ -567,6 +588,10 @@ class Infograph extends HTMLElement {
       case 'river':
       case 'mountain':
         this.buildPath(this.settings.type)
+        break;
+      case 'city':
+      case 'tower':
+        this.buildBlocks(this.settings.type)
         break;
     }
 
@@ -589,6 +614,7 @@ class Infograph extends HTMLElement {
     this.renderSVGContent();
 
     console.log("%c this.data ","color: blue; background-color: orange",this.data)
+    console.log("%c this.cordinates ","color: orange; background-color: grey",this.cordinates)
     console.log("%c this.settings ","color: white; background-color: grey",this.settings)
     console.log("%c this.core ","color: white; background-color: red",this.core)
   }
