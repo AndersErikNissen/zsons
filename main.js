@@ -570,14 +570,32 @@ class Infograph extends HTMLElement {
     if (type === 'city') reservedSpacing = reservedSpacing + ((this.data.length - 1) * (this.cordinates.padding.x * 2));
     let grooveWidth = (this.cordinates.graph.width - reservedSpacing) / this.data.length;
 
-    const buildTower = (dataObject) => {
-      let reservedBlockSpacing = (dataObject.amount_of_values - 1) * (this.cordinates.padding.y / 2);
+    let defs = this.createElement('defs', {});
+
+    const buildTower = (dataObject, dataIndex) => {
+      let levelSpacing = this.cordinates.padding.y / 4;
+      let reservedBlockSpacing = (dataObject.amount_of_values - 1) * levelSpacing;
       let towerHeight = (this.cordinates.graph.height / 100) * ((dataObject.combined_value / this.settings.ceiling) * 100);
+      let onePercentOfHeight = (towerHeight - reservedBlockSpacing) / 100;
+      let firstX = (grooveWidth + this.cordinates.padding.x) * dataIndex;
+      let lastX = firstX + grooveWidth;
       
+      defs.appendChild(this.createElementStack(['clipPath', 'rect'], [{ id: 'tower-clippath-' + dataIndex }, { ry: 1, x: firstX, y: this.cordinates.graph.height - towerHeight, width: grooveWidth, height: towerHeight}]));
+      
+      let towerGroup = this.createElement('g', {'clip-path': 'url(#tower-clippath-' + dataIndex + ')' });
+      let previousY = this.cordinates.graph.height;
+      towerGroup.append(...dataObject.percentage_values_of_combined.map((value, index) => {
+        let y = previousY - (value * onePercentOfHeight) - (levelSpacing * index);
+        previousY = y;
+        return this.createElement('rect', { x: firstX, y: y, height: value * onePercentOfHeight, width: grooveWidth, fill: 'red' });
+      }));
+
+      this.svg.appendChild(towerGroup);
     }
-    this.data.forEach(obj => {
-      buildTower(obj);
-    });
+
+    this.data.forEach((obj,index) => buildTower(obj,index));
+
+    this.svg.append(defs);
   }
 
   renderSVGContent() {
