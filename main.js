@@ -168,14 +168,14 @@ class Infograph extends HTMLElement {
   get collectAllAttributes() {
     if (this.hasAttributes()) {
       var 
-        allowedTypes = ['river','mountain','tower','yarn'],
+        allowedTypes = ['river','mountain','tower','yarn','city'],
         hasAllowedType = allowedTypes.find(type => type === this.getAttribute('type').toLowerCase());
 
       return {
         ...(hasAllowedType && { type: this.getAttribute('type') }),
         use_labels: this.hasAttribute('labels') ? true : false,
         value_label: this.hasAttribute('value-label') ? this.getAttribute('value-label') : '',
-        vertical_labels: this.getAttribute('labels').toLowerCase() === 'vertical' ? true : false,
+        vertical_labels: this.hasAttribute('labels') && this.getAttribute('labels').toLowerCase() === 'vertical' ? true : false,
         aspect: isNaN(Number(this.getAttribute('aspect'))) ? false : Number(this.getAttribute('aspect')),
         format_labels: this.hasAttribute('format-labels') ? true : false,
       }
@@ -255,20 +255,20 @@ class Infograph extends HTMLElement {
     // Left label area
     var leftWidth = this.settings.use_labels && Math.ceil(Math.max.apply(null, leftRulers.map(rect => rect.width))) || 0;
     var leftHeight = this.settings.use_labels && Math.ceil(Math.max.apply(null, leftRulers.map(rect => rect[ this.settings.vertical_labels ? 'width' : 'height' ]))) || 0;
-    var leftX = containerPadding.x;
-    var leftY = containerPadding.y;
+    var leftX = 0;
+    var leftY = 0;
     
     // Bottom label area
     var bottomHeight = this.settings.use_labels && Math.ceil(bottomRuler[ this.settings.vertical_labels ? 'width' : 'height' ]) || 0; // Use width if labels will be displayed vertically.
-    var bottomWidth = this.settings.width - (containerPadding.x * 2);
-    var bottomY = this.settings.height - bottomHeight - containerPadding.y;
-    var bottomX = containerPadding.x;
+    var bottomWidth = this.settings.width - 0;
+    var bottomY = this.settings.height - bottomHeight - 0;
+    var bottomX = 0;
     
     // Graph area
-    var graphX = leftWidth + containerPadding.x + (leftWidth > 0 ? containerPadding.x : 0);
-    var graphY = containerPadding.y;
-    var graphWidth = this.settings.width - graphX - containerPadding.x;
-    var graphHeight = this.settings.height - bottomHeight - (containerPadding.y * this.settings.use_labels ? 3 : 2);
+    var graphX = leftWidth + (leftWidth > 0 ? containerPadding.x : 0);
+    var graphY = 0;
+    var graphWidth = this.settings.width - graphX - 0;
+    var graphHeight = this.settings.height - bottomHeight - (this.settings.use_labels ? containerPadding.y : 0);
 
     this.cordinates = {
       combined_value: { font: combinedValueFontSize, width: combinedValueRuler.getBBox().width, height: combinedValueRuler.getBBox().height },
@@ -288,8 +288,8 @@ class Infograph extends HTMLElement {
     // For each value get the percentage based on the ceiling value)
     data.forEach(obj => obj.percentage_values = obj.values.map(value => this.round((value / ceilingValue) * 100)));
     
-    var combinedValue = data.map(obj => obj.combined_value).reduce((accumulation, current) =>  accumulation + current );
-    var amountOfValues = Math.max.apply(null, data.map(obj => obj.amount_of_values));
+    var combinedValue = data.map(obj => obj.combined_value).reduce((accumulation, current) =>  accumulation + current);
+    var amountOfValues = data.map(obj => obj.amount_of_values).reduce((accumulation, current) => current + accumulation);
 
     var labelsLeft = { heighest: this.valueFormatter(ceilingValue) + ' ' + this.settings.value_label, middle: this.valueFormatter(ceilingValue / 2) + ' ' + this.settings.value_label }; 
     // Longest bottom label 
@@ -565,35 +565,54 @@ class Infograph extends HTMLElement {
   buildBlocks(type) {
     /* Tower is the default type - City will overwrite it */
     let blockAmount = this.data.length;
-    if (type === 'city') blockAmount = this.settings.amount_of_values;
     let reservedSpacing = this.cordinates.padding.x * (blockAmount - 1);
-    if (type === 'city') reservedSpacing = reservedSpacing + ((this.data.length - 1) * (this.cordinates.padding.x * 2));
     let grooveWidth = (this.cordinates.graph.width - reservedSpacing) / this.data.length;
+    if (type === 'city') {
+      blockAmount = this.settings.amount_of_values;
+      reservedSpacing = (this.cordinates.padding.x / 2 * ((blockAmount - 1) - (this.data.length - 1))) + ((this.data.length - 1) * this.cordinates.padding.x);
+      grooveWidth = (this.cordinates.graph.width - reservedSpacing) / blockAmount;
+    } 
 
     let defs = this.createElement('defs', {});
 
     const buildTower = (dataObject, dataIndex) => {
-      let levelSpacing = this.cordinates.padding.y / 4;
-      let reservedBlockSpacing = (dataObject.amount_of_values - 1) * levelSpacing;
+      let floor = this.cordinates.padding.y / 2;
       let towerHeight = (this.cordinates.graph.height / 100) * ((dataObject.combined_value / this.settings.ceiling) * 100);
-      let onePercentOfHeight = (towerHeight - reservedBlockSpacing) / 100;
-      let firstX = (grooveWidth + this.cordinates.padding.x) * dataIndex;
+      let onePercentOfHeight = (towerHeight - ((dataObject.amount_of_values - 1) * floor)) / 100;
+      let firstX = this.cordinates.graph.x + (grooveWidth * dataIndex) + (this.cordinates.padding.x * dataIndex);
       let lastX = firstX + grooveWidth;
-      
-      defs.appendChild(this.createElementStack(['clipPath', 'rect'], [{ id: 'tower-clippath-' + dataIndex }, { ry: 1, x: firstX, y: this.cordinates.graph.height - towerHeight, width: grooveWidth, height: towerHeight}]));
-      
       let towerGroup = this.createElement('g', {'clip-path': 'url(#tower-clippath-' + dataIndex + ')' });
-      let previousY = this.cordinates.graph.height;
+      defs.appendChild(this.createElementStack(['clipPath', 'rect'], [{ id: 'tower-clippath-' + dataIndex }, { ry: this.cordinates.graph.height / 50, x: firstX, y: this.cordinates.graph.height - towerHeight, width: grooveWidth, height: towerHeight}]));
+      
+      let previousY = this.cordinates.graph.height - towerHeight;
       towerGroup.append(...dataObject.percentage_values_of_combined.map((value, index) => {
-        let y = previousY - (value * onePercentOfHeight) - (levelSpacing * index);
-        previousY = y;
-        return this.createElement('rect', { x: firstX, y: y, height: value * onePercentOfHeight, width: grooveWidth, fill: 'red' });
+        let y = previousY + (onePercentOfHeight * value);
+        let path = this.createElement('path', { d: `M ${firstX},${y} L ${lastX},${y} L ${lastX},${previousY} L ${firstX},${previousY} Z`, fill: this.core.colors.list[index] });
+        previousY = y + floor;
+        return path;
       }));
 
       this.svg.appendChild(towerGroup);
     }
 
-    this.data.forEach((obj,index) => buildTower(obj,index));
+    let previousX = this.cordinates.graph.x;
+    const buildCity = (dataObject, dataIndex) => {
+      let cityGroup = this.createElement('g', {});
+
+      cityGroup.append(...dataObject.percentage_values.map((value, index) => {
+        let height = (this.cordinates.graph.height / 100) * value;
+        let y = this.cordinates.graph.y + (this.cordinates.graph.height - height);
+        let house = this.createElement('rect', { x: previousX, y: y, width: grooveWidth, height: height, ry: grooveWidth / 5, rx: grooveWidth / 5, fill: 'red' })
+        previousX = previousX + (grooveWidth + (this.cordinates.padding.x / 2));
+        return house;
+      }));
+      
+      previousX = previousX + (this.cordinates.padding.x / 2);
+      this.svg.appendChild(cityGroup);
+    }
+
+    if (type === 'tower') this.data.forEach((obj,index) => buildTower(obj,index));
+    if (type === 'city') this.data.forEach((obj,index) => buildCity(obj,index));
 
     this.svg.append(defs);
   }
