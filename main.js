@@ -24,7 +24,11 @@ class Infograph extends HTMLElement {
         font-size: 12px;
         font-family: sans-serif;
       }
-      @media (min-width: 1024px) {text { font-size: 16px; }}
+      @media (min-width: 1024px) {
+        text { 
+          font-size: 12px; 
+        }
+      }
 
       .yarn-group circle {
         transition: r var(--animation-timing), transform var(--animation-timing);
@@ -121,11 +125,15 @@ class Infograph extends HTMLElement {
     var heighestValue = Math.max.apply(null,data.map(obj => obj[heighstValueName]));
     var heighestSingleValue = Math.max.apply(null,data.map(obj => obj.heighest_value ));
     // Create ceilingValue
-    var aTenth = Math.pow(10, Number(String(heighestValue).length)) / 10;
+    var valueLength = String(Math.abs(heighestValue)).length;
+    var aTenth = (10 ** valueLength) * 0.1;
+    if (aTenth === heighestValue) aTenth = (10 ** (valueLength - 1)) * 0.1;
+
     var ceilingValue = aTenth;
     while (ceilingValue % heighestValue === ceilingValue) { ceilingValue += aTenth };
+
     // Add overhead if too close
-    if (ceilingValue === heighestValue || aTenth * 8 <= heighestValue) ceilingValue += aTenth * 2;
+    if (aTenth * 5 <= heighestValue) ceilingValue += aTenth * 5;
     
     return { ceiling_value: ceilingValue, heighest_value: heighestSingleValue };
   }
@@ -256,7 +264,7 @@ class Infograph extends HTMLElement {
     var leftWidth = this.settings.use_labels && Math.ceil(Math.max.apply(null, leftRulers.map(rect => rect.width))) || 0;
     var leftHeight = this.settings.use_labels && Math.ceil(Math.max.apply(null, leftRulers.map(rect => rect[ this.settings.vertical_labels ? 'width' : 'height' ]))) || 0;
     var leftX = 0;
-    var leftY = 0;
+    var leftY = containerPadding.y;
     
     // Bottom label area
     var bottomHeight = this.settings.use_labels && Math.ceil(bottomRuler[ this.settings.vertical_labels ? 'width' : 'height' ]) || 0; // Use width if labels will be displayed vertically.
@@ -266,9 +274,9 @@ class Infograph extends HTMLElement {
     
     // Graph area
     var graphX = leftWidth + (leftWidth > 0 ? containerPadding.x : 0);
-    var graphY = 0;
+    var graphY = containerPadding.y;
     var graphWidth = this.settings.width - graphX - 0;
-    var graphHeight = this.settings.height - bottomHeight - (this.settings.use_labels ? containerPadding.y : 0);
+    var graphHeight = this.settings.height - bottomHeight - (this.settings.use_labels ? containerPadding.y * 3 : 0);
 
     this.cordinates = {
       combined_value: { font: combinedValueFontSize, width: combinedValueRuler.getBBox().width, height: combinedValueRuler.getBBox().height },
@@ -291,7 +299,12 @@ class Infograph extends HTMLElement {
     var combinedValue = data.map(obj => obj.combined_value).reduce((accumulation, current) =>  accumulation + current);
     var amountOfValues = data.map(obj => obj.amount_of_values).reduce((accumulation, current) => current + accumulation);
 
-    var labelsLeft = { heighest: this.valueFormatter(ceilingValue) + ' ' + this.settings.value_label, middle: this.valueFormatter(ceilingValue / 2) + ' ' + this.settings.value_label }; 
+    var labelsLeft = { 
+      heighest: this.valueFormatter(ceilingValue) + ' ' + this.settings.value_label, 
+      middle: this.valueFormatter(ceilingValue / 2) + ' ' + this.settings.value_label, 
+      lowest: '0 ' + this.settings.value_label,
+    };
+
     // Longest bottom label 
     var allBottomLabelLengths = data.map(obj => obj.label ? obj.label.length : obj.labels ? obj.labels.map(label => label.length) : []).flat();
     var allBottomLabels = data.map(obj => obj.label ? obj.label : obj.labels ? obj.labels.map(label => label) : []).flat();
@@ -611,6 +624,34 @@ class Infograph extends HTMLElement {
       this.svg.appendChild(cityGroup);
     }
 
+    const buildExtras = () => {
+      Object.values(this.settings.labels.left).forEach((value, index) => {
+        let strokeWidth = 2;
+        let yAdjuster = [0, 0, strokeWidth / 2]
+        let y = this.cordinates.padding.y + (this.cordinates.graph.height / 2 * index) - yAdjuster[index];
+        this.svg.appendChild(this.createElement('text', {
+          y: y,
+          x: this.cordinates.left.width,
+          'text-anchor': 'end',
+          'dominant-baseline': 'central',
+          fill: this.core.colors.main,
+        }, value));
+
+        this.svg.appendChild(
+          this.createElement('path', { 
+            d: `M ${this.cordinates.graph.x},${y} L ${this.cordinates.graph.x + this.cordinates.graph.width},${y}`, 
+            'stroke-width': strokeWidth, 
+            stroke: this.core.colors.main,
+            'stroke-dasharray': '7 3',
+            'stroke-dashoffset': 1
+          })
+        );
+      });
+
+      
+    };
+
+    buildExtras();
     if (type === 'tower') this.data.forEach((obj,index) => buildTower(obj,index));
     if (type === 'city') this.data.forEach((obj,index) => buildCity(obj,index));
 
