@@ -157,7 +157,7 @@ class Infograph extends HTMLElement {
         colors: {
           main: /** Used for things like fonts */ '#000',
           main2: '#EEE',
-          secondary: '#93DC93',
+          secondary: '#E6E6E6',
           gradient: [{'stop-color':'#93DC93', 'offset': '0%'},{'stop-color':'#93DC93', 'offset': '100%', 'stop-opacity': 0}],
           gradientName: 'mainGradient',
           list: ["#F0FAF0","#D1F0D1","#B2E6B2","#93DC93","#74D274","#56C856","#3CB93C","#329A32","#287B28","#1E5C1E"],
@@ -609,24 +609,46 @@ class Infograph extends HTMLElement {
     }
 
     let previousX = this.cordinates.graph.x;
-    const buildCity = (dataObject, dataIndex) => {
+    const buildCity = (dataObject, dataIndex, startX) => {
       let cityGroup = this.createElement('g', {});
-
+      const ySpacing = (this.cordinates.padding.x / 2);
+      let groupWidth = 0;
+      
       cityGroup.append(...dataObject.percentage_values.map((value, index) => {
         let height = (this.cordinates.graph.height / 100) * value;
         let y = this.cordinates.graph.y + (this.cordinates.graph.height - height);
-        let house = this.createElement('rect', { x: previousX, y: y, width: grooveWidth, height: height, ry: grooveWidth / 5, rx: grooveWidth / 5, fill: 'red' })
-        previousX = previousX + (grooveWidth + (this.cordinates.padding.x / 2));
+        let house = this.createElement('rect', { 
+          x: previousX, 
+          y: y, 
+          width: grooveWidth, 
+          height: height, 
+          ry: grooveWidth / 5, 
+          rx: grooveWidth / 5, 
+          fill: 'red' 
+        });
+        
+        groupWidth += grooveWidth + (index === dataObject.percentage_values.length - 1 ? 0 : ySpacing);
+
+        previousX = previousX + (grooveWidth + ySpacing);
         return house;
       }));
-      
+      console.log(groupWidth)
+    
+      let label = this.createElement('text', { 
+        x: startX + (groupWidth / 2), 
+        y: this.cordinates.bottom.y, 
+        fill: this.core.colors.main, 
+        'text-anchor': 'middle',
+        'dominant-baseline': 'hanging',  
+      }, dataObject.labels[0]);
+
       previousX = previousX + (this.cordinates.padding.x / 2);
-      this.svg.appendChild(cityGroup);
+      this.svg.append(cityGroup, label);
     }
 
     const buildExtras = () => {
       Object.values(this.settings.labels.left).forEach((value, index) => {
-        let strokeWidth = 2;
+        let strokeWidth = 1;
         let yAdjuster = [0, 0, strokeWidth / 2]
         let y = this.cordinates.padding.y + (this.cordinates.graph.height / 2 * index) - yAdjuster[index];
         this.svg.appendChild(this.createElement('text', {
@@ -641,8 +663,8 @@ class Infograph extends HTMLElement {
           this.createElement('path', { 
             d: `M ${this.cordinates.graph.x},${y} L ${this.cordinates.graph.x + this.cordinates.graph.width},${y}`, 
             'stroke-width': strokeWidth, 
-            stroke: this.core.colors.main,
-            'stroke-dasharray': '7 3',
+            stroke: this.core.colors.secondary,
+            'stroke-dasharray': '9 4',
             'stroke-dashoffset': 1
           })
         );
@@ -652,8 +674,8 @@ class Infograph extends HTMLElement {
     };
 
     buildExtras();
-    if (type === 'tower') this.data.forEach((obj,index) => buildTower(obj,index));
-    if (type === 'city') this.data.forEach((obj,index) => buildCity(obj,index));
+    if (type === 'tower') this.data.forEach((obj, index) => buildTower(obj, index));
+    if (type === 'city') this.data.forEach((obj, index) => buildCity(obj, index, previousX));
 
     this.svg.append(defs);
   }
