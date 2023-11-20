@@ -75,7 +75,20 @@ class Infograph extends HTMLElement {
         transition: fill 300ms linear;
       }
       
+      .cityHouse {
+        pointer-events: all;
+        opacity: 0.75;
+        transition: opacity 300ms ease-in;
+        pointer-events: none;
+      }
 
+      .hoverRect {
+        cursor: pointer;
+      }
+
+      .hoverRect:hover ~ .cityHouse {
+        opacity: 1;
+      }
 
       </style>
       
@@ -124,6 +137,9 @@ class Infograph extends HTMLElement {
     var heighstValueName = this.settings.type && this.settings.type === 'tower' && 'combined_value' || 'heighest_value';
     var heighestValue = Math.max.apply(null,data.map(obj => obj[heighstValueName]));
     var heighestSingleValue = Math.max.apply(null,data.map(obj => obj.heighest_value ));
+
+    // GET HEIGHEST TOTAL VALUE????
+
     // Create ceilingValue
     var valueLength = String(Math.abs(heighestValue)).length;
     var aTenth = (10 ** valueLength) * 0.1;
@@ -595,9 +611,9 @@ class Infograph extends HTMLElement {
       let firstX = this.cordinates.graph.x + (grooveWidth * dataIndex) + (this.cordinates.padding.x * dataIndex);
       let lastX = firstX + grooveWidth;
       let towerGroup = this.createElement('g', {'clip-path': 'url(#tower-clippath-' + dataIndex + ')' });
-      defs.appendChild(this.createElementStack(['clipPath', 'rect'], [{ id: 'tower-clippath-' + dataIndex }, { ry: this.cordinates.graph.height / 50, x: firstX, y: this.cordinates.graph.height - towerHeight, width: grooveWidth, height: towerHeight}]));
+      defs.appendChild(this.createElementStack(['clipPath', 'rect'], [{ id: 'tower-clippath-' + dataIndex }, { ry: this.cordinates.graph.height / 50, x: firstX, y: this.cordinates.graph.height + this.cordinates.padding.y - towerHeight, width: grooveWidth, height: towerHeight}]));
       
-      let previousY = this.cordinates.graph.height - towerHeight;
+      let previousY = this.cordinates.graph.height + this.cordinates.padding.y - towerHeight;
       towerGroup.append(...dataObject.percentage_values_of_combined.map((value, index) => {
         let y = previousY + (onePercentOfHeight * value);
         let path = this.createElement('path', { d: `M ${firstX},${y} L ${lastX},${y} L ${lastX},${previousY} L ${firstX},${previousY} Z`, fill: this.core.colors.list[index] });
@@ -609,8 +625,11 @@ class Infograph extends HTMLElement {
     }
 
     let previousX = this.cordinates.graph.x;
+
     const buildCity = (dataObject, dataIndex, startX) => {
-      let cityGroup = this.createElement('g', {});
+      let cityGroup = this.createElement('g', {
+        class: 'cityGroup'
+      });
       const ySpacing = (this.cordinates.padding.x / 2);
       let groupWidth = 0;
       
@@ -618,6 +637,7 @@ class Infograph extends HTMLElement {
         let height = (this.cordinates.graph.height / 100) * value;
         let y = this.cordinates.graph.y + (this.cordinates.graph.height - height);
         let house = this.createElement('rect', { 
+          class: 'cityHouse',
           x: previousX, 
           y: y, 
           width: grooveWidth, 
@@ -632,15 +652,24 @@ class Infograph extends HTMLElement {
         previousX = previousX + (grooveWidth + ySpacing);
         return house;
       }));
-      console.log(groupWidth)
     
-      let label = this.createElement('text', { 
+      const label = this.createElement('text', {
         x: startX + (groupWidth / 2), 
         y: this.cordinates.bottom.y, 
         fill: this.core.colors.main, 
         'text-anchor': 'middle',
         'dominant-baseline': 'hanging',  
       }, dataObject.labels[0]);
+
+      const hoverRect = this.createElement('rect', {
+        class: 'hoverRect',
+        x: startX,
+        y: this.cordinates.graph.y,
+        width: groupWidth,
+        height: this.cordinates.graph.height,
+        fill: 'transparent'
+      });
+      cityGroup.insertBefore(hoverRect,cityGroup.firstChild);
 
       previousX = previousX + (this.cordinates.padding.x / 2);
       this.svg.append(cityGroup, label);
