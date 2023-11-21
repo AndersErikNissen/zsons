@@ -138,18 +138,20 @@ class Infograph extends HTMLElement {
     var heighestValue = Math.max.apply(null,data.map(obj => obj[heighstValueName]));
     var heighestSingleValue = Math.max.apply(null,data.map(obj => obj.heighest_value ));
 
-    // GET HEIGHEST TOTAL VALUE????
-
     // Create ceilingValue
     var valueLength = String(Math.abs(heighestValue)).length;
     var aTenth = (10 ** valueLength) * 0.1;
     if (aTenth === heighestValue) aTenth = (10 ** (valueLength - 1)) * 0.1;
-
     var ceilingValue = aTenth;
     while (ceilingValue % heighestValue === ceilingValue) { ceilingValue += aTenth };
-
+    
     // Add overhead if too close
-    if (aTenth * 5 <= heighestValue) ceilingValue += aTenth * 5;
+    if (heighestValue >= ceilingValue * 0.75) ceilingValue += ceilingValue * 0.25;
+    
+    // Remove some amount, if too large difference
+    if (aTenth * 1.25 >= heighestValue) ceilingValue -= aTenth * 0.25;
+
+    console.log("!",aTenth,heighestValue, ceilingValue)
     
     return { ceiling_value: ceilingValue, heighest_value: heighestSingleValue };
   }
