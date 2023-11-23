@@ -144,14 +144,9 @@ class Infograph extends HTMLElement {
     if (aTenth === heighestValue) aTenth = (10 ** (valueLength - 1)) * 0.1;
     var ceilingValue = aTenth;
     while (ceilingValue % heighestValue === ceilingValue) { ceilingValue += aTenth };
-    
-    // Add overhead if too close
-    if (heighestValue >= ceilingValue * 0.75) ceilingValue += ceilingValue * 0.25;
-    
-    // Remove some amount, if too large difference
-    if (aTenth * 1.25 >= heighestValue) ceilingValue -= aTenth * 0.25;
 
-    console.log("!",aTenth,heighestValue, ceilingValue)
+    /* Increase if heighest ~ ceiling */ if (heighestValue >= ceilingValue * 0.75) ceilingValue += ceilingValue * 0.5;
+    /* Reduce if ceiling >> heighest */if (ceilingValue * 0.75 >= heighestValue) ceilingValue -= ceilingValue * 0.25;
     
     return { ceiling_value: ceilingValue, heighest_value: heighestSingleValue };
   }
