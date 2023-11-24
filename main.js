@@ -74,19 +74,25 @@ class Infograph extends HTMLElement {
         fill: cyan;
         transition: fill 300ms linear;
       }
+
+      .towerGroup,
+      .tower {
+        pointer-events: none;
+      }
       
-      .cityHouse {
-        pointer-events: all;
+      .cityHouse, .tower {
         opacity: 0.75;
         transition: opacity 300ms ease-in;
         pointer-events: none;
       }
-
+      
       .hoverRect {
+        pointer-events: all;
         cursor: pointer;
       }
 
-      .hoverRect:hover ~ .cityHouse {
+      .hoverRect:hover ~ .cityHouse,
+      .hoverRect:hover + .towerGroup .tower {
         opacity: 1;
       }
 
@@ -400,7 +406,9 @@ class Infograph extends HTMLElement {
     /* Value hover elements */ 
       valueTextElements = data.values.map(value => {
         let text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        text.textContent = value;
+        let textValue = value;
+        if (this.settings.use_labels) textValue += " " + this.settings.value_label;
+        text.textContent = textValue;
         return text;
       }),
       valueTextGroup = this.createElement('g', { style: 'opacity: 0;' });
@@ -408,8 +416,10 @@ class Infograph extends HTMLElement {
     valueTextGroup.append(...valueTextElements);
     this.svg.appendChild(valueTextGroup);
     let valueLabelObjects = valueTextElements.map((ele, i) => {
+      let value = data.values[i] + "";
+      if (this.settings.use_labels) value += " " + this.settings.value_label;
       return {
-        value: data.values[i],
+        value: value,
         height: Math.ceil(ele.getBBox().height) + this.core.sizes.detailSpacing,
         width: Math.ceil(ele.getBBox().width) + (this.core.sizes.detailSpacing * 2),
       }
@@ -419,7 +429,6 @@ class Infograph extends HTMLElement {
     let reserveXSpace = Math.ceil(Math.max.apply(null,valueLabelObjects.map(obj => obj.width)) / 2);
 
     let
-      //labelY = this.cordinates.left.height * 1.1,
       labelY = 0,
       graphHeight = this.settings.height - labelY - this.cordinates.padding.y,
       graphWidth = this.settings.width - (reserveXSpace * 2),
@@ -607,18 +616,27 @@ class Infograph extends HTMLElement {
       let onePercentOfHeight = (towerHeight - ((dataObject.amount_of_values - 1) * floor)) / 100;
       let firstX = this.cordinates.graph.x + (grooveWidth * dataIndex) + (this.cordinates.padding.x * dataIndex);
       let lastX = firstX + grooveWidth;
-      let towerGroup = this.createElement('g', {'clip-path': 'url(#tower-clippath-' + dataIndex + ')' });
+      let towerGroup = this.createElement('g', {class: 'towerGroup', 'clip-path': 'url(#tower-clippath-' + dataIndex + ')' });
       defs.appendChild(this.createElementStack(['clipPath', 'rect'], [{ id: 'tower-clippath-' + dataIndex }, { ry: this.cordinates.graph.height / 50, x: firstX, y: this.cordinates.graph.height + this.cordinates.padding.y - towerHeight, width: grooveWidth, height: towerHeight}]));
       
       let previousY = this.cordinates.graph.height + this.cordinates.padding.y - towerHeight;
       towerGroup.append(...dataObject.percentage_values_of_combined.map((value, index) => {
         let y = previousY + (onePercentOfHeight * value);
-        let path = this.createElement('path', { d: `M ${firstX},${y} L ${lastX},${y} L ${lastX},${previousY} L ${firstX},${previousY} Z`, fill: this.core.colors.list[index] });
+        let path = this.createElement('path', { class: 'tower', d: `M ${firstX},${y} L ${lastX},${y} L ${lastX},${previousY} L ${firstX},${previousY} Z`, fill: this.core.colors.list[index] });
         previousY = y + floor;
         return path;
       }));
 
-      this.svg.appendChild(towerGroup);
+      const hoverRect = this.createElement('rect', {
+        class: 'hoverRect',
+        x: firstX,
+        y: this.cordinates.graph.y,
+        width: grooveWidth,
+        height: this.cordinates.graph.height,
+        fill: 'transparent'
+      });
+      
+      this.svg.append(hoverRect, towerGroup);
     }
 
     let previousX = this.cordinates.graph.x;
