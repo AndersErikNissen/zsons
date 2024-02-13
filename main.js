@@ -205,6 +205,7 @@ class Infograph extends HTMLElement {
         vertical_labels: this.hasAttribute('labels') && this.getAttribute('labels').toLowerCase() === 'vertical' ? true : false,
         aspect: isNaN(Number(this.getAttribute('aspect'))) ? false : Number(this.getAttribute('aspect')),
         format_labels: this.hasAttribute('format-labels') ? true : false,
+        show_extra: this.hasAttribute('show-extra') ? true : false,
       }
     }
     return {};
@@ -215,7 +216,7 @@ class Infograph extends HTMLElement {
    */
   set mapAttributes(attributes) {
     // Add missing default settings
-    var defaultSettings = { type: 'river', use_labels: false, vertical_labels: false, aspect: false, theme: 'default', format_labels: false, value_label: '' }
+    var defaultSettings = { type: 'river', use_labels: false, vertical_labels: false, aspect: false, theme: 'default', format_labels: false, value_label: '', show_extra: false }
     for (const key in defaultSettings) { if(attributes[key]) defaultSettings[key] = attributes[key] };
 
     // Info from Custom Element
@@ -351,6 +352,7 @@ class Infograph extends HTMLElement {
     var ceilingValue = this.getCeilingValue([data]).ceiling_value;
     var percentageValues = data.values.map(value => (value / ceilingValue) * 100);
     var combinedValueHeight = this.cordinates.padding.y + this.cordinates.combined_value.height;
+    if (!this.settings.show_extra) combinedValueHeight = 0;
     var graphHeight = this.settings.height - this.cordinates.left.height - combinedValueHeight - this.cordinates.padding.y - this.cordinates.bottom.height - this.cordinates.padding.y;
     var graphBottom = this.cordinates.left.height  + combinedValueHeight + graphHeight;
     var stripeWidth = this.settings.width / data.amount_of_values;
@@ -363,8 +365,11 @@ class Infograph extends HTMLElement {
     );
     this.svg.appendChild(combineValueDefs);
 
-    /* Combined value */ this.svg.append(this.createElementStack(['text','textPath'], [{},{ 'style': 'font-size: ' + this.cordinates.combined_value.font + 'px;', 'fill': this.core.colors.main, 'href': '#yarnPath-combinedValue' }], ['', this.settings.combined_value]));
-    /* Combined value label */this.svg.append(this.createElementStack(['text','textPath'], [{},{ 'style': 'font-size: ' + (this.cordinates.combined_value.font / 3) + 'px;', 'fill': this.core.colors.main, 'href': '#yarnPath-valueLabel' }], ['', this.settings.value_label]));
+    if (this.settings.show_extra) {
+      /* Combined value */ this.svg.append(this.createElementStack(['text','textPath'], [{},{ 'style': 'font-size: ' + this.cordinates.combined_value.font + 'px;', 'fill': this.core.colors.main, 'href': '#yarnPath-combinedValue' }], ['', this.settings.combined_value]));
+      /* Combined value label */this.svg.append(this.createElementStack(['text','textPath'], [{},{ 'style': 'font-size: ' + (this.cordinates.combined_value.font / 3) + 'px;', 'fill': this.core.colors.main, 'href': '#yarnPath-valueLabel' }], ['', this.settings.value_label]));
+    }
+    
     data.values.forEach((value,i) => {
       var x = (stripeWidth * i) + (stripeWidth / 2);
       var cordinateFromPercentage = (graphHeight / 100) * percentageValues[i];
