@@ -5,11 +5,106 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>zsons</title>
-  <script src="/main.js" defer></script>
+  <title>ZSONS - Show your data</title>
+  <link href="/assets/styles/main.css" rel="stylesheet">
+  <script src="/assets/scripts/main.js" defer></script>
+
+  <style>
+    @font-face {
+      font-family: "Geist";
+      font-weight: 200;
+      src: url("/assets/typeface/Geist-UltraLight.woff2") format("woff2");
+    }
+
+    @font-face {
+      font-family: "Geist";
+      font-weight: 300;
+      src: url("/assets/typeface/Geist-Light.woff2") format("woff2");
+    }
+
+    @font-face {
+      font-family: "Geist";
+      font-weight: 400;
+      src: url("/assets/typeface/Geist-Regular.woff2") format("woff2");
+    }
+
+    @font-face {
+      font-family: "Geist";
+      font-weight: 500;
+      src: url("/assets/typeface/Geist-Medium.woff2") format("woff2");
+    }
+
+    @font-face {
+      font-family: "Geist";
+      font-weight: 700;
+      src: url("/assets/typeface/Geist-Bold.woff2") format("woff2");
+    }
+
+
+    @font-face {
+      font-family: "Geist Mono";
+      font-weight: 200;
+      src: url("/assets/typeface/GeistMono-UltraLight.woff2") format("woff2");
+    }
+
+    @font-face {
+      font-family: "Geist Mono";
+      font-weight: 300;
+      src: url("/assets/typeface/GeistMono-Light.woff2") format("woff2");
+    }
+
+    @font-face {
+      font-family: "Geist Mono";
+      font-weight: 400;
+      src: url("/assets/typeface/GeistMono-Regular.woff2") format("woff2");
+    }
+
+    @font-face {
+      font-family: "Geist Mono";
+      font-weight: 500;
+      src: url("/assets/typeface/GeistMono-Medium.woff2") format("woff2");
+    }
+
+    @font-face {
+      font-family: "Geist Mono";
+      font-weight: 700;
+      src: url("/assets/typeface/GeistMono-Bold.woff2") format("woff2");
+    }
+  </style>
 </head>
 <body>
-  <div style="width: 90%; height: 90vh;">
+  <div class="hidden-svg-list">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <symbol id="icon-plus">
+        <path d="M11 5H9V9L5 9V11H9V15H11V11H15V9L11 9V5Z" fill="currentColor"/>
+      </symbol>
+    </svg>
+    
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <symbol id="icon-plus-subtle">
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M9.5 9.5V4H10.5V9.5H16V10.5H10.5V16H9.5V10.5H4V9.5H9.5Z" fill="#131212"/>
+      </symbol>
+    </svg>
+  </div>
+
+  <div class="btn-primary" style="--bg-scale:6;">
+    <div class="icon">
+      <svg viewBox="0 0 20 20">
+        <use href="#icon-plus" />
+      </svg>
+    </div>
+    <span class="label">BUTTON</span>
+  </div>
+  
+  <div class="btn-secondary">
+    <svg class="icon" viewBox="0 0 20 20">
+      <use href="#icon-plus-subtle" />
+    </svg>
+    <span class="label">BUTTON</span>
+  </div>
+
+
+  <!-- <div style="width: 90%; height: 90vh;">
 
     <aenother-infograph type="yarn" labels="vertical" value-label="fisk">
       <script slot="json" type="application/json">
@@ -30,6 +125,6 @@
       </script>
     </aenother-infograph>
   </div>
-  
+   -->
 </body>
 </html>

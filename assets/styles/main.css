@@ -1,0 +1,153 @@
+/* Basis ^START^ */
+
+body 
+{
+  font-family: Geist, sans-serif;
+  font-size: 16px;
+}
+
+* 
+{
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.hidden-svg-list {
+  display: none;
+}
+
+/* Basis ^STOP^ */
+
+
+/* .brand ^START^ */
+
+.brand, 
+.brand-small,
+.brand-full 
+{
+  display: block;
+  height: auto;
+}
+
+.brand { width: 120px; }
+
+.brand-small { width: 80px; }
+
+.brand-full { width: 100%; }
+
+/* .brand ^STOP^ */
+
+/* .btn-primary ^START^ */
+
+.btn-primary 
+{
+  display: inline-flex;
+  align-items: center;
+  border-radius: 4px; /* ^REPLACE^ */
+  padding: 6px 12px 6px 6px;
+  overflow: hidden;
+  cursor: pointer;
+  font-weight: 700;
+  line-height: 24px;
+  letter-spacing: -0.03em; /* ^REPLACE^ */
+}
+
+.btn-primary .icon::before 
+{
+  content: "";
+  position: absolute;
+  
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px; /* ^REPLACE^ */
+  
+  transition: transform 0.5s ease-in-out; /* ^REPLACE^ */
+  transform-origin: center center;
+  background-color: #FF4D00; /* ^REPLACE^ */
+}
+
+.btn-primary .icon
+{
+  transition: transform 0.5s ease-in-out; /* ^REPLACE^ */
+  position: relative;
+  margin-bottom: 1px;
+  margin-right: 4px; /* ^REPLACE^ */
+  width: 20px;
+  height: 20px;
+}
+
+.btn-primary .icon svg {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.btn-primary:hover .icon::before,
+.btn-primary:active .icon::before
+{
+  transform: scale(calc(var(--bg-scale, 20) + 3)) rotate(90deg);
+}
+
+.btn-primary:hover .icon,
+.btn-primary:active .icon
+{
+  transform: rotate(90deg);
+}
+
+.btn-primary .label {
+  position: relative;
+  z-index: 1;
+}
+
+/* .btn-primary ^STOP^ */
+
+/* .btn-secondary ^START^ */
+
+.btn-secondary,
+.btn-secondary-alt
+{
+  display: inline-flex;
+  align-items: center;
+  border-radius: 4px; /* ^REPLACE^ */
+  padding: 6px 12px 6px 8px;
+  cursor: pointer;
+  font-weight: 300;
+  line-height: 24px;
+  border: 1px solid transparent;
+  letter-spacing: 0.04em; /* ^REPLACE^ */
+  transition: border 0.5s linear, background-color 0.5s ease-in-out, color 0.5s ease-in-out; /* ^REPLACE^ */
+}
+
+.btn-secondary .icon 
+{
+  width: 20px;
+  height: 20px; 
+  transform-origin: center center; 
+  margin-bottom: 1px;
+} 
+
+.btn-secondary:hover { border: 1px solid #000; } /* ^REPLACE^ */
+
+.btn-secondary:hover .icon 
+{
+  transition: transform 0.5s ease-in-out; /* ^REPLACE^ */
+  transform: rotate(90deg);
+} 
+
+.btn-secondary-alt:hover 
+{ 
+  color: 1px solid #FFF; /* ^REPLACE^ */
+  background-color: 1px solid #000; /* ^REPLACE^ */
+} 
+
+.btn-secondary :nth-child(2), .btn-secondary-alt :nth-child(2) { margin-left: 4px; } /* ^REPLACE^ */
+
+@keyframes rotate90 {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(90deg); }
+}
+
+/* .btn-secondary ^STOP^ */
