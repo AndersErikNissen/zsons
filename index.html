@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>ZSONS - Show your data</title>
+  <link href="/assets/styles/root.css" rel="stylesheet">
+  <link href="/assets/styles/global.css" rel="stylesheet">
   <link href="/assets/styles/main.css" rel="stylesheet">
   <script src="/assets/scripts/main.js" defer></script>
 
@@ -73,36 +75,81 @@
   </style>
 </head>
 <body>
-  <div class="hidden-svg-list">
+  <div class="hidden">
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <symbol id="icon-plus">
-        <path d="M11 5H9V9L5 9V11H9V15H11V11H15V9L11 9V5Z" fill="currentColor"/>
-      </symbol>
+      <symbol id="icon-plus"><path d="M11 5H9V9L5 9V11H9V15H11V11H15V9L11 9V5Z" fill="currentColor"/></symbol>
+      <symbol id="icon-plus-subtle"><path fill-rule="evenodd" clip-rule="evenodd" d="M9.5 9.5V4H10.5V9.5H16V10.5H10.5V16H9.5V10.5H4V9.5H9.5Z" fill="currentColor"/></symbol>
+      <symbol id="icon-info"><path fill-rule="evenodd" clip-rule="evenodd" d="M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10ZM18 10C18 14.4183 14.4183 18 10 18C5.58172 18 2 14.4183 2 10C2 5.58172 5.58172 2 10 2C14.4183 2 18 5.58172 18 10ZM10.6637 9.58678C9.86726 10.2755 9.5354 11.1295 9.5354 12.0937H10.3982C10.3982 11.3499 10.6903 10.6749 11.3407 10.1791C12.4292 9.35262 13 8.66391 13 7.69972C13 6.1157 11.7655 5 10 5C8.34071 5 7.13274 6.25344 7 8.11295L7.94248 8.18182C8.07522 6.79063 8.85841 5.92286 10.0398 5.92286C11.2478 5.92286 12.0708 6.65289 12.0575 7.69972C12.0575 8.44934 11.6256 8.80056 11.0066 9.3039C10.8976 9.39248 10.7829 9.48577 10.6637 9.58678ZM9.26991 13.595V15H10.6504V13.595H9.26991Z" fill="currentColor"/></symbol>
+      <symbol id="icon-star"><path d="M8.875 8.875L10 1L11.125 8.875L19 9.99999L11.125 11.125L10 19L8.875 11.125L1 10L8.875 8.875Z" fill="#currentColor"/></symbol>  
     </svg>
-    
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <symbol id="icon-plus-subtle">
-        <path fill-rule="evenodd" clip-rule="evenodd" d="M9.5 9.5V4H10.5V9.5H16V10.5H10.5V16H9.5V10.5H4V9.5H9.5Z" fill="#131212"/>
-      </symbol>
+
+    <svg xmlns="http://www.w3.org/2000/svg" width="318" height="35" viewBox="0 0 318 35" fill="none">
+      <symbol id="zsooons"><path d="M26.0656 8.6125C26.0656 3.85595 22.1756 7.52929e-07 17.377 0L0 7.52929e-07C0 4.75655 3.88999 8.6125 8.68852 8.6125H14.7705L0 25.8375V34.45H26.0656C26.0656 29.6935 22.1756 25.8375 17.377 25.8375H11.2951L26.0656 8.6125Z" fill="currentColor"/><path d="M53.8689 12.9188H45.1803C45.1803 10.5405 43.2353 8.6125 40.8361 8.6125C38.4368 8.6125 36.4918 10.5405 36.4918 12.9188H40.8361C48.0339 12.9188 53.8689 18.7027 53.8689 25.8375C53.8689 30.5941 49.9789 34.45 45.1803 34.45H36.4918C31.6933 34.45 27.8033 30.5941 27.8033 25.8375H45.1803C45.1803 23.4592 43.2353 21.5313 40.8361 21.5313H36.4918C31.6933 21.5313 27.8033 17.6753 27.8033 12.9188C27.8033 5.78392 33.6383 0 40.8361 0C48.0339 0 53.8689 5.78392 53.8689 12.9188Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M91.5808 4.30615C91.5825 4.30615 91.5842 4.30615 91.5859 4.30615L91.6639 4.30615C99.5892 4.34627 106 10.1149 106 17.2249C106 24.3349 99.5892 30.1033 91.6639 30.1434L91.5808 30.1437L69.9426 30.1437C62.0174 30.1035 55.6066 24.3349 55.6066 17.2249C55.6066 10.1149 62.0174 4.34648 69.9426 4.30636L70.0211 4.30615L91.5808 4.30615ZM91.5838 12.9187C91.5828 12.9187 91.5818 12.9187 91.5808 12.9187L70.0258 12.9187C67.3713 12.9187 65.2194 14.8466 65.2194 17.2249C65.2194 19.6032 67.3713 21.5312 70.0258 21.5312L91.5808 21.5312C94.2353 21.5312 96.3872 19.6032 96.3872 17.2249C96.3872 14.8475 94.2369 12.9201 91.5838 12.9187Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M143.712 4.30615C143.714 4.30615 143.715 4.30615 143.717 4.30615L143.795 4.30615C151.72 4.34627 158.131 10.1149 158.131 17.2249C158.131 24.3349 151.72 30.1033 143.795 30.1434L143.712 30.1437L122.074 30.1437C114.148 30.1035 107.738 24.3349 107.738 17.2249C107.738 10.1149 114.148 4.34648 122.074 4.30636L122.152 4.30615L143.712 4.30615ZM143.712 12.9187L122.157 12.9187C119.502 12.9187 117.351 14.8466 117.351 17.2249C117.351 19.6032 119.502 21.5312 122.157 21.5312H143.712C146.366 21.5312 148.518 19.6032 148.518 17.2249C148.518 14.8466 146.366 12.9187 143.712 12.9187Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M195.843 4.30615C195.845 4.30615 195.846 4.30615 195.848 4.30615L195.926 4.30615C203.851 4.34627 210.262 10.1149 210.262 17.2249C210.262 24.3349 203.851 30.1033 195.926 30.1434L195.843 30.1437L174.205 30.1437C166.28 30.1035 159.869 24.3349 159.869 17.2249C159.869 10.1149 166.28 4.34648 174.205 4.30636L174.283 4.30615L195.843 4.30615ZM195.843 12.9187L174.288 12.9187C171.634 12.9187 169.482 14.8466 169.482 17.2249C169.482 19.6032 171.634 21.5312 174.288 21.5312H195.843C198.498 21.5312 200.649 19.6032 200.649 17.2249C200.649 14.8466 198.498 12.9187 195.843 12.9187Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M247.974 4.30615C247.976 4.30615 247.978 4.30615 247.979 4.30615L248.057 4.30615C255.983 4.34627 262.393 10.1149 262.393 17.2249C262.393 24.3349 255.983 30.1033 248.057 30.1434L247.974 30.1437L226.336 30.1437C218.411 30.1035 212 24.3349 212 17.2249C212 10.1149 218.411 4.34648 226.336 4.30636L226.415 4.30615L247.974 4.30615ZM247.974 12.9187L226.419 12.9187C223.765 12.9187 221.613 14.8466 221.613 17.2249C221.613 19.6032 223.765 21.5312 226.419 21.5312H247.974C250.629 21.5312 252.781 19.6032 252.781 17.2249C252.781 14.8466 250.629 12.9187 247.974 12.9187Z" fill="currentColor"/><path d="M290.197 12.9188C290.197 5.78392 284.362 0 277.164 0C269.966 0 264.131 5.78392 264.131 12.9188V34.45H272.82V12.9188C272.82 10.5405 274.765 8.6125 277.164 8.6125C279.563 8.6125 281.508 10.5405 281.508 12.9188V25.8375C281.508 30.5941 285.398 34.45 290.197 34.45V12.9188Z" fill="currentColor"/><path d="M318 12.9188H309.311C309.311 10.5405 307.366 8.6125 304.967 8.6125C302.568 8.6125 300.623 10.5405 300.623 12.9188H304.967C312.165 12.9188 318 18.7027 318 25.8375C318 30.5941 314.11 34.45 309.311 34.45H300.623C295.824 34.45 291.934 30.5941 291.934 25.8375H309.311C309.311 23.4592 307.366 21.5313 304.967 21.5313H300.623C295.824 21.5313 291.934 17.6753 291.934 12.9188C291.934 5.78392 297.769 0 304.967 0C312.165 0 318 5.78392 318 12.9188Z" fill="currentColor"/></symbol>
     </svg>
   </div>
 
-  <div class="btn-primary" style="--bg-scale:6;">
-    <div class="icon">
-      <svg viewBox="0 0 20 20">
-        <use href="#icon-plus" />
-      </svg>
+
+<!-- 
+  <div class="menu">
+    <div class="btn-menu">
+      <a href="/yarn.html">yarn</a>
+      <svg class="icon" viewBox="0 0 20 20"><use href="#icon-plus-subtle" /></svg>
     </div>
-    <span class="label">BUTTON</span>
-  </div>
+    <div class="btn-menu">
+      <a href="/river.html">river</a>
+      <svg class="icon" viewBox="0 0 20 20"><use href="#icon-plus-subtle" /></svg>
+    </div>
+    <div class="btn-menu">
+      <a href="/mountain.html">mountain</a>
+      <svg class="icon" viewBox="0 0 20 20"><use href="#icon-plus-subtle" /></svg>
+    </div>
+    <div class="btn-menu">
+      <a href="/tower.html">tower</a>
+      <svg class="icon" viewBox="0 0 20 20"><use href="#icon-plus-subtle" /></svg>
+    </div>
+    <div class="btn-menu">
+      <a href="/city.html">city</a>
+      <svg class="icon" viewBox="0 0 20 20"><use href="#icon-plus-subtle" /></svg>
+    </div>
+  </div> -->  
   
-  <div class="btn-secondary">
-    <svg class="icon" viewBox="0 0 20 20">
-      <use href="#icon-plus-subtle" />
-    </svg>
-    <span class="label">BUTTON</span>
-  </div>
-
+  <!-- <div class="menu-mobile">
+    <div class="menu-links">
+      <a href="/about.html">about</a>
+      <a href="/visuals.html">visuals</a>
+    </div>
+    <div class="menu-mobile-footer">
+      <div class="infi">
+        <div class="infi-text-block"><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><div></div></div>
+        <div class="infi-text-block"><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><div></div></div>
+      </div>
+      <div class="links">
+        <div class="btn-menu">
+          <a href="/yarn.html">yarn</a>
+          <svg class="icon" viewBox="0 0 20 20"><use href="#icon-plus-subtle" /></svg>
+        </div>
+        <div class="btn-menu">
+          <a href="/river.html">river</a>
+          <svg class="icon" viewBox="0 0 20 20"><use href="#icon-plus-subtle" /></svg>
+        </div>
+        <div class="btn-menu">
+          <a href="/mountain.html">mountain</a>
+          <svg class="icon" viewBox="0 0 20 20"><use href="#icon-plus-subtle" /></svg>
+        </div>
+        <div class="btn-menu">
+          <a href="/tower.html">tower</a>
+          <svg class="icon" viewBox="0 0 20 20"><use href="#icon-plus-subtle" /></svg>
+        </div>
+        <div class="btn-menu">
+          <a href="/city.html">city</a>
+          <svg class="icon" viewBox="0 0 20 20"><use href="#icon-plus-subtle" /></svg>
+        </div>
+      </div>
+      <div class="menu-mobile-icon">
+        <svg class="icon-x" viewBox="0 0 318 35"><use href="#zsooons" /></svg>    
+      </div>
+    </div>
+  </div> -->
 
   <!-- <div style="width: 90%; height: 90vh;">
 

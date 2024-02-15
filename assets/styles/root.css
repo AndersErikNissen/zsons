@@ -1,0 +1,33 @@
+:root {
+  --radius-s: 4px;
+  --radius-m: 12px;
+
+  --letter-spacing-wide: 0.04em;
+  --letter-spacing-narrow: -0.03em;
+
+  --h4: 700 24px/32px Geist;
+  
+  --title-bold: 700 40px/48px Geist;
+  --title-light: 200 40px/48px "Geist Mono";
+
+  --body-ultra-light: 200 16px/24px "Geist Mono";
+  --body-light: 300 16px/24px "Geist Mono";
+  --body-regular: 400 16px/24px Geist;
+  --body-bold: 700 16px/24px Geist;
+  
+  --label-regular: 200 14px/22px Geist;
+  --label-ultra-light: 200 14px/22px "Geist Mono";
+
+  --color-orange: #FF4D00;
+  --color-black: #131212;
+  --color-black-subtle: rgb(18, 17, 17, 0.15);
+  --color-white: #FFFFFF;
+
+  --transition: 0.3s ease-in-out;
+
+  --space-s: 4px;
+  --space-m: 8px;
+  --space-l: 12px;
+  --space-xl: 24px;
+
+}

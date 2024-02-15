@@ -1,0 +1,73 @@
+/* .menu ^START^ */
+
+.menu 
+{
+  width: 320px;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-l);
+  background-color: var(--color-black);
+  border-radius: var(--radius-m);
+}
+
+.menu .btn-menu {
+  margin-bottom: var(--space-l);
+  width: 100%;
+}
+
+/* Animation */
+
+/* .menu ^STOP^ */
+
+/* .menu-mobile ^START^ */
+
+.menu-mobile
+{
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  pointer-events: none;
+  /* transform: translateY(-101%); */
+  background-color: var(--color-white);
+}
+
+.menu-mobile .menu-links 
+{
+  padding: var(--space-xl);
+}
+
+.menu-mobile .menu-links a 
+{
+  display: block; 
+  text-transform: uppercase; 
+  font: var(--title-light);
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.menu-mobile .menu-links a { margin-bottom: var(--space-xl); }
+
+.menu-mobile-footer { background-color: var(--color-black); }
+
+.menu-mobile-footer .links { padding: var(--space-xl); }
+
+.menu-mobile-footer .icon-x { color: var(--color-orange); }
+
+.menu-mobile-footer .btn-menu { margin-bottom: var(--space-xl); }
+
+.menu-mobile-icon { padding: 0 var(--space-xl) var(--space-xl); }
+
+/* Animation */
+
+.open-menu .menu-mobile {
+  pointer-events: all;
+  transform: translateY(0%);
+  transition: transform 0.5s cubic-bezier(.27,.83,.46,.95);
+}
+
+/* .menu-mobile ^STOP^ */
