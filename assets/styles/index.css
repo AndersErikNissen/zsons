@@ -1,0 +1,36 @@
+/* .hero-animation ^START^ */
+
+.frame-1 
+{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@keyframes hero-frame-1 {
+ 0%
+ {
+  color: var(--color-black);
+  background-color: var(--color-orange);
+}
+
+6.25%
+{
+  color: var(--color-peach);
+  background-color: var(--color-subtle);
+ 
+}
+12.50%
+{
+  color: var(--color-white);
+  background-color: transparent;
+  background-image: radial-gradient()
+ }
+
+ 25%
+ {
+
+ }
+}
+
+/* .hero-animation ^STOP^ */

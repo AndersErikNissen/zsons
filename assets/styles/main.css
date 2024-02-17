@@ -38,6 +38,13 @@ a
   height: auto;
 }
 
+.page-width 
+{
+  max-width: 1224px;
+  padding-right: var(--space-l);
+  padding-left: var(--space-l);
+}
+
 /* Basis ^STOP^ */
 
 /* .brand ^START^ */
@@ -178,6 +185,13 @@ a
   letter-spacing: var(--letter-spacing-wide);
   background-color: var(--color-black-subtle);
 }
+
+.btn-tertiary-active {
+  color: var(--color-white);
+  background-color: var(--color-black);
+}
+
+
 
 /* .btn-tertiary ^STOP^ */
 
