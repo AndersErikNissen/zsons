@@ -1,36 +1,329 @@
 /* .hero-animation ^START^ */
-
-.frame-1 
+.hero-animation
 {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-@keyframes hero-frame-1 {
- 0%
- {
-  color: var(--color-black);
-  background-color: var(--color-orange);
+.animation-1, .animation-2, .animation-3, animation-4, .animation-5 
+{
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 
-6.25%
+/* .hero-animation ^STOP^ */
+
+/* .animation-1 ^START^ */
+
+.animation-1 
 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: animation-1-frames 10s linear infinite;
+  background-image: none;
+}
+
+.animation-1 svg {
+  width: 60%;
+  height: auto;
+  display: block;
+}
+
+@keyframes animation-1-frames {
+ 0%, 6.24%
+ {
+  opacity: 1;
+  color: var(--color-black);
+  background-color: var(--color-orange);
+  background-image: none;
+}
+
+6.25%, 12.49%
+{
+  opacity: 1;
   color: var(--color-peach);
   background-color: var(--color-subtle);
- 
+  background-image: none;
 }
-12.50%
+
+12.50%, 18.74%
 {
+  opacity: 1;
   color: var(--color-white);
   background-color: transparent;
-  background-image: radial-gradient()
+  background-image: radial-gradient(farthest-corner at 90% 140%, #872900 0%, #FFCEB9 100%);
+ }
+
+ 18.75%, 24.9%
+ {
+  opacity: 1;
+  color: var(--color-orange);
+  background-color: var(--color-black);
+  background-image: none;
  }
 
  25%
  {
+  opacity: 1;
+  color: var(--color-black);
+  background-color: var(--color-orange);
+  background-image: none;
+ }
 
+ 25.01%, 100% {
+  opacity: 0;
  }
 }
 
-/* .hero-animation ^STOP^ */
+/* .animation-1 ^STOP^ */
+
+/* .animation-2 ^START^ */
+
+.animation-2 {
+  display: flex;
+  align-items: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-image: url("/assets/media/liquid-80s.jpg");
+  animation: animation-2 10s linear infinite;
+}
+
+.animation-2 .frame-group { 
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  animation: animation-2-frames 10s linear infinite; 
+}
+
+.animation-2 .frame
+{
+  flex: 0 0 100%;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.animation-2 svg {
+  flex: 0 0 auto;
+  width: 100%;
+  color: var(--color-white);
+  height: auto;
+  margin: -1px 0;
+}
+
+.animation-2 .frame-background {
+  flex: 1 1 100%;
+  width: 100%;
+  background-color: var(--color-white);
+}
+
+@keyframes animation-2 {
+  25%, 37.5% {
+    opacity: 1;
+  }
+  
+  0%, 24.99%, 37.51% {
+    opacity: 0;
+  }
+}
+
+@keyframes animation-2-frames {
+  0%, 25%, 37.51% { transform: translateX(0%); }
+  
+  37.5% { transform: translateX(-200%); }
+}
+
+
+/* .animation-2 ^STOP^ */
+
+/* .animation-3 ^START^ */
+
+.animation-3 
+{
+  opacity: 1;
+  display: flex; 
+  justify-content: center;
+  align-items: center;
+  background-color: var(--color-black);
+  animation: animation-3 10s linear infinite;
+}
+
+.animation-3 .frame-group
+{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-50%);
+  animation: animation-3-frames 10s linear infinite;
+}
+
+.animation-3 .frame
+{
+  flex: 0 0 100%;
+  width: 100%;
+}
+
+.animation-3 .frame svg {
+  width: 100%;
+  height: 100%;
+  color: var(--color-orange);
+}
+
+.animation-3 #brand-z {
+  position: relative;
+  width: 10%;
+  height: auto;
+  color: var(--color-white);
+}
+
+@keyframes animation-3 {
+  0%, 37.49%, 50.01%, 100% { opacity: 0; }
+  
+  37.5%, 50% { opacity: 1; }
+}
+
+@keyframes animation-3-frames {
+  0%, 37.5%, 50.01%, 100% { transform: translateY(-50%); }
+  
+  50% { transform: translateY(-200%); }
+}
+
+/* .animation-3 ^STOP^ */
+
+/* .animation-4 ^START^ */
+
+/* .animation-4 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: animation-4 10s linear infinite;
+}
+
+.animation-4 svg {
+  width: 75%;
+  height: auto;
+}
+
+.animation-4 svg rect {
+  animation: animation-4-frames 10s linear infinite;
+}
+
+@keyframes animation-4 {
+  0%, 74.99% { opacity: 0; }
+  
+  75%, 100% { opacity: 1; }
+}
+
+@keyframes animation-4-frames {
+  0%, 74.99% { height: 50%; }
+  
+  75%, 100% { height: 100%; }
+} */
+
+/* .animation-4 ^STOP^ */
+
+/* .animation-5 ^START^ */
+
+.animation-5 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--color-white);
+  animation: animation-5 10s linear infinite;
+}
+
+.animation-5 svg {
+  display: block;
+  position: relative;
+  width: 35%;
+  height: auto;
+}
+
+.animation-5 .frame-background {
+  background-color: var(--color-orange);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: scale(0.6);
+  animation: animation-5-bg 10s linear infinite;
+}
+
+@keyframes animation-5 {
+  0%, 49.99%, 60.01%, 100% { 
+    opacity: 0; 
+    color: var(--color-white);
+  }
+  
+  50%, 52.5% { 
+    opacity: 1;
+    color: var(--color-white);
+   }
+
+  52.51%, 55% { 
+    opacity: 1; 
+    color: var(--color-orange);
+  }
+
+
+  55.01%, 57.5% { 
+    opacity: 1; 
+    color: var(--color-orange-subtle);
+  }
+
+  57.51%, 60% 
+  { 
+    opacity: 1; 
+    background-color: rgb(51, 15, 0); 
+  }
+}
+
+@keyframes animation-5-bg {
+  0%, 49.99%, 60.01%, 100% 
+  {
+    background-color: var(--color-black); 
+    transform: scale(0.6); 
+  }
+  
+  52.5% 
+  { 
+    transform: scale(1); 
+    color: var(--color-orange);
+  }
+
+  52.51%, 55% 
+  { 
+    transform: scale(1); 
+    background-color: rgb(255, 213, 171); 
+  }
+
+  55.01%, 57.5% { 
+    transform: scale(1); 
+    background-color: rgb(169, 48, 0); 
+  }
+
+  57.51%, 60% 
+  { 
+    transform: scale(1); 
+    background-color: var(--color-orange); 
+  }
+}
+
+/* .animation-5 ^STOP^ */
