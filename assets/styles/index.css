@@ -11,7 +11,7 @@
   align-items: center;
 }
 
-.animation-1, .animation-2, .animation-3, animation-4, .animation-5 
+.animation-1, .animation-2, .animation-3, animation-4, .animation-5, .animation-6, .animation-flip
 {
   opacity: 0;
   position: absolute;
@@ -327,3 +327,163 @@
 }
 
 /* .animation-5 ^STOP^ */
+
+/* .animation-6 ^START^ */
+
+.animation-6 { 
+  background-color: #fffaf8;
+  animation: animation-6 20s linear infinite; 
+}
+
+.animation-6 svg {
+  width: 100%;
+  height: 100%;
+}
+
+.frame-mobile { display: none; }
+
+@media (max-width: 767px) {
+  .frame-mobile { display: block; }
+  .frame-desktop { display: none; }
+}
+
+.animation-6 svg #col-1 { animation: animation-6-col-1 4s linear infinite; }
+.animation-6 svg #col-2 { animation: animation-6-col-2 4s linear infinite; }
+.animation-6 svg #col-3 { animation: animation-6-col-3 4s linear infinite; }
+.animation-6 svg #col-4 { animation: animation-6-col-4 4s linear infinite; }
+.animation-6 svg #col-5 { animation: animation-6-col-5 4s linear infinite; }
+.animation-6 svg #col-6 { animation: animation-6-col-6 4s linear infinite; }
+
+@keyframes animation-6 {
+  60%
+  { 
+    transform: scale(2);
+    opacity: 1; 
+  }
+  
+  70% 
+  { 
+    transform: scale(1);
+    opacity: 1; 
+  }
+
+  80% 
+  { 
+    transform: scale(1);
+    opacity: 1; 
+  }
+
+  0%, 59.99%, 80.01%, 100% { 
+    transform: scale(2);
+    opacity: 0; 
+  } 
+}
+
+@keyframes animation-6-col-1 {
+  from { transform: translateY(0); }
+  to { transform: translateY(10%); }
+}
+@keyframes animation-6-col-2 {
+  from { transform: translateY(0); }
+  to { transform: translateY(-19%); }
+}
+@keyframes animation-6-col-3 {
+  from { transform: translateY(0); }
+  to { transform: translateY(5%); }
+}
+@keyframes animation-6-col-4 {
+  from { transform: translateY(0); }
+  to { transform: translateY(-12%); }
+}
+@keyframes animation-6-col-5 {
+  from { transform: translateY(0); }
+  to { transform: translateY(23%); }
+}
+@keyframes animation-6-col-6 {
+  from { transform: translateY(0); }
+  to { transform: translateY(-15%); }
+}
+
+/* .animation-6 ^STOP^ */
+
+/* .animation-flip ^START^ */
+
+.animation-flip
+{
+  animation: animation-flip 20s linear infinite; 
+}
+
+.animation-flip .frame-1, .animation-flip .frame-2,  
+.animation-flip .frame-3, .animation-flip .frame-4
+{
+  position: absolute;
+  border-radius: var(--radius-l);
+  overflow: hidden;
+  opacity: 0;
+}  
+
+.animation-flip .frame-1 
+{
+  top: 5%;
+  left: 5%;
+  width: 90%;
+  height: 90%;
+  animation: animation-flip-1 4s linear infinite;
+}
+
+.animation-flip .frame-2
+{
+  top: 10%;
+  left: 10%;
+  width: 80%;
+  height: 80%;
+  animation: animation-flip-2 4s linear infinite;
+}
+
+.animation-flip .frame-3
+{
+  top: 15%;
+  left: 15%;
+  width: 70%;
+  height: 70%;
+  animation: animation-flip-3 4s linear infinite;
+}
+
+.animation-flip .frame-4
+{
+  top: 20%;
+  left: 20%;
+  width: 60%;
+  height: 60%;
+  animation: animation-flip-4 4s linear infinite;
+}
+
+@keyframes animation-flip {
+  0%, 79.99% { opacity: 0; }
+
+  80%, 100% { 
+    opacity: 1; 
+  } 
+}
+
+@keyframes animation-flip-1 {
+  19.99% { opacity: 0; }
+  20%, 100% { opacity: 1; }
+}
+
+@keyframes animation-flip-2 {
+  0%, 39.99% { opacity: 0; }
+  40%, 100% { opacity: 1; }
+}
+
+@keyframes animation-flip-3 {
+  0%, 59.99% { opacity: 0; }
+  60%, 100% { opacity: 1; }
+}
+
+@keyframes animation-flip-4 {
+  0%, 79.99% { opacity: 0; }
+  80%, 100% { opacity: 1; }
+}
+
+/* .animation-flip ^STOP^ */

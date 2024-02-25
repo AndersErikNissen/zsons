@@ -1,6 +1,8 @@
 :root {
   --radius-s: 4px;
   --radius-m: 12px;
+  --radius-l: 40px;
+  --radius-xl: 60px;
 
   --letter-spacing-wide: 0.04em;
   --letter-spacing-narrow: -0.03em;
