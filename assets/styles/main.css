@@ -17,6 +17,12 @@ body
   box-sizing: border-box;
 }
 
+main 
+{
+  position: relative;
+  background-color: var(--color-white);
+}
+
 a 
 {
   color: inherit;
@@ -45,7 +51,7 @@ a
   padding-left: var(--space-l);
 }
 
-.media 
+.media, .media-fill
 {
   width: 100%;
   display: block;
@@ -82,6 +88,16 @@ a
 }
 
 /* Basis ^STOP^ */
+
+/* Typo ^START^ */
+
+.h1 {
+  font: var(--h1);
+  letter-spacing: -0.03;
+  text-transform: uppercase;
+}
+
+/* Typo ^STOP^ */
 
 /* .brand ^START^ */
 
@@ -226,8 +242,6 @@ a
   color: var(--color-white);
   background-color: var(--color-black);
 }
-
-
 
 /* .btn-tertiary ^STOP^ */
 
@@ -437,5 +451,10 @@ a
   font: var(--body-light); 
 }
 
-
 /* .usp ^STOP^ */
+
+/* .sxs ^START^ */
+
+
+
+/* .sxs ^STOP^ */

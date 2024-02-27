@@ -7,6 +7,7 @@
   --letter-spacing-wide: 0.04em;
   --letter-spacing-narrow: -0.03em;
 
+  --h1: 700 56px/67px Geist;
   --h4: 700 24px/32px Geist;
   
   --title-bold: 700 40px/48px Geist;
@@ -33,5 +34,4 @@
   --space-m: 8px;
   --space-l: 12px;
   --space-xl: 24px;
-
 }

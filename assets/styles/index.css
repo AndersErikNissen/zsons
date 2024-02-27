@@ -1,17 +1,18 @@
 /* .hero-animation ^START^ */
 .hero-animation
 {
-  position: fixed;
+  position: sticky;
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
 }
 
-.animation-1, .animation-2, .animation-3, animation-4, .animation-5, .animation-6, .animation-flip
+.animation-pages, .animation-slide, .animation-3, animation-4, .animation-window, .animation-row, .animation-flip
 {
   opacity: 0;
   position: absolute;
@@ -21,27 +22,68 @@
   height: 100%;
 }
 
+.hero-content 
+{
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: var(--space-xl);
+  width: 100%;
+}
+
+.hero-content-inner { width: 100%; }
+
+.hero-icon 
+{
+  width: 100px;
+  height: 100px;
+  transform-origin: center center;
+  animation: rotate360 10s linear infinite;
+}
+
+@keyframes rotate360 {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 /* .hero-animation ^STOP^ */
 
-/* .animation-1 ^START^ */
+/* .animation-pages ^START^ */
 
-.animation-1 
+.animation-pages
+{
+  animation: animation-pages 20s linear infinite;
+}
+
+.animation-pages .frame
 {
   display: flex;
   justify-content: center;
   align-items: center;
-  animation: animation-1-frames 10s linear infinite;
+  animation: animation-pages-frames 4s linear infinite;
+  width: 100%;
+  height: 100%;
   background-image: none;
+  color: var(--color-black);
+  background-color: var(--color-orange);
 }
 
-.animation-1 svg {
+.animation-pages svg {
   width: 60%;
   height: auto;
   display: block;
 }
 
-@keyframes animation-1-frames {
- 0%, 6.24%
+@keyframes animation-pages {
+  0%, 19.99% { opacity: 1; }
+  20%, 100% { opacity: 0; }
+}
+
+@keyframes animation-pages-frames {
+ 0%, 24.99%
  {
   opacity: 1;
   color: var(--color-black);
@@ -49,7 +91,7 @@
   background-image: none;
 }
 
-6.25%, 12.49%
+25%, 49.99%
 {
   opacity: 1;
   color: var(--color-peach);
@@ -57,7 +99,7 @@
   background-image: none;
 }
 
-12.50%, 18.74%
+50%, 74.99%
 {
   opacity: 1;
   color: var(--color-white);
@@ -65,49 +107,47 @@
   background-image: radial-gradient(farthest-corner at 90% 140%, #872900 0%, #FFCEB9 100%);
  }
 
- 18.75%, 24.9%
+ 75%, 100%
  {
   opacity: 1;
-  color: var(--color-orange);
-  background-color: var(--color-black);
+  color: var(--color-orange-subtle);
+  background-color: rgb(182, 115, 52);
   background-image: none;
- }
-
- 25%
- {
-  opacity: 1;
-  color: var(--color-black);
-  background-color: var(--color-orange);
-  background-image: none;
- }
-
- 25.01%, 100% {
-  opacity: 0;
  }
 }
 
-/* .animation-1 ^STOP^ */
+/* .animation-pages ^STOP^ */
 
-/* .animation-2 ^START^ */
+/* .animation-slide ^START^ */
 
-.animation-2 {
+.animation-slide {
   display: flex;
   align-items: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-image: url("/assets/media/liquid-80s.jpg");
-  animation: animation-2 10s linear infinite;
+  animation: animation-slide 20s linear infinite;
 }
 
-.animation-2 .frame-group { 
+@keyframes animation-slide {
+  0%, 19.99%, 40%, 100% { opacity: 0; }
+  20%, 39.99% { opacity: 1; }
+}
+
+.animation-slide .frame-group { 
   display: flex;
   width: 100%;
   height: 100%;
   align-items: center;
-  animation: animation-2-frames 10s linear infinite; 
+  transform: translateX(-50%);
+  animation: animation-slide-frames 4s linear infinite; 
 }
 
-.animation-2 .frame
+.animation-slide .media-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+}
+
+.animation-slide .frame
 {
   flex: 0 0 100%;
   display: flex;
@@ -115,7 +155,7 @@
   height: 100%;
 }
 
-.animation-2 svg {
+.animation-slide svg {
   flex: 0 0 auto;
   width: 100%;
   color: var(--color-white);
@@ -123,139 +163,38 @@
   margin: -1px 0;
 }
 
-.animation-2 .frame-background {
+.animation-slide .frame-background {
   flex: 1 1 100%;
   width: 100%;
   background-color: var(--color-white);
 }
 
-@keyframes animation-2 {
-  25%, 37.5% {
-    opacity: 1;
-  }
-  
-  0%, 24.99%, 37.51% {
-    opacity: 0;
-  }
-}
-
-@keyframes animation-2-frames {
-  0%, 25%, 37.51% { transform: translateX(0%); }
-  
-  37.5% { transform: translateX(-200%); }
+@keyframes animation-slide-frames {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(-150%); }
 }
 
 
-/* .animation-2 ^STOP^ */
+/* .animation-slide ^STOP^ */
 
-/* .animation-3 ^START^ */
+/* .animation-window ^START^ */
 
-.animation-3 
-{
-  opacity: 1;
-  display: flex; 
-  justify-content: center;
-  align-items: center;
-  background-color: var(--color-black);
-  animation: animation-3 10s linear infinite;
-}
-
-.animation-3 .frame-group
-{
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  transform: translateX(-50%);
-  animation: animation-3-frames 10s linear infinite;
-}
-
-.animation-3 .frame
-{
-  flex: 0 0 100%;
-  width: 100%;
-}
-
-.animation-3 .frame svg {
-  width: 100%;
-  height: 100%;
-  color: var(--color-orange);
-}
-
-.animation-3 #brand-z {
-  position: relative;
-  width: 10%;
-  height: auto;
-  color: var(--color-white);
-}
-
-@keyframes animation-3 {
-  0%, 37.49%, 50.01%, 100% { opacity: 0; }
-  
-  37.5%, 50% { opacity: 1; }
-}
-
-@keyframes animation-3-frames {
-  0%, 37.5%, 50.01%, 100% { transform: translateY(-50%); }
-  
-  50% { transform: translateY(-200%); }
-}
-
-/* .animation-3 ^STOP^ */
-
-/* .animation-4 ^START^ */
-
-/* .animation-4 {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  animation: animation-4 10s linear infinite;
-}
-
-.animation-4 svg {
-  width: 75%;
-  height: auto;
-}
-
-.animation-4 svg rect {
-  animation: animation-4-frames 10s linear infinite;
-}
-
-@keyframes animation-4 {
-  0%, 74.99% { opacity: 0; }
-  
-  75%, 100% { opacity: 1; }
-}
-
-@keyframes animation-4-frames {
-  0%, 74.99% { height: 50%; }
-  
-  75%, 100% { height: 100%; }
-} */
-
-/* .animation-4 ^STOP^ */
-
-/* .animation-5 ^START^ */
-
-.animation-5 {
+.animation-window {
   display: flex;
   justify-content: center;
   align-items: center;
   color: var(--color-white);
-  animation: animation-5 10s linear infinite;
+  animation: animation-window 20s linear infinite;
 }
 
-.animation-5 svg {
+.animation-window svg {
   display: block;
   position: relative;
   width: 35%;
   height: auto;
 }
 
-.animation-5 .frame-background {
+.animation-window .frame-background {
   background-color: var(--color-orange);
   position: absolute;
   top: 0;
@@ -263,79 +202,78 @@
   width: 100%;
   height: 100%;
   transform: scale(0.6);
-  animation: animation-5-bg 10s linear infinite;
+  animation: animation-window-bg 4s linear infinite;
 }
 
-@keyframes animation-5 {
-  0%, 49.99%, 60.01%, 100% { 
+@keyframes animation-window {
+  0%, 39.99%, 60%, 100% { 
     opacity: 0; 
     color: var(--color-white);
   }
   
-  50%, 52.5% { 
+  40%, 44.99% { 
     opacity: 1;
     color: var(--color-white);
    }
 
-  52.51%, 55% { 
+  45%, 49.99% { 
     opacity: 1; 
     color: var(--color-orange);
   }
 
-
-  55.01%, 57.5% { 
+  50%, 54.99% { 
     opacity: 1; 
     color: var(--color-orange-subtle);
   }
 
-  57.51%, 60% 
+  55%, 59.99%
   { 
     opacity: 1; 
-    background-color: rgb(51, 15, 0); 
+    color: rgb(51, 15, 0); 
   }
 }
 
-@keyframes animation-5-bg {
-  0%, 49.99%, 60.01%, 100% 
+@keyframes animation-window-bg {
+  0%
   {
     background-color: var(--color-black); 
     transform: scale(0.6); 
   }
-  
-  52.5% 
-  { 
+
+  24.99%
+  {
+    background-color: var(--color-black); 
     transform: scale(1); 
-    color: var(--color-orange);
   }
 
-  52.51%, 55% 
-  { 
+  25%, 49.99% 
+  {
     transform: scale(1); 
     background-color: rgb(255, 213, 171); 
   }
+  
+  50%, 74.99%
+  { 
+    transform: scale(1); 
+    background-color: rgb(49, 25, 0);
+  }
 
-  55.01%, 57.5% { 
+  75%, 100% { 
     transform: scale(1); 
     background-color: rgb(169, 48, 0); 
   }
-
-  57.51%, 60% 
-  { 
-    transform: scale(1); 
-    background-color: var(--color-orange); 
-  }
 }
 
-/* .animation-5 ^STOP^ */
+/* .animation-window ^STOP^ */
 
-/* .animation-6 ^START^ */
+/* .animation-row ^START^ */
 
-.animation-6 { 
+.animation-row { 
   background-color: #fffaf8;
-  animation: animation-6 20s linear infinite; 
+  animation: animation-row 20s linear infinite; 
 }
 
-.animation-6 svg {
+.animation-row svg {
   width: 100%;
   height: 100%;
 }
@@ -347,14 +285,14 @@
   .frame-desktop { display: none; }
 }
 
-.animation-6 svg #col-1 { animation: animation-6-col-1 4s linear infinite; }
-.animation-6 svg #col-2 { animation: animation-6-col-2 4s linear infinite; }
-.animation-6 svg #col-3 { animation: animation-6-col-3 4s linear infinite; }
-.animation-6 svg #col-4 { animation: animation-6-col-4 4s linear infinite; }
-.animation-6 svg #col-5 { animation: animation-6-col-5 4s linear infinite; }
-.animation-6 svg #col-6 { animation: animation-6-col-6 4s linear infinite; }
+.animation-row svg #col-1 { animation: animation-row-col-1 4s linear infinite; }
+.animation-row svg #col-2 { animation: animation-row-col-2 4s linear infinite; }
+.animation-row svg #col-3 { animation: animation-row-col-3 4s linear infinite; }
+.animation-row svg #col-4 { animation: animation-row-col-4 4s linear infinite; }
+.animation-row svg #col-5 { animation: animation-row-col-5 4s linear infinite; }
+.animation-row svg #col-6 { animation: animation-row-col-6 4s linear infinite; }
 
-@keyframes animation-6 {
+@keyframes animation-row {
   60%
   { 
     transform: scale(2);
@@ -379,32 +317,32 @@
   } 
 }
 
-@keyframes animation-6-col-1 {
+@keyframes animation-row-col-1 {
   from { transform: translateY(0); }
   to { transform: translateY(10%); }
 }
-@keyframes animation-6-col-2 {
+@keyframes animation-row-col-2 {
   from { transform: translateY(0); }
   to { transform: translateY(-19%); }
 }
-@keyframes animation-6-col-3 {
+@keyframes animation-row-col-3 {
   from { transform: translateY(0); }
   to { transform: translateY(5%); }
 }
-@keyframes animation-6-col-4 {
+@keyframes animation-row-col-4 {
   from { transform: translateY(0); }
   to { transform: translateY(-12%); }
 }
-@keyframes animation-6-col-5 {
+@keyframes animation-row-col-5 {
   from { transform: translateY(0); }
   to { transform: translateY(23%); }
 }
-@keyframes animation-6-col-6 {
+@keyframes animation-row-col-6 {
   from { transform: translateY(0); }
   to { transform: translateY(-15%); }
 }
 
-/* .animation-6 ^STOP^ */
+/* .animation-row ^STOP^ */
 
 /* .animation-flip ^START^ */
 
@@ -414,13 +352,18 @@
 }
 
 .animation-flip .frame-1, .animation-flip .frame-2,  
-.animation-flip .frame-3, .animation-flip .frame-4
+.animation-flip .frame-3, .animation-flip .frame-4,
+.animation-flip .frame-5
 {
   position: absolute;
   border-radius: var(--radius-l);
   overflow: hidden;
-  opacity: 0;
-}  
+}
+
+.animation-flip .frame-2, .animation-flip .frame-3, .animation-flip .frame-4, .animation-flip .frame-5 
+{ 
+  opacity: 0; 
+}
 
 .animation-flip .frame-1 
 {
@@ -428,7 +371,6 @@
   left: 5%;
   width: 90%;
   height: 90%;
-  animation: animation-flip-1 4s linear infinite;
 }
 
 .animation-flip .frame-2
@@ -437,7 +379,7 @@
   left: 10%;
   width: 80%;
   height: 80%;
-  animation: animation-flip-2 4s linear infinite;
+  animation: animation-flip-1 4s linear infinite;
 }
 
 .animation-flip .frame-3
@@ -446,7 +388,7 @@
   left: 15%;
   width: 70%;
   height: 70%;
-  animation: animation-flip-3 4s linear infinite;
+  animation: animation-flip-2 4s linear infinite;
 }
 
 .animation-flip .frame-4
@@ -455,6 +397,15 @@
   left: 20%;
   width: 60%;
   height: 60%;
+  animation: animation-flip-3 4s linear infinite;
+}
+
+.animation-flip .frame-5
+{
+  top: 25%;
+  left: 25%;
+  width: 50%;
+  height: 50%;
   animation: animation-flip-4 4s linear infinite;
 }
 
