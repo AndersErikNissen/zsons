@@ -14,7 +14,7 @@
 
 .animation-pages, .animation-slide, .animation-3, animation-4, .animation-window, .animation-row, .animation-flip
 {
-  opacity: 0;
+  visibility: hidden;
   position: absolute;
   top: 0;
   left: 0;
@@ -55,7 +55,8 @@
 
 .animation-pages
 {
-  animation: animation-pages 20s linear infinite;
+  visibility: visible;
+  animation: animation-pages 20s step-end infinite;
 }
 
 .animation-pages .frame
@@ -78,8 +79,7 @@
 }
 
 @keyframes animation-pages {
-  0%, 19.99% { opacity: 1; }
-  20%, 100% { opacity: 0; }
+  20% { visibility: hidden; }
 }
 
 @keyframes animation-pages-frames {
@@ -123,12 +123,12 @@
 .animation-slide {
   display: flex;
   align-items: center;
-  animation: animation-slide 20s linear infinite;
+  animation: animation-slide 20s steps(1, end) infinite;
 }
 
 @keyframes animation-slide {
-  0%, 19.99%, 40%, 100% { opacity: 0; }
-  20%, 39.99% { opacity: 1; }
+  20% { visibility: visible; }
+  40% { visibility: hidden; }
 }
 
 .animation-slide .frame-group { 
@@ -207,28 +207,28 @@
 
 @keyframes animation-window {
   0%, 39.99%, 60%, 100% { 
-    opacity: 0; 
+    visibility: hidden;
     color: var(--color-white);
   }
   
   40%, 44.99% { 
-    opacity: 1;
+    visibility: visible;
     color: var(--color-white);
-   }
-
+  }
+  
   45%, 49.99% { 
-    opacity: 1; 
+    visibility: visible;
     color: var(--color-orange);
   }
-
+  
   50%, 54.99% { 
-    opacity: 1; 
+    visibility: visible;
     color: var(--color-orange-subtle);
   }
-
+  
   55%, 59.99%
   { 
-    opacity: 1; 
+    visibility: visible;
     color: rgb(51, 15, 0); 
   }
 }
@@ -296,25 +296,25 @@
   60%
   { 
     transform: scale(2);
-    opacity: 1; 
+    visibility: visible;
   }
   
   70% 
   { 
     transform: scale(1);
-    opacity: 1; 
+    visibility: visible;
   }
-
+  
   80% 
   { 
     transform: scale(1);
-    opacity: 1; 
+    visibility: visible;
   }
-
+  
   0%, 59.99%, 80.01%, 100% { 
     transform: scale(2);
-    opacity: 0; 
-  } 
+    visibility: hidden;
+  }
 }
 
 @keyframes animation-row-col-1 {
@@ -348,7 +348,7 @@
 
 .animation-flip
 {
-  animation: animation-flip 20s linear infinite; 
+  animation: animation-flip 20s step-end infinite; 
 }
 
 .animation-flip .frame-1, .animation-flip .frame-2,  
@@ -410,11 +410,7 @@
 }
 
 @keyframes animation-flip {
-  0%, 79.99% { opacity: 0; }
-
-  80%, 100% { 
-    opacity: 1; 
-  } 
+  80% { visibility: visible; } 
 }
 
 @keyframes animation-flip-1 {
