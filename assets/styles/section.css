@@ -10,10 +10,18 @@
   padding-bottom: var(--space-section);
 }
 
-.sxs-blocks 
+.sxs-blocks, .sxs-blocks-boxed 
 { 
   display: flex; 
   align-items: stretch;
+  width: 100%;
+}
+
+.sxs-blocks-boxed 
+{
+  border-radius: var(--radius-l);
+  padding: var(--space-xl);
+  background-color: var(--color-orange-subtle);
 }
 
 .sxs-block, .sxs-block-1, .sxs-block-2
@@ -29,7 +37,7 @@
   min-height: 50vh;
 }
 
-.sxs-intro .sxs-block-2 
+.sxs-blocks-boxed .sxs-block-2, .sxs-intro .sxs-block-2 
 {
   display: flex;
   flex-direction: column;
@@ -37,7 +45,7 @@
   justify-content: start;
 }
 
-.sxs-intro .sxs-block-2 p
+.sxs-blocks-boxed .sxs-block-2 p, .sxs-intro .sxs-block-2 p
 {
   max-width: 300px;
   font: var(--body-light);
