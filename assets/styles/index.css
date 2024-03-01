@@ -457,6 +457,7 @@
 
 .sticky-graph-intro
 {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: start;
@@ -472,19 +473,31 @@
   padding-bottom: var(--space-l);
 }
 
+@media (max-width: 959px) {
+  .sticky-graphs { 
+    grid-template-columns: 1fr;
+    padding: var(--space-section) var(--space-m);
+  }
+
+  .sticky-media, .sticky-media .media-fill::before { background-color: var(--color-white); }
+
+  .sticky-media, .sticky-graph-intro { height: 50vh; }
+
+  .sticky-graph-intro 
+  { 
+    padding-top: var(--space-section); 
+    padding-bottom: var(--space-section); 
+    justify-content: start;
+  }
+}
+
 /* .sticky-graphs ^STOP^ */
 
 /* .footer-graph ^START^ */
 
-.footer-graph
-{
-  display: flex;
-}
+.footer-graph { display: flex; }
 
-.footer-graph-block-1, .footer-graph-block-2 
-{
-  flex: 0 0 50%;
-}
+.footer-graph-block-1, .footer-graph-block-2 { flex: 0 0 50%; }
 
 .footer-graph-block-1 
 {
@@ -513,6 +526,12 @@
   color: var(--color-grey); 
   padding-bottom: var(--space-l);
 } 
+
+@media (max-width: 959px) {
+  .footer-graph { flex-wrap: wrap; }
+
+  .footer-graph-block-1, .footer-graph-block-2 { flex: 1 1 100%; }
+}
 
 
 /* .footer-graph ^STOP^ */

@@ -15,6 +15,8 @@
   display: flex; 
   align-items: stretch;
   width: 100%;
+  column-gap: var(--radius-xl);
+  row-gap: var(--radius-l);
 }
 
 .sxs-blocks-boxed 
@@ -28,9 +30,6 @@
 {
   flex: 1 1 100%;
 }
-
-.sxs-block-1 { padding-right: var( --radius-l); }
-.sxs-block-2 { padding-left: var( --radius-l); }
 
 .sxs-intro 
 {
@@ -47,10 +46,99 @@
 
 .sxs-blocks-boxed .sxs-block-2 p, .sxs-intro .sxs-block-2 p
 {
-  max-width: 300px;
   font: var(--body-light);
   margin-bottom: var(--space-m);
 }
 
+@media (min-width: 960px) {
+  .sxs-blocks-boxed .sxs-block-2 p, .sxs-intro .sxs-block-2 p { max-width: 300px; }
+}
+
+@media (max-width: 959px) {
+  .sxs-blocks, .sxs-blocks-boxed { flex-wrap: wrap; }
+
+  .sxs-blocks .usp-group, .sxs-blocks-boxed .usp-group { padding: 0; }
+
+  .sxs-blocks-boxed {
+    margin-right: var(--space-m);
+    margin-left: var(--space-m);
+  }
+
+  .media-block { 
+    position: relative;
+    padding-top: calc(100% / var(--media-ratio-phone)); 
+  }
+  
+  .media-block .media-fill 
+  {  
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+  }
+}
 
 /* .sxs ^STOP^ */
+
+/* #footer ^START^ */
+
+#footer 
+{
+  padding: var(--space-section) 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  row-gap: var(--space-section);
+}
+
+.footer-content 
+{
+  display: flex;
+  align-items: start;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.footer-block-1 
+{
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  max-width: 520px;
+}
+
+.footer-block-1 p { 
+  line-height: 1.6; 
+  font: var(--h3-subtle);
+  letter-spacing: var(--letter-spacing-narrow);
+}
+
+.footer-block-1 p:last-child { margin-top: var(--space-m); }
+
+.footer-block-2
+{
+  display: flex;
+  column-gap: var(--space-xxl);
+}
+
+#footer .icon-x, .footer-content { padding: 0 var(--space-section); }
+
+#footer .icon-x { 
+  color: var(--color-orange); 
+}
+
+#footer a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 959px) {
+  .footer-content 
+  {
+    flex-direction: column;
+    row-gap: var(--space-xl);
+  }
+  
+  #footer .icon-x, .footer-content { padding: 0 var(--space-m); }
+}
+
+/* #footer ^STOP^ */
