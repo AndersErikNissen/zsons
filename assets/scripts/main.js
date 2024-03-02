@@ -34,7 +34,7 @@ class navigationItem {
   get rect() {
     return {
       width: this.node.getBoundingClientRect().width,
-      left: this.node.getBoundingClientRect().left,
+      x: this.node.getBoundingClientRect().x,
     }
   }
 
@@ -43,7 +43,7 @@ class navigationItem {
       bubbles: true,
       detail: {
         width: this.rect.width,
-        left: this.rect.left,
+        x: this.rect.x,
       },
     });
 
@@ -63,7 +63,7 @@ class navigationGroup {
   get rect() {
     return {
       width: this.node.getBoundingClientRect().width,
-      left: this.node.getBoundingClientRect().left,
+      x: this.node.getBoundingClientRect().x,
     }
   }
 
@@ -78,11 +78,14 @@ class navigationGroup {
   }
   
   handlePuck(e) {
-    console.log(e);
+    var relativePuckX = e.detail.x - this.rect.x;
+
+    this.puck.style.transform = `translateX(${relativePuckX}px)`;
+    this.puck.style.width = `${e.detail.width}px`;
   }
 
   events() {
-    this.node.addEventListener('navigation:hover', this.handlePuck);
+    this.node.addEventListener('navigation:hover', this.handlePuck.bind(this));
   }
 }
 
