@@ -24,71 +24,94 @@
 
 
 
-class navigationItem {
-  constructor(node) {
-    this.node = node;
+// class navigationItem {
+//   constructor(node) {
+//     this.node = node;
 
-    this.eventBinder();
-  }
+//     this.eventBinder();
+//   }
 
-  get rect() {
-    return {
-      width: this.node.getBoundingClientRect().width,
-      x: this.node.getBoundingClientRect().x,
-    }
-  }
+//   eventBinder() {
+//     let hoverEvent = new CustomEvent('navigation:hover', {
+//       bubbles: true,
+//       detail: {
+//         width: this.node.offsetWidth,
+//         widthRect: this.node.getBoundingClientRect().width,
+//         offsetLeft: this.node.offsetLeft,
+//         right: this.node.getBoundingClientRect().right,
+//       },
+//     });
 
-  eventBinder() {
-    let hoverEvent = new CustomEvent('navigation:hover', {
+//     this.node.addEventListener('mouseover', function() { this.dispatchEvent(hoverEvent) })
+//   }
+// }
+
+// class navigationGroup {
+//   constructor(node) {
+//     this.node = node;
+//     this.puck = node.querySelector('.puck');
+//     this.lastPuckLocation = 0;
+
+//     this.events();
+//     console.log(this.rect)
+//   }
+
+//   get rect() {
+//     return {
+//       width: this.node.getBoundingClientRect().width,
+//       offsetWidth: this.node.offsetWidth,
+//       offsetLeft: this.node.offsetLeft,
+//       x: this.node.getBoundingClientRect().x,
+//     }
+//   }
+
+//   get items() {
+//     let itemsObjects = [];
+  
+//     this.node.querySelectorAll('[class^="navigation-item"]').forEach(item => {
+//       itemsObjects.push(new navigationItem(item));
+//     });
+
+//     return itemsObjects;
+//   }
+  
+//   handlePuck(e) {
+//     console.log(e.detail)
+//     this.puck.style.transform = `translateX(${e.detail.offsetLeft}px)`;
+//     this.puck.style.width = `${e.detail.width}px`;
+//   }
+
+//   events() {
+//     this.node.addEventListener('navigation:hover', this.handlePuck.bind(this));
+//   }
+// }
+
+// var _1 = new navigationGroup(this.document.querySelector('.navigation-group'));
+
+// _1.items.forEach(item => console.log(item));
+
+
+
+(function() {
+  const puck = document.querySelector('.puck');
+  const navigationGroup = document.querySelector('.navigation-group');
+  const navigationItems = document.querySelectorAll('[class^="navigation-item"]');
+
+  navigationItems.forEach((item, index) => item.addEventListener('mouseover', () => {
+    item.dispatchEvent(new CustomEvent('navigation-item:hover', {
       bubbles: true,
       detail: {
-        width: this.rect.width,
-        x: this.rect.x,
-      },
-    });
+        item: item,
+        index: index,
+        width: item.offsetWidth,
+        left: item.offsetLeft,
+      }
+    }));
+  }));
 
-    this.node.addEventListener('mouseover', function() { this.dispatchEvent(hoverEvent) })
-  }
-}
-
-class navigationGroup {
-  constructor(node) {
-    this.node = node;
-    this.puck = node.querySelector('.puck');
-    this.lastPuckLocation = 0;
-
-    this.events();
-  }
-
-  get rect() {
-    return {
-      width: this.node.getBoundingClientRect().width,
-      x: this.node.getBoundingClientRect().x,
-    }
-  }
-
-  get items() {
-    let itemsObjects = [];
-  
-    this.node.querySelectorAll('[class^="navigation-item"]').forEach(item => {
-      itemsObjects.push(new navigationItem(item));
-    });
-
-    return itemsObjects;
-  }
-  
-  handlePuck(e) {
-    var relativePuckX = e.detail.x - this.rect.x;
-
-    this.puck.style.transform = `translateX(${relativePuckX}px)`;
-    this.puck.style.width = `${e.detail.width}px`;
-  }
-
-  events() {
-    this.node.addEventListener('navigation:hover', this.handlePuck.bind(this));
-  }
-}
-
-var _1 = new navigationGroup(this.document.querySelector('.navigation-group'));
-
-_1.items.forEach(item => console.log(item.rect));
+  navigationGroup.addEventListener('navigation-item:hover', (e, host) => {
+    puck.style.transform = `translateX(${e.detail.left}px)`;
+    puck.style.width = `${e.detail.width}px`;
+    navigationGroup.dataset.activeItem = e.detail.index + 1;
+  })
+})()

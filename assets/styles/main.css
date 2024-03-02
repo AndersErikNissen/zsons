@@ -23,6 +23,11 @@ main
   background-color: var(--color-white);
 }
 
+ul
+{
+  list-style: none;
+}
+
 a 
 {
   color: inherit;
