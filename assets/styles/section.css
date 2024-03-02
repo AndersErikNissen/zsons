@@ -104,13 +104,12 @@
   display: flex;
   flex-direction: column;
   align-items: start;
-  max-width: 520px;
+  max-width: 300px;
 }
 
 .footer-block-1 p { 
   line-height: 1.6; 
-  font: var(--h3-subtle);
-  letter-spacing: var(--letter-spacing-narrow);
+  font: var(--body-regular);
 }
 
 .footer-block-1 p:last-child { margin-top: var(--space-m); }

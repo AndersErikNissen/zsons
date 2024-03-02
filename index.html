@@ -12,6 +12,7 @@
   <link href="/assets/styles/index.css" rel="stylesheet">
   <link href="/assets/styles/section.css" rel="stylesheet">
   <script src="/assets/scripts/main.js" defer></script>
+  <script src="/assets/scripts/graph.js" defer></script>
 
   <style>
     @font-face {
@@ -714,9 +715,43 @@
         </svg>
     
         <div class="navigation-group">
-          <a href="/about.html" class="btn-tertiary">ABOUT</a>
-          <a href="/visuals.html" class="btn-tertiary">VISUALS</a>
-          <div class="btn-tertiary" data-graphs-menu>GRAPHS</div>
+          <div class="navigation-bg-1"></div>
+          <a href="/about.html" class="navigation-item-1">
+            <span>ABOUT</span>
+          </a>
+          <div class="navigation-bg-2"></div>
+          <a href="/visuals.html" class="navigation-item-2">
+            <span>VISUALS</span>
+          </a>
+          <div class="navigation-bg-3"></div>
+          <div class="navigation-item-3 menu-container">
+            <span>GRAPHS</span>
+
+            <div class="menu-shell">
+              <div class="menu">
+                <div class="btn-menu">
+                  <a href="/yarn.html">yarn</a>
+                  <svg class="icon" viewBox="0 0 20 20"><use href="#icon-plus-subtle" /></svg>
+                </div>
+                <div class="btn-menu">
+                  <a href="/river.html">river</a>
+                  <svg class="icon" viewBox="0 0 20 20"><use href="#icon-plus-subtle" /></svg>
+                </div>
+                <div class="btn-menu">
+                  <a href="/mountain.html">mountain</a>
+                  <svg class="icon" viewBox="0 0 20 20"><use href="#icon-plus-subtle" /></svg>
+                </div>
+                <div class="btn-menu">
+                  <a href="/tower.html">tower</a>
+                  <svg class="icon" viewBox="0 0 20 20"><use href="#icon-plus-subtle" /></svg>
+                </div>
+                <div class="btn-menu">
+                  <a href="/city.html">city</a>
+                  <svg class="icon" viewBox="0 0 20 20"><use href="#icon-plus-subtle" /></svg>
+                </div>
+              </div>
+            </div>
+          </div>
           <div class="puck"></div>
         </div>
       </div>
@@ -736,7 +771,7 @@
           </a>
         </div>
         <div class="sxs-block-2">
-          <p>The project dives into how to display data with use of Javascript and Vector.</p>
+          <p>The project dives into how to display data with use of Javascript and Vectors.</p>
           <p>Hopefully the project can inspire and help you on your journey with displaying data via graphs.</p>
         </div>
       </div>
@@ -811,6 +846,7 @@
         <div></div>
       </div>
     </section>
+
     <section class="infi-large">
       <div class="infi-text-block">
         <p class="infi-text">DATA SHOULD BE SEEN</p>
@@ -1043,30 +1079,6 @@
     </footer>
   </main>
 
-<!-- 
-  <div class="menu">
-    <div class="btn-menu">
-      <a href="/yarn.html">yarn</a>
-      <svg class="icon" viewBox="0 0 20 20"><use href="#icon-plus-subtle" /></svg>
-    </div>
-    <div class="btn-menu">
-      <a href="/river.html">river</a>
-      <svg class="icon" viewBox="0 0 20 20"><use href="#icon-plus-subtle" /></svg>
-    </div>
-    <div class="btn-menu">
-      <a href="/mountain.html">mountain</a>
-      <svg class="icon" viewBox="0 0 20 20"><use href="#icon-plus-subtle" /></svg>
-    </div>
-    <div class="btn-menu">
-      <a href="/tower.html">tower</a>
-      <svg class="icon" viewBox="0 0 20 20"><use href="#icon-plus-subtle" /></svg>
-    </div>
-    <div class="btn-menu">
-      <a href="/city.html">city</a>
-      <svg class="icon" viewBox="0 0 20 20"><use href="#icon-plus-subtle" /></svg>
-    </div>
-  </div> -->  
-  
   <!-- <div class="menu-mobile">
     <div class="menu-links">
       <a href="/about.html">about</a>

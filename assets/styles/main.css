@@ -265,27 +265,6 @@ a
 
 /* .btn-secondary ^STOP^ */
 
-/* .btn-tertiary ^START^ */
-
-.btn-tertiary
-{
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  border-radius: 100px;
-  padding: 5px 15px 4px 15px;
-  font: var(--body-ultra-light);
-  letter-spacing: var(--letter-spacing-wide);
-  background-color: var(--color-black-subtle);
-}
-
-.btn-tertiary-active {
-  color: var(--color-white);
-  background-color: var(--color-black);
-}
-
-/* .btn-tertiary ^STOP^ */
-
 /* .btn-menu ^START^ */
 
 .btn-menu
@@ -480,14 +459,14 @@ a
 
 .headed-list-title
 {
-  font: var(--h3-faint);
+  font: var(--body-ultra-light);
   letter-spacing: var(--letter-spacing-wide);
   margin-bottom: var(--space-m);
 } 
 
 .headed-list-item 
 {
-  font: var(--h3-subtle);
+  font: var(--body-regular);
   letter-spacing: var(--letter-spacing-narrow);
 }
 
