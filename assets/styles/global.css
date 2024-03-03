@@ -5,28 +5,44 @@
   position: absolute;
   top: 100%;
   right: 0;
-  padding-top: var(--space-l);
+  padding-top: var(--space-m);
   pointer-events: none;
 }
 
 .menu 
 {
+  position: relative;
   width: 320px;
   height: auto;
   display: flex;
   flex-direction: column;
+  row-gap: var(--space-l);
   border-radius: var(--radius-m);
   padding: var(--space-l);
-  background-color: var(--color-black);
   opacity: 0;
-  transform: translate(-4%, 8%) rotate(3deg);
-  transition: opacity var(--transition), transform var(--transition);
+  
+  transition: opacity var(--transition);
+  overflow: hidden;
+}
+
+.menu::before 
+{
+  content: "";
+  background-color: var(--color-black);
+  border-radius: var(--radius-m);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: translateY(-101%);
 }
 
 .menu .btn-menu 
 {
-  margin-bottom: var(--space-l);
+  position: relative;
   width: 100%;
+  opacity: 0;
 }
 
 .menu-container 
@@ -36,8 +52,19 @@
 
 .menu-container:hover .menu, .menu-shell:hover .menu, .menu:hover 
 {
-  transform: translate(0%, 0%) rotate(0deg);
+  transition: opacity var(--transition);
   opacity: 1;
+}
+
+.menu-container:hover .menu .btn-menu, .menu-shell:hover .menu .btn-menu, .menu:hover  .btn-menu
+{
+  transition: opacity 0.05s var(--transition);
+  opacity: 1;
+}
+
+.menu-container:hover .menu::before, .menu-shell:hover .menu::before, .menu:hover::before {
+  transform: translateY(0%);
+  transition: transform var(--transition);
 }
 
 .menu-container:hover .menu-shell , .menu-shell:hover { pointer-events: all; }
@@ -138,7 +165,7 @@
 {
   display: grid;
   grid-template-columns: repeat(3, auto);
-  column-gap: var(--space-l);
+  column-gap: var(--space-m);
   align-items: center;
   position: relative;
 }
@@ -151,7 +178,7 @@
   display: block;
   align-items: center;
   justify-content: center;
-  padding: 5px 15px 4px 15px;
+  padding: 5px 15px 4px;
   font: var(--body-ultra-light);
   letter-spacing: var(--letter-spacing-wide);
   border-radius: 99px;
@@ -199,14 +226,21 @@
   width: 0px;
   height: 100%;
   border-radius: 100px;
-  opacity: 1;
+  opacity: 0;
   background-color: var(--color-black);
-  transition: transform var(--transition);
+  transition: opacity var(--transition);
 } 
 
-.navigation-group-active .puck 
+.puck-active 
+{
+  opacity: 1;
+  transition: width var(--transition), transform var(--transition), opacity var(--transition); 
+}
+
+.puck-active-spawn 
 { 
-  transition: opacity var(--transition), transform var(--transition); 
+  transition: none;
+  opacity: 1;
 }
 
 /* .navigation-group ^STOP^ */

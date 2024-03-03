@@ -1,117 +1,96 @@
-/**
- * From - idle or no puck
- * To - puck follows the cursor
- */
-
-/**
- * Are we on a desktop? - else return
- * Is the navigation being hovered? - else return
-  * 
-  * Is there an active NI (A:NI)?
-  * - remove active class from A:NI and place puck instead
-  * > move to other NI if A:NI is not first item to be hovered
-  * else place puck on NI
-  *
-  * On mouse move: is a new NI being hovered? - else return
-  * - move puck to new NI
-  * > get the position and width of NI
-  * > replace puck width and transform amount
-  * 
-  * On exit: 
-  * - is there an A:NI? - move puck to A:NI
-  * - else hide puck
- *  */
-
-
-
-// class navigationItem {
-//   constructor(node) {
-//     this.node = node;
-
-//     this.eventBinder();
-//   }
-
-//   eventBinder() {
-//     let hoverEvent = new CustomEvent('navigation:hover', {
-//       bubbles: true,
-//       detail: {
-//         width: this.node.offsetWidth,
-//         widthRect: this.node.getBoundingClientRect().width,
-//         offsetLeft: this.node.offsetLeft,
-//         right: this.node.getBoundingClientRect().right,
-//       },
-//     });
-
-//     this.node.addEventListener('mouseover', function() { this.dispatchEvent(hoverEvent) })
-//   }
-// }
-
-// class navigationGroup {
-//   constructor(node) {
-//     this.node = node;
-//     this.puck = node.querySelector('.puck');
-//     this.lastPuckLocation = 0;
-
-//     this.events();
-//     console.log(this.rect)
-//   }
-
-//   get rect() {
-//     return {
-//       width: this.node.getBoundingClientRect().width,
-//       offsetWidth: this.node.offsetWidth,
-//       offsetLeft: this.node.offsetLeft,
-//       x: this.node.getBoundingClientRect().x,
-//     }
-//   }
-
-//   get items() {
-//     let itemsObjects = [];
-  
-//     this.node.querySelectorAll('[class^="navigation-item"]').forEach(item => {
-//       itemsObjects.push(new navigationItem(item));
-//     });
-
-//     return itemsObjects;
-//   }
-  
-//   handlePuck(e) {
-//     console.log(e.detail)
-//     this.puck.style.transform = `translateX(${e.detail.offsetLeft}px)`;
-//     this.puck.style.width = `${e.detail.width}px`;
-//   }
-
-//   events() {
-//     this.node.addEventListener('navigation:hover', this.handlePuck.bind(this));
-//   }
-// }
-
-// var _1 = new navigationGroup(this.document.querySelector('.navigation-group'));
-
-// _1.items.forEach(item => console.log(item));
-
-
-
 (function() {
-  const puck = document.querySelector('.puck');
-  const navigationGroup = document.querySelector('.navigation-group');
-  const navigationItems = document.querySelectorAll('[class^="navigation-item"]');
 
-  navigationItems.forEach((item, index) => item.addEventListener('mouseover', () => {
+const puck = document.querySelector('.puck'),
+  navigationGroup = document.querySelector('.navigation-group'),
+  navigationItems = navigationGroup.querySelectorAll('[class^="navigation-item"]');
+
+let hasBeenHovered = false,
+  puckSpawned = false,
+  activeItem = false;
+
+  
+navigationItems.forEach((item, index) => {
+  // Check for active item
+  if (item.classList.contains('navigation-item-active')) {
+    activeItem = {
+      node: item,
+      index: index,
+    };
+  } 
+
+  item.addEventListener('mouseover', () => {
     item.dispatchEvent(new CustomEvent('navigation-item:hover', {
       bubbles: true,
       detail: {
-        item: item,
-        index: index,
-        width: item.offsetWidth,
-        left: item.offsetLeft,
+        item: {
+          node: item,
+          index: index,
+        },
       }
     }));
-  }));
-
-  navigationGroup.addEventListener('navigation-item:hover', (e, host) => {
-    puck.style.transform = `translateX(${e.detail.left}px)`;
-    puck.style.width = `${e.detail.width}px`;
-    navigationGroup.dataset.activeItem = e.detail.index + 1;
   })
+});
+
+// Move puck
+const movePuck = (item) => {
+  if (puck.classList.contains('puck-active-spawn')) 
+    puck.classList.replace('puck-active-spawn', 'puck-active');
+
+  puck.style.width = `${item.node.offsetWidth}px`;
+  puck.style.transform = `translateX(${item.node.offsetLeft}px)`;
+  navigationGroup.dataset.activeItem = item.index + 1;
+}
+
+// Spawn puck
+const spawnPuck = (item) => {
+  movePuck(item);
+  if (activeItem) puck.classList.add('puck-active-spawn');
+  navigationGroup.getBoundingClientRect();
+  if (!activeItem) puck.classList.add('puck-active');
+}
+
+const despawnPuck = () => {
+  puck.classList.toggle('puck-active');
+  navigationGroup.dataset.activeItem = "";
+  puckSpawned = false;
+}
+
+
+// Handles the hover events
+navigationGroup.addEventListener('navigation-item:hover', (e) => {
+
+  // Has active item and need to "replace" it with the real puck
+  if (activeItem && !hasBeenHovered) {
+    spawnPuck(activeItem);   
+    activeItem.node.classList.remove('navigation-item-active');
+    
+    puckSpawned = true;
+    hasBeenHovered = true;
+  }
+  
+  if (!puckSpawned) {
+    spawnPuck(e.detail.item);   
+    puckSpawned = true;
+  } else {
+    movePuck(e.detail.item);   
+  }
+});
+
+navigationGroup.addEventListener('mouseleave', () => {
+  if (activeItem) {
+    movePuck(activeItem);
+  }
+
+  if (!activeItem) {
+    despawnPuck();
+  }
+});
+/**
+ * 
+  * mouse leave (group)
+  * place puck at active location  
+  
+  * 
+  */
+
 })()
