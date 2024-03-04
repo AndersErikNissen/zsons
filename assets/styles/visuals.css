@@ -1,0 +1,43 @@
+.hero
+{
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: end;
+  background-color: #270E00;
+  position: relative;
+}
+
+.hero-svg {
+  width: 100%;
+  height: auto;
+}
+
+#top-navigation 
+{
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+.hero-brand-cover
+{
+  position: absolute;
+  top: var(--space-l);
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0 auto;
+  width: 100%;
+  height: calc((100% - var(--space-l)) + var(--space-l) + 38px);
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.hero-icon-brand
+{
+  position: sticky;
+  top: var(--space-l);
+  left: 0;
+  color: var(--color-white);
+  z-index: 100;
+}

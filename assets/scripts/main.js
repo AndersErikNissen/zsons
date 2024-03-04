@@ -85,12 +85,10 @@ navigationGroup.addEventListener('mouseleave', () => {
     despawnPuck();
   }
 });
-/**
- * 
-  * mouse leave (group)
-  * place puck at active location  
-  
-  * 
-  */
+})();
 
-})()
+(function() {
+  // Mobile menu
+  const btn = document.querySelector('.btn-mobile-menu');
+  btn.addEventListener('click', () => document.body.classList.toggle('active-mobile-menu'));
+})();

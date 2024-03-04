@@ -7,12 +7,12 @@
 
   <title>ZSONS - Show your data</title>
   <link href="/assets/styles/root.css" rel="stylesheet">
-  <link href="/assets/styles/global.css" rel="stylesheet">
   <link href="/assets/styles/main.css" rel="stylesheet">
   <link href="/assets/styles/index.css" rel="stylesheet">
   <link href="/assets/styles/section.css" rel="stylesheet">
   
   <script src="/assets/scripts/graph.js" defer></script>
+  <script src="/assets/scripts/main.js" defer></script>
 
   <style>
     @font-face {
@@ -93,6 +93,7 @@
       <symbol id="icon-graph-line"><path fill-rule="evenodd" clip-rule="evenodd" d="M15.8806 2.5L18.8765 8.49175L17.0876 9.38618L16.0835 7.37793L14.4528 11.4547L11.5167 9.49726L9.41907 15.7902L6.13748 12.5086L2.8141 17.4937L1.15 16.3843L5.82663 9.36932L8.54504 12.0877L10.4474 6.38067L13.5113 8.42327L15.8806 2.5Z" fill="currentColor"/></symbol>
       <symbol id="icon-graph-bars"><rect x="9" y="7" width="2" height="9" fill="currentColor"/><rect x="12" y="9" width="2" height="7" fill="currentColor"/><rect x="6" y="13" width="2" height="3" fill="currentColor"/><rect x="3" y="11" width="2" height="5" fill="currentColor"/><rect x="15" y="5" width="2" height="11" fill="currentColor"/></symbol>
       <symbol id="icon-arrow"><path d="M16 4.31771L16 16L4.3177 16L4.3177 15.1014L14.4659 15.1014L4 4.63543L4.63544 4L15.1014 14.4659L15.1014 4.31771L16 4.31771Z" fill="currentColor"/></symbol>
+      <symbol id="icon-arrow-right"><path xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd" d="M12.9887 4.33105L18.0907 10L12.9887 15.669L11.5021 14.3311L14.5 11H2V9.00002H14.5L11.5021 5.66898L12.9887 4.33105Z" fill="currentColor"/></symbol>
     </svg>
 
     <svg xmlns="http://www.w3.org/2000/svg" width="318" height="35" viewBox="0 0 318 35" fill="none">
@@ -731,30 +732,118 @@
               <div class="menu">
                 <div class="btn-menu">
                   <a href="/yarn.html">yarn</a>
-                  <svg class="icon" viewBox="0 0 20 20"><use href="#icon-plus-subtle" /></svg>
+                  <svg class="icon" viewBox="0 0 20 20"><use href="#icon-arrow-right" /></svg>
                 </div>
                 <div class="btn-menu">
                   <a href="/river.html">river</a>
-                  <svg class="icon" viewBox="0 0 20 20"><use href="#icon-plus-subtle" /></svg>
+                  <svg class="icon" viewBox="0 0 20 20"><use href="#icon-arrow-right" /></svg>
                 </div>
                 <div class="btn-menu">
                   <a href="/mountain.html">mountain</a>
-                  <svg class="icon" viewBox="0 0 20 20"><use href="#icon-plus-subtle" /></svg>
+                  <svg class="icon" viewBox="0 0 20 20"><use href="#icon-arrow-right" /></svg>
                 </div>
                 <div class="btn-menu">
                   <a href="/tower.html">tower</a>
-                  <svg class="icon" viewBox="0 0 20 20"><use href="#icon-plus-subtle" /></svg>
+                  <svg class="icon" viewBox="0 0 20 20"><use href="#icon-arrow-right" /></svg>
                 </div>
                 <div class="btn-menu">
                   <a href="/city.html">city</a>
-                  <svg class="icon" viewBox="0 0 20 20"><use href="#icon-plus-subtle" /></svg>
+                  <svg class="icon" viewBox="0 0 20 20"><use href="#icon-arrow-right" /></svg>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        <div class="btn-mobile-menu">
+          <svg class="btn-mobile-menu-icon" viewBox="0 0 20 20">
+            <use href="#icon-plus-subtle" />
+          </svg>
+          <div class="elevator">
+            <div class="elevator-labels">
+              <span class="elevator-label-active">CLOSE</span>
+              <span class="elevator-label-idle">MENU</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
+
+    <section class="menu-mobile-container">
+      <div class="menu-mobile">
+  
+        <div class="menu-links">
+    
+          <a href="/about.html">about</a>
+    
+          <a href="/visuals.html">visuals</a>
+    
+        </div>
+    
+        <div class="menu-mobile-footer">
+    
+          <div class="infi">
+    
+            <div class="infi-text-block"><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><div></div></div>
+    
+            <div class="infi-text-block"><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><div></div></div>
+    
+          </div>
+    
+          <div class="links">
+    
+            <div class="btn-menu">
+    
+              <a href="/yarn.html">yarn</a>
+    
+              <svg class="icon" viewBox="0 0 20 20"><use href="#icon-arrow-right" /></svg>
+    
+            </div>
+    
+            <div class="btn-menu">
+    
+              <a href="/river.html">river</a>
+    
+              <svg class="icon" viewBox="0 0 20 20"><use href="#icon-arrow-right" /></svg>
+    
+            </div>
+    
+            <div class="btn-menu">
+    
+              <a href="/mountain.html">mountain</a>
+    
+              <svg class="icon" viewBox="0 0 20 20"><use href="#icon-arrow-right" /></svg>
+    
+            </div>
+    
+            <div class="btn-menu">
+    
+              <a href="/tower.html">tower</a>
+    
+              <svg class="icon" viewBox="0 0 20 20"><use href="#icon-arrow-right" /></svg>
+    
+            </div>
+    
+            <div class="btn-menu">
+    
+              <a href="/city.html">city</a>
+    
+              <svg class="icon" viewBox="0 0 20 20"><use href="#icon-arrow-right" /></svg>
+    
+            </div>
+    
+          </div>
+    
+          <div class="menu-mobile-icon">
+    
+            <svg class="icon-x" viewBox="0 0 318 35"><use href="#zsooons" /></svg>    
+    
+          </div>
+    
+        </div>
+    
+      </div> 
+    </section>
 
     <section class="sxs-intro">
       <div class="sxs-blocks page-width">
@@ -1078,44 +1167,6 @@
     </footer>
   </main>
 
-  <!-- <div class="menu-mobile">
-    <div class="menu-links">
-      <a href="/about.html">about</a>
-      <a href="/visuals.html">visuals</a>
-    </div>
-    <div class="menu-mobile-footer">
-      <div class="infi">
-        <div class="infi-text-block"><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><div></div></div>
-        <div class="infi-text-block"><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><div></div></div>
-      </div>
-      <div class="links">
-        <div class="btn-menu">
-          <a href="/yarn.html">yarn</a>
-          <svg class="icon" viewBox="0 0 20 20"><use href="#icon-plus-subtle" /></svg>
-        </div>
-        <div class="btn-menu">
-          <a href="/river.html">river</a>
-          <svg class="icon" viewBox="0 0 20 20"><use href="#icon-plus-subtle" /></svg>
-        </div>
-        <div class="btn-menu">
-          <a href="/mountain.html">mountain</a>
-          <svg class="icon" viewBox="0 0 20 20"><use href="#icon-plus-subtle" /></svg>
-        </div>
-        <div class="btn-menu">
-          <a href="/tower.html">tower</a>
-          <svg class="icon" viewBox="0 0 20 20"><use href="#icon-plus-subtle" /></svg>
-        </div>
-        <div class="btn-menu">
-          <a href="/city.html">city</a>
-          <svg class="icon" viewBox="0 0 20 20"><use href="#icon-plus-subtle" /></svg>
-        </div>
-      </div>
-      <div class="menu-mobile-icon">
-        <svg class="icon-x" viewBox="0 0 318 35"><use href="#zsooons" /></svg>    
-      </div>
-    </div>
-  </div> -->
-
   <!-- <div style="width: 90%; height: 90vh;">
 
     <aenother-infograph type="yarn" labels="vertical" value-label="fisk">
@@ -1138,6 +1189,5 @@
     </aenother-infograph>
   </div>
    -->
-   <script src="/assets/scripts/main.js" defer></script>
 </body>
 </html>
