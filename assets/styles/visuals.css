@@ -13,6 +13,13 @@
   height: auto;
 }
 
+#icon-brand { color: var(--color-orange); }
+
+.navigation-bg-1, .navigation-bg-2, .navigation-bg-3
+{
+  background-color: var(--color-orange-subtle);
+}
+
 #top-navigation 
 {
   position: fixed;
@@ -20,24 +27,97 @@
   left: 0;
 }
 
-.hero-brand-cover
-{
-  position: absolute;
-  top: var(--space-l);
-  left: 50%;
-  transform: translateX(-50%);
-  margin: 0 auto;
-  width: 100%;
-  height: calc((100% - var(--space-l)) + var(--space-l) + 38px);
-  z-index: 1000;
-  pointer-events: none;
+.navigation-item-active, .puck, 
+.menu::before, .menu-mobile-footer::before  
+{ 
+  background-color: #270E00; 
 }
 
-.hero-icon-brand
-{
-  position: sticky;
-  top: var(--space-l);
-  left: 0;
-  color: var(--color-white);
-  z-index: 100;
+/* .visual-grid ^START^ */
+
+.visual-grid {
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: var(--space-l);
+  row-gap: var(--space-l);
+  padding: var(--space-l) 0;
 }
+
+.visual-grid-item, .visual-grid-item-tall
+{
+  position: relative;
+}
+
+.visual-grid-white { color: var(--color-white); }
+.visual-grid-orange { color: var(--color-orange); }
+
+.visual-grid-item-tall, 
+.visual-grid-item-tall-white, 
+.visual-grid-item-tall-orange 
+{
+  --media-ratio: 0.75;
+  grid-row: auto / span 2;
+}
+
+.visual-grid-item-content
+{
+  position: absolute;
+  bottom: var(--space-l);
+  left: var(--space-l);
+  width: calc(100% - (var(--space-l) * 2));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.visual-grid-item img, .visual-grid-item-tall img
+{ 
+  border-radius: var(--radius-l); 
+}
+
+/* .visual-grid ^STOP^ */
+
+/* .btn-download ^START^ */
+
+.btn-download
+{
+  display: flex;
+  align-items: center;
+  column-gap: var(--space-s);
+  font: var(--body-light-mono);
+  line-height: 1.6;
+  letter-spacing: var(--letter-spacing-wide);
+  transition: background-color var(--transition), color var(--transition);
+  padding: 5px 12px 5px 10px;
+  border-radius: 99px;
+}
+
+.btn-download:hover, 
+.btn-download:active
+{
+  color: var(--color-white);
+  background-color: var(--color-black);
+}
+
+.visual-grid-white .btn-download:hover,
+.visual-grid-white .btn-download:active
+{
+  color: var(--color-black);
+  background-color: var(--color-white);
+}
+
+.visual-grid-orange .btn-download:hover, 
+.visual-grid-orange .btn-download:active 
+{
+  color: var(--color-orange-subtle);
+  background-color: var(--color-orange);
+}
+
+.btn-download svg 
+{
+  width: 20px;
+  height: 20px;
+}
+
+/* .btn-download ^STOP^ */
