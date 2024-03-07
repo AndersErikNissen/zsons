@@ -1,0 +1,95 @@
+.graph-hero 
+{
+  margin: 0 var(--space-l) var(--space-l);
+  min-height: 100vh;
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  border-radius: var(--radius-xl);
+  position: relative;
+  overflow: hidden;
+}
+
+.h1.h-scale {
+  font-size: 15vw;
+  line-height: 1;
+}
+
+.graph-hero .media-fill 
+{
+  position: absolute;
+}
+
+.graph-hero-content
+{
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-xl);
+  column-gap: var(--space-l);
+  row-gap: var(--space-l);
+  width: 100%;
+}
+
+.graph-hero-heading, .graph-hero-content
+{
+  position: relative;
+  color: var(--color-white);
+}
+
+.graph-hero-heading
+{
+  align-self: end;
+}
+
+.graph-hero-text
+{
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  row-gap: var(--space-l);
+  max-width: 520px;
+  font: var(--h3-faint);
+  letter-spacing: var(--letter-spacing-narrow);
+}
+
+/* Style graphs containers */
+.graph-container-1
+{
+  min-height: 50vh;
+  background-color: var(--color-orange-subtle);
+}
+
+.boxed-graph {
+  padding: var(--space-l);
+  border-radius: var(--radius-xl);
+}
+
+
+@media (min-width: 1920px) {
+  .h1.h-scale { font-size: 288px; }
+}
+
+@media (max-width: 959px) {
+  .graph-hero .media-fill
+  {
+    height: 100%;
+    padding-top: 0;
+  }
+
+  .graph-hero-content
+  {
+    flex-direction: column-reverse;
+    justify-content: space-between;
+  }
+
+  .graph-hero-text 
+  {
+    font-size: 24px;
+    line-height: 1.6;
+    max-width: 80%;
+  }
+}
+
+@media (max-width: 419px) {
+  .graph-hero-text { font-size: 16px; }
+}

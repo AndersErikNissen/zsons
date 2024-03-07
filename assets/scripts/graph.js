@@ -16,12 +16,8 @@ class Infograph extends HTMLElement {
         --animation-timing: 0.5s ease-in;
       }
 
-      #svg {
-        
-      }
-
       text {
-        font-size: 12px;
+        font-size: 16px;
         font-family: sans-serif;
       }
       @media (min-width: 1024px) {
@@ -174,9 +170,9 @@ class Infograph extends HTMLElement {
           dynamicSpacing: /** Use static/dynamic spacing */ 0.03,
         },
         colors: {
-          main: /** Used for things like fonts */ '#000',
+          main: /** Used for things like fonts */ '#131212',
           main2: '#EEE',
-          secondary: '#E6E6E6',
+          secondary: '#FF4D00',
           gradient: [{'stop-color':'#93DC93', 'offset': '0%'},{'stop-color':'#93DC93', 'offset': '100%', 'stop-opacity': 0}],
           gradientName: 'mainGradient',
           list: ["#F0FAF0","#D1F0D1","#B2E6B2","#93DC93","#74D274","#56C856","#3CB93C","#329A32","#287B28","#1E5C1E"],

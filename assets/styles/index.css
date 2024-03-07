@@ -443,7 +443,7 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   column-gap: var(--space-section);
-  padding: var(--space-section) var(--space-xl);
+  padding: var(--space-section) var(--space-l);
 }
 
 .sticky-media 
