@@ -41,7 +41,18 @@
   grid-template-columns: repeat(2, 1fr);
   column-gap: var(--space-l);
   row-gap: var(--space-l);
-  padding: var(--space-l) 0;
+  padding-top: var(--space-xxl);
+  padding-bottom: var(--space-xxl);
+}
+
+@media (max-width: 959px) {
+  .visual-grid {
+    grid-template-columns: 1fr;
+    column-gap: var(--space-m);
+    row-gap: var(--space-m);
+    padding-top: var(--space-xl);
+    padding-bottom: var(--space-xl);
+  }
 }
 
 .visual-grid-item, .visual-grid-item-tall

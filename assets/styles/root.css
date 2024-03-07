@@ -5,12 +5,14 @@
   --radius-xl: 60px;
 
   --media-ratio: 1;
-  --media-ratio-phone: 1.5;
+  --media-ratio-phone: 2;
 
   --letter-spacing-wide: 0.04em;
   --letter-spacing-narrow: -0.03em;
 
   --h1: 700 56px/67px Geist;
+  --h1-mono: 300 56px/67px "Geist Mono";
+  --h2: 700 48px/58px Geist;
   --h3-intense: 700 32px/44px Geist;
   --h3-subtle: 300 32px/44px Geist;
   --h3-faint: 200 32px/44px Geist;

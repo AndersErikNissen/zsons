@@ -476,7 +476,7 @@
 @media (max-width: 959px) {
   .sticky-graphs { 
     grid-template-columns: 1fr;
-    padding: var(--space-section) var(--space-m);
+    padding: var(--space-section) var(--space-l);
   }
 
   .sticky-media, .sticky-media .media-fill::before { background-color: var(--color-white); }
