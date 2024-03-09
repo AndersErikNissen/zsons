@@ -427,10 +427,11 @@ class Infograph extends HTMLElement {
     });
     valueTextGroup.remove();
 
-    let reserveXSpace = Math.ceil(Math.max.apply(null,valueLabelObjects.map(obj => obj.width)) / 2);
-
+    let reserveXSpace = Math.ceil(Math.max.apply(null, valueLabelObjects.map(obj => obj.width)) / 2);
+    let reserveYSpace = Math.ceil(Math.max.apply(null, valueLabelObjects.map(obj => obj.height)));
+    
     let
-      labelY = 0,
+      labelY = 0 + reserveYSpace,
       graphHeight = this.settings.height - labelY - this.cordinates.padding.y,
       graphWidth = this.settings.width - (reserveXSpace * 2),
       graphXOffset = reserveXSpace,
@@ -729,6 +730,21 @@ class Infograph extends HTMLElement {
     switch(this.settings.type) {
       case 'yarn':
         this.buildYarns()
+
+        let observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.setAttribute('running', '');
+            }
+          });
+        }, {
+          root: null,
+          rootMargin: "0px",
+          threshold: 1.0,
+        })
+
+        observer.observe(this)
+
         break;
       case 'river':
       case 'mountain':
@@ -739,10 +755,6 @@ class Infograph extends HTMLElement {
         this.buildBlocks(this.settings.type)
         break;
     }
-
-    this.setAttribute('running','');
-    setTimeout(()=> {
-    }, 5000)
   }
   
   connectedCallback() {
@@ -757,11 +769,6 @@ class Infograph extends HTMLElement {
     this.buildData = this.JSONData;
 
     this.renderSVGContent();
-
-    console.log("%c this.data ","color: blue; background-color: orange",this.data)
-    console.log("%c this.cordinates ","color: orange; background-color: grey",this.cordinates)
-    console.log("%c this.settings ","color: white; background-color: grey",this.settings)
-    console.log("%c this.core ","color: white; background-color: red",this.core)
   }
 }
 

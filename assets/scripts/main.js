@@ -92,3 +92,41 @@ navigationGroup.addEventListener('mouseleave', () => {
   const btn = document.querySelector('.btn-mobile-menu');
   btn.addEventListener('click', () => document.body.classList.toggle('active-mobile-menu'));
 })();
+
+
+(function() {
+  const windowCenter = window.innerWidth / 2;
+  const queryInfoIcons = document.querySelectorAll('[data-info-trigger]');
+  const iconTexts = {
+    "Labels": "Set attribute to show labels, and set the value to vertival to display the labels that way.", 
+    "Load effect": "If true, then the graph will animate when 100% is visible on the screen.",
+    "Hover effect": "Will give the possibility to showcase extra information on hover (On mobile the use can click to show the information).",
+  };
+
+  
+  let infoIconObjects = [];
+  queryInfoIcons.forEach(icon => {
+    let iconParent = icon.parentElement;
+
+    infoIconObjects.push({
+      node: icon,
+      parent: iconParent,
+      rect: {
+        x: icon.getBoundingClientRect().x, 
+        y: icon.getBoundingClientRect().y - window.scrollY,
+      },
+      text: iconTexts[iconParent.querySelector('.label-light').textContent],
+    });
+  });
+
+  infoIconObjects.forEach(obj => {
+    let span = document.createElement('span');
+    span.classList.add('info-popup');
+    span.textContent = obj.text;
+
+    obj.parent.appendChild(span);
+  });
+
+  console.warn(infoIconObjects)
+
+})();
