@@ -15,6 +15,11 @@
   line-height: 1;
 }
 
+.h1.h-scale-small {
+  font-size: 10vw;
+  line-height: 1;
+}
+
 .graph-hero .media-fill 
 {
   position: absolute;
@@ -35,6 +40,8 @@
   position: relative;
   color: var(--color-white);
 }
+
+.graph-dark .graph-hero-heading, .graph-dark .graph-hero-content { color: var(--color-black); }
 
 .graph-hero-heading
 {
@@ -67,6 +74,7 @@
 
 @media (min-width: 1920px) {
   .h1.h-scale { font-size: 288px; }
+  .h1.h-scale-small { font-size: 236px; }
 }
 
 @media (max-width: 959px) {

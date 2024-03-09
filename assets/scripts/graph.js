@@ -164,18 +164,18 @@ class Infograph extends HTMLElement {
     const LIST_OF_CORES = {
       default: {
         sizes: {
-          font: 12,
-          details: /** Used for visual elements like circles */ 9,
-          detailSpacing: 12,
+          font: 16,
+          details: /** Used for visual elements like circles */ 12,
+          detailSpacing: 16,
           dynamicSpacing: /** Use static/dynamic spacing */ 0.03,
         },
         colors: {
           main: /** Used for things like fonts */ '#131212',
           main2: '#EEE',
           secondary: '#FF4D00',
-          gradient: [{'stop-color':'#93DC93', 'offset': '0%'},{'stop-color':'#93DC93', 'offset': '100%', 'stop-opacity': 0}],
+          gradient: [{'stop-color':'#FF4D00', 'offset': '0%'},{'stop-color':'#FF4D00', 'offset': '100%', 'stop-opacity': 0}],
           gradientName: 'mainGradient',
-          list: ["#F0FAF0","#D1F0D1","#B2E6B2","#93DC93","#74D274","#56C856","#3CB93C","#329A32","#287B28","#1E5C1E"],
+          list: ["#FFB899","#FFA985","#FF9B70","#FF8D5C","#FF7E47","#FF7033","#FF621F","#FF4D00","#F54900","#E04300"],
         },
       }
     }
@@ -660,7 +660,7 @@ class Infograph extends HTMLElement {
           height: height, 
           ry: grooveWidth / 5, 
           rx: grooveWidth / 5, 
-          fill: 'red' 
+          fill: this.getCore.colors.secondary,
         });
         
         groupWidth += grooveWidth + (index === dataObject.percentage_values.length - 1 ? 0 : ySpacing);

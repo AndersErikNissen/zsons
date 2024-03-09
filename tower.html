@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>ZSONS - Graph: Tower</title>
+  <link href="/assets/styles/root.css" rel="stylesheet">
+  <link href="/assets/styles/main.css" rel="stylesheet">
+  <link href="/assets/styles/graph.css" rel="stylesheet">
+  <link href="/assets/styles/about.css" rel="stylesheet">
+  <link href="/assets/styles/section.css" rel="stylesheet">
+  
+  <script src="/assets/scripts/graph.js" defer></script>
+  <script src="/assets/scripts/main.js" defer></script>
+
+  <style>
+    @font-face {
+      font-family: "Geist";
+      font-weight: 200;
+      src: url("/assets/typeface/Geist-UltraLight.woff2") format("woff2");
+    }
+
+    @font-face {
+      font-family: "Geist";
+      font-weight: 300;
+      src: url("/assets/typeface/Geist-Light.woff2") format("woff2");
+    }
+
+    @font-face {
+      font-family: "Geist";
+      font-weight: 400;
+      src: url("/assets/typeface/Geist-Regular.woff2") format("woff2");
+    }
+
+    @font-face {
+      font-family: "Geist";
+      font-weight: 500;
+      src: url("/assets/typeface/Geist-Medium.woff2") format("woff2");
+    }
+
+    @font-face {
+      font-family: "Geist";
+      font-weight: 700;
+      src: url("/assets/typeface/Geist-Bold.woff2") format("woff2");
+    }
+
+    @font-face {
+      font-family: "Geist";
+      font-weight: 900;
+      src: url("/assets/typeface/Geist-Black.woff2") format("woff2");
+    }
+
+
+    @font-face {
+      font-family: "Geist Mono";
+      font-weight: 200;
+      src: url("/assets/typeface/GeistMono-UltraLight.woff2") format("woff2");
+    }
+
+    @font-face {
+      font-family: "Geist Mono";
+      font-weight: 300;
+      src: url("/assets/typeface/GeistMono-Light.woff2") format("woff2");
+    }
+
+    @font-face {
+      font-family: "Geist Mono";
+      font-weight: 400;
+      src: url("/assets/typeface/GeistMono-Regular.woff2") format("woff2");
+    }
+
+    @font-face {
+      font-family: "Geist Mono";
+      font-weight: 500;
+      src: url("/assets/typeface/GeistMono-Medium.woff2") format("woff2");
+    }
+
+    @font-face {
+      font-family: "Geist Mono";
+      font-weight: 700;
+      src: url("/assets/typeface/GeistMono-Bold.woff2") format("woff2");
+    }
+  </style>
+</head>
+<body>
+  <div class="hidden">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <symbol id="icon-plus"><path d="M11 5H9V9L5 9V11H9V15H11V11H15V9L11 9V5Z" fill="currentColor"/></symbol>
+      <symbol id="icon-plus-subtle"><path fill-rule="evenodd" clip-rule="evenodd" d="M9.5 9.5V4H10.5V9.5H16V10.5H10.5V16H9.5V10.5H4V9.5H9.5Z" fill="currentColor"/></symbol>
+      <symbol id="icon-info"><path fill-rule="evenodd" clip-rule="evenodd" d="M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10ZM18 10C18 14.4183 14.4183 18 10 18C5.58172 18 2 14.4183 2 10C2 5.58172 5.58172 2 10 2C14.4183 2 18 5.58172 18 10ZM10.6637 9.58678C9.86726 10.2755 9.5354 11.1295 9.5354 12.0937H10.3982C10.3982 11.3499 10.6903 10.6749 11.3407 10.1791C12.4292 9.35262 13 8.66391 13 7.69972C13 6.1157 11.7655 5 10 5C8.34071 5 7.13274 6.25344 7 8.11295L7.94248 8.18182C8.07522 6.79063 8.85841 5.92286 10.0398 5.92286C11.2478 5.92286 12.0708 6.65289 12.0575 7.69972C12.0575 8.44934 11.6256 8.80056 11.0066 9.3039C10.8976 9.39248 10.7829 9.48577 10.6637 9.58678ZM9.26991 13.595V15H10.6504V13.595H9.26991Z" fill="currentColor"/></symbol>
+      <symbol id="icon-star"><path d="M8.875 8.875L10 1L11.125 8.875L19 9.99999L11.125 11.125L10 19L8.875 11.125L1 10L8.875 8.875Z" fill="#currentColor"/></symbol>  
+      <symbol id="icon-graph-line"><path fill-rule="evenodd" clip-rule="evenodd" d="M15.8806 2.5L18.8765 8.49175L17.0876 9.38618L16.0835 7.37793L14.4528 11.4547L11.5167 9.49726L9.41907 15.7902L6.13748 12.5086L2.8141 17.4937L1.15 16.3843L5.82663 9.36932L8.54504 12.0877L10.4474 6.38067L13.5113 8.42327L15.8806 2.5Z" fill="currentColor"/></symbol>
+      <symbol id="icon-graph-bars"><rect x="9" y="7" width="2" height="9" fill="currentColor"/><rect x="12" y="9" width="2" height="7" fill="currentColor"/><rect x="6" y="13" width="2" height="3" fill="currentColor"/><rect x="3" y="11" width="2" height="5" fill="currentColor"/><rect x="15" y="5" width="2" height="11" fill="currentColor"/></symbol>
+      <symbol id="icon-arrow"><path d="M16 4.31771L16 16L4.3177 16L4.3177 15.1014L14.4659 15.1014L4 4.63543L4.63544 4L15.1014 14.4659L15.1014 4.31771L16 4.31771Z" fill="currentColor"/></symbol>
+      <symbol id="icon-arrow-right"><path xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd" d="M12.9887 4.33105L18.0907 10L12.9887 15.669L11.5021 14.3311L14.5 11H2V9.00002H14.5L11.5021 5.66898L12.9887 4.33105Z" fill="currentColor"/></symbol>
+      <symbol id="icon-download-subtle"><path fill-rule="evenodd" clip-rule="evenodd" d="M4 12H5V15L15 15V12H16V16H15H5H4V12Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M9.50001 11.7929V4H10.5V11.7929L12.6465 9.64645L13.3536 10.3536L10 13.7071L6.64645 10.3536L7.35356 9.64645L9.50001 11.7929Z" fill="currentColor"/></symbol>
+    </svg>
+
+    <svg xmlns="http://www.w3.org/2000/svg" width="318" height="35" viewBox="0 0 318 35" fill="none">
+      <symbol id="zsooons"><path d="M26.0656 8.6125C26.0656 3.85595 22.1756 7.52929e-07 17.377 0L0 7.52929e-07C0 4.75655 3.88999 8.6125 8.68852 8.6125H14.7705L0 25.8375V34.45H26.0656C26.0656 29.6935 22.1756 25.8375 17.377 25.8375H11.2951L26.0656 8.6125Z" fill="currentColor"/><path d="M53.8689 12.9188H45.1803C45.1803 10.5405 43.2353 8.6125 40.8361 8.6125C38.4368 8.6125 36.4918 10.5405 36.4918 12.9188H40.8361C48.0339 12.9188 53.8689 18.7027 53.8689 25.8375C53.8689 30.5941 49.9789 34.45 45.1803 34.45H36.4918C31.6933 34.45 27.8033 30.5941 27.8033 25.8375H45.1803C45.1803 23.4592 43.2353 21.5313 40.8361 21.5313H36.4918C31.6933 21.5313 27.8033 17.6753 27.8033 12.9188C27.8033 5.78392 33.6383 0 40.8361 0C48.0339 0 53.8689 5.78392 53.8689 12.9188Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M91.5808 4.30615C91.5825 4.30615 91.5842 4.30615 91.5859 4.30615L91.6639 4.30615C99.5892 4.34627 106 10.1149 106 17.2249C106 24.3349 99.5892 30.1033 91.6639 30.1434L91.5808 30.1437L69.9426 30.1437C62.0174 30.1035 55.6066 24.3349 55.6066 17.2249C55.6066 10.1149 62.0174 4.34648 69.9426 4.30636L70.0211 4.30615L91.5808 4.30615ZM91.5838 12.9187C91.5828 12.9187 91.5818 12.9187 91.5808 12.9187L70.0258 12.9187C67.3713 12.9187 65.2194 14.8466 65.2194 17.2249C65.2194 19.6032 67.3713 21.5312 70.0258 21.5312L91.5808 21.5312C94.2353 21.5312 96.3872 19.6032 96.3872 17.2249C96.3872 14.8475 94.2369 12.9201 91.5838 12.9187Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M143.712 4.30615C143.714 4.30615 143.715 4.30615 143.717 4.30615L143.795 4.30615C151.72 4.34627 158.131 10.1149 158.131 17.2249C158.131 24.3349 151.72 30.1033 143.795 30.1434L143.712 30.1437L122.074 30.1437C114.148 30.1035 107.738 24.3349 107.738 17.2249C107.738 10.1149 114.148 4.34648 122.074 4.30636L122.152 4.30615L143.712 4.30615ZM143.712 12.9187L122.157 12.9187C119.502 12.9187 117.351 14.8466 117.351 17.2249C117.351 19.6032 119.502 21.5312 122.157 21.5312H143.712C146.366 21.5312 148.518 19.6032 148.518 17.2249C148.518 14.8466 146.366 12.9187 143.712 12.9187Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M195.843 4.30615C195.845 4.30615 195.846 4.30615 195.848 4.30615L195.926 4.30615C203.851 4.34627 210.262 10.1149 210.262 17.2249C210.262 24.3349 203.851 30.1033 195.926 30.1434L195.843 30.1437L174.205 30.1437C166.28 30.1035 159.869 24.3349 159.869 17.2249C159.869 10.1149 166.28 4.34648 174.205 4.30636L174.283 4.30615L195.843 4.30615ZM195.843 12.9187L174.288 12.9187C171.634 12.9187 169.482 14.8466 169.482 17.2249C169.482 19.6032 171.634 21.5312 174.288 21.5312H195.843C198.498 21.5312 200.649 19.6032 200.649 17.2249C200.649 14.8466 198.498 12.9187 195.843 12.9187Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M247.974 4.30615C247.976 4.30615 247.978 4.30615 247.979 4.30615L248.057 4.30615C255.983 4.34627 262.393 10.1149 262.393 17.2249C262.393 24.3349 255.983 30.1033 248.057 30.1434L247.974 30.1437L226.336 30.1437C218.411 30.1035 212 24.3349 212 17.2249C212 10.1149 218.411 4.34648 226.336 4.30636L226.415 4.30615L247.974 4.30615ZM247.974 12.9187L226.419 12.9187C223.765 12.9187 221.613 14.8466 221.613 17.2249C221.613 19.6032 223.765 21.5312 226.419 21.5312H247.974C250.629 21.5312 252.781 19.6032 252.781 17.2249C252.781 14.8466 250.629 12.9187 247.974 12.9187Z" fill="currentColor"/><path d="M290.197 12.9188C290.197 5.78392 284.362 0 277.164 0C269.966 0 264.131 5.78392 264.131 12.9188V34.45H272.82V12.9188C272.82 10.5405 274.765 8.6125 277.164 8.6125C279.563 8.6125 281.508 10.5405 281.508 12.9188V25.8375C281.508 30.5941 285.398 34.45 290.197 34.45V12.9188Z" fill="currentColor"/><path d="M318 12.9188H309.311C309.311 10.5405 307.366 8.6125 304.967 8.6125C302.568 8.6125 300.623 10.5405 300.623 12.9188H304.967C312.165 12.9188 318 18.7027 318 25.8375C318 30.5941 314.11 34.45 309.311 34.45H300.623C295.824 34.45 291.934 30.5941 291.934 25.8375H309.311C309.311 23.4592 307.366 21.5313 304.967 21.5313H300.623C295.824 21.5313 291.934 17.6753 291.934 12.9188C291.934 5.78392 297.769 0 304.967 0C312.165 0 318 5.78392 318 12.9188Z" fill="currentColor"/></symbol>
+    </svg>
+
+    <svg id="icon-scroll-down" xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100" fill="none">
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M57.8882 3.56252C58.5231 2.01176 57.4483 0.436011 55.863 0.0713513C54.3391 -0.269275 52.8016 0.632664 52.5899 2.2861C52.4861 3.09689 52.7157 4.07963 53.315 5.07748L53.1988 5.14303C51.9494 5.84701 50.9993 6.38237 50.8092 7.98836C50.5584 10.073 52.0135 11.4552 54.4141 11.7626C55.4157 11.8909 56.3944 11.6931 57.0616 11.2777L57.4592 11.9588L59.4624 12.2153L58.2893 10.2714C59.0071 9.5877 59.5454 8.41239 59.7181 7.19029L57.9897 6.80732C57.9458 7.52883 57.7306 8.32541 57.3577 8.71396L55.6032 5.75836C56.7759 5.18142 57.5557 4.3925 57.8882 3.56252ZM54.5023 10.1904C53.2484 10.0136 52.4873 9.26976 52.5838 8.2641C52.666 7.36975 53.4967 6.81357 54.1537 6.47763L56.1516 9.80369C55.7868 10.1287 55.186 10.278 54.5023 10.1904ZM54.7764 4.39206C54.3947 3.71296 54.2593 3.13007 54.3184 2.66906C54.3839 2.03103 54.9281 1.56749 55.542 1.69457C56.1102 1.79971 56.4168 2.3076 56.3374 2.92762C56.2601 3.53179 55.636 4.11438 54.7764 4.39206ZM30.5705 3.71915L34.196 14.5061L35.8825 13.9393L33.268 6.16053L39.0425 12.8772L41.2455 12.1368L37.62 1.34979L35.9335 1.91661L38.6604 10.0296L32.6519 3.01959L30.5705 3.71915ZM29.0897 17.4712L27.2167 18.6174L20.2236 9.55526L21.7547 8.61821L27.0028 15.5351L23.8699 8.45117L25.073 7.71485L29.9641 13.7414L26.1842 5.90733L27.7153 4.97019L32.6032 15.3208L30.7165 16.4755L26.0361 10.6395L29.0897 17.4712ZM23.265 22.461C25.216 20.5588 24.7624 17.8895 22.1777 15.2385C19.5706 12.5646 16.9136 12.0435 14.9626 13.9457C13.0117 15.8479 13.4653 18.5172 16.0724 21.1912C18.6571 23.8422 21.3141 24.3631 23.265 22.461ZM17.4036 19.8932C15.4567 17.8964 14.9904 16.2243 16.1152 15.1278C17.2398 14.0312 18.8995 14.5396 20.8464 16.5365C22.7822 18.5218 23.2372 20.1824 22.1126 21.279C20.9879 22.3755 19.3394 21.8786 17.4036 19.8932ZM6.04655 25.8196L7.688 23.3309C9.44411 20.6683 12.2601 20.1832 15.284 22.1776C18.2811 24.1543 18.9704 26.8937 17.2407 29.5162L15.5464 32.0852L6.04655 25.8196ZM8.39544 25.2568L15.1389 29.7045L15.8096 28.6876C16.9745 26.9214 16.5081 25.2122 14.2604 23.7297C11.9857 22.2294 10.2309 22.4737 9.06613 24.2399L8.39544 25.2568ZM11.2808 48.4692L12.2646 41.0652L10.6282 40.8478L9.87654 46.504L0.232218 45.2225L0 46.9702L11.2808 48.4692ZM11.2571 49.6825L11.9304 57.1212L0.596829 58.1471L0.437826 56.3912L10.1273 55.5141L9.61287 49.8314L11.2571 49.6825ZM13.6778 62.0846C12.8097 59.5019 10.2076 58.7531 6.69808 59.9327C3.15811 61.1225 1.53653 63.2908 2.40461 65.8736C3.27277 68.4564 5.87479 69.2051 9.41469 68.0153C12.9243 66.8358 14.5459 64.6675 13.6778 62.0846ZM8.82235 66.253C6.17881 67.1415 4.46995 66.8366 3.9695 65.3477C3.46905 63.8587 4.64688 62.5836 7.29042 61.6951C9.91879 60.8117 11.6125 61.1217 12.1129 62.6106C12.6134 64.0995 11.4507 65.3695 8.82235 66.253ZM9.3081 79.0969L7.39321 75.9468C6.1444 73.8924 6.49023 71.9002 8.31182 70.7929C9.44858 70.1019 10.7664 70.2949 11.5898 71.0324C11.163 69.96 11.4034 69.2138 12.3723 68.4934L15.0111 66.5705L15.9352 68.0908L13.4554 69.9359C12.6616 70.5122 12.6958 71.1854 13.4367 72.4044L14.3775 73.952L18.1166 71.6792L19.0324 73.1857L9.3081 79.0969ZM9.80305 76.7328L12.9668 74.8096L11.9927 73.2072C11.3017 72.0704 10.3185 71.749 9.31867 72.3567C8.33258 72.9562 8.13786 73.9936 8.82893 75.1304L9.80305 76.7328ZM16.5376 76.4416L17.7656 77.8409C19.2531 76.7954 20.432 76.7885 21.2594 77.6384C22.4334 78.8442 22.0023 80.5614 20.0155 82.4956C18.0172 84.4411 16.2777 84.8371 15.1037 83.6312C14.3434 82.8503 14.3586 81.717 15.2952 80.3355L13.9179 79.0815C12.4623 81.1249 12.4562 83.2784 13.8984 84.7599C15.8775 86.7926 18.6825 86.3882 21.3125 83.8277C23.9194 81.2898 24.3989 78.4965 22.4199 76.4638C20.8994 74.9019 18.6664 74.906 16.5376 76.4416ZM30.5115 87.621L28.9351 86.7527C29.5042 85.4025 29.2293 84.1169 27.9782 83.3065C27.0231 82.6878 26.032 82.7143 25.4965 83.5705C24.9697 84.4132 25.3468 85.3641 26.6324 86.7697C28.3326 88.5967 28.6541 90.0463 27.7827 91.3916C26.6848 93.0865 24.7049 93.3128 22.8754 92.1276C20.9786 90.899 20.4746 88.7584 21.4357 86.8028L23.0216 87.7155C22.459 88.8788 22.764 90.0885 23.8133 90.7682C24.7281 91.3607 25.7627 91.2671 26.2935 90.3886C26.8765 89.4296 26.0459 88.4714 25.1257 87.4743C23.6827 85.9284 22.9743 84.1328 23.9154 82.68C25.083 80.8774 27.2211 80.8491 28.943 81.9645C30.9878 83.289 31.658 85.5563 30.5115 87.621ZM42.1486 96.2178C41.5149 97.769 42.5908 99.344 44.1765 99.7074C45.7006 100.047 47.2374 99.1437 47.4478 97.49C47.5511 96.6792 47.3206 95.6965 46.7205 94.6992L46.8367 94.6336C48.0855 93.9286 49.0352 93.3925 49.224 91.7863C49.4732 89.7014 48.0171 88.3205 45.6162 88.0149C44.6145 87.8874 43.6359 88.086 42.969 88.502L42.5709 87.8212L40.5675 87.5662L41.7421 89.5092C41.0248 90.1935 40.4875 91.3691 40.3158 92.5915L42.0445 92.973C42.0879 92.2514 42.3024 91.4547 42.675 91.0659L44.4318 94.0201C43.2595 94.598 42.4804 95.3875 42.1486 96.2178ZM45.5292 89.5872C46.7832 89.763 47.545 90.5063 47.4493 91.512C47.3677 92.4064 46.5375 92.9632 45.8807 93.2997L43.8802 89.9752C44.2447 89.6499 44.8455 89.5002 45.5292 89.5872ZM45.2597 95.3858C45.6419 96.0646 45.7778 96.6474 45.7191 97.1085C45.654 97.7465 45.1103 98.2105 44.4962 98.0838C43.9279 97.9792 43.6209 97.4716 43.6998 96.8515C43.7767 96.2472 44.4002 95.6642 45.2597 95.3858ZM71.093 13.0372L69.5172 12.1677C68.3693 14.2315 69.0378 16.4994 71.0815 17.8254C72.8026 18.9421 74.9407 18.9154 76.1097 17.1137C77.0519 15.6615 76.3449 13.8654 74.9029 12.3185C73.9835 11.3207 73.1536 10.3619 73.7374 9.40318C74.2688 8.5252 75.3035 8.43235 76.2178 9.02558C77.2666 9.70601 77.5707 10.9159 77.0072 12.0788L78.5924 12.9927C79.555 11.0379 79.0526 8.89686 77.1568 7.66679C75.3281 6.48033 73.3481 6.70503 72.2489 8.39923C71.3765 9.74381 71.6969 11.1936 73.3957 13.0219C74.6803 14.4285 75.0567 15.3796 74.5292 16.222C73.9931 17.0779 73.002 17.1035 72.0473 16.4841C70.7968 15.6728 70.523 14.3869 71.093 13.0372ZM82.2343 21.933L83.4623 23.3323C81.3335 24.8679 79.1006 24.872 77.58 23.3101C75.601 21.2773 76.0805 18.4842 78.6875 15.9461C81.3174 13.3857 84.1225 12.9812 86.1014 15.014C87.5438 16.4955 87.5376 18.649 86.082 20.6924L84.7047 19.4385C85.6413 18.0569 85.6565 16.9236 84.8962 16.1426C83.7222 14.9368 81.9827 15.3329 79.9844 17.2783C77.9976 19.2126 77.5666 20.9296 78.7405 22.1355C79.5679 22.9854 80.7468 22.9785 82.2343 21.933ZM92.6268 23.8594L90.7142 20.7078L80.9855 26.6117L81.9002 28.119L85.641 25.8489L86.5806 27.3973C87.3207 28.6168 87.3543 29.2901 86.56 29.8659L84.0788 31.709L85.0018 33.23L87.6421 31.309C88.6115 30.5894 88.8524 29.8433 88.4265 28.7707C89.2493 29.5087 90.567 29.7028 91.7043 29.0126C93.5267 27.9067 93.874 25.9148 92.6268 23.8594ZM87.0524 24.9925L90.2176 23.0716L91.1905 24.6748C91.8807 25.812 91.6852 26.8494 90.6987 27.4481C89.6983 28.0551 88.7154 27.7329 88.0252 26.5956L87.0524 24.9925ZM93.3022 39.8413C89.7925 41.0208 87.1905 40.2722 86.3224 37.6893C85.4543 35.1066 87.0759 32.9383 90.5855 31.7587C94.1254 30.5688 96.7275 31.3176 97.5956 33.9003C98.4636 36.4832 96.842 38.6515 93.3022 39.8413ZM96.0307 34.4263C95.5303 32.9375 93.8214 32.6325 91.1778 33.521C88.5494 34.4044 87.3869 35.6744 87.8873 37.1634C88.3878 38.6523 90.0814 38.9623 92.7097 38.0789C95.3533 37.1904 96.5311 35.9152 96.0307 34.4263ZM88.0697 42.6528L88.743 50.0915L90.3872 49.9427L89.8728 44.2599L99.5622 43.3827L99.4033 41.6269L88.0697 42.6528ZM87.7352 58.7087L88.7191 51.3047L99.9999 52.8038L99.7676 54.5515L90.1234 53.2699L89.3717 58.9262L87.7352 58.7087ZM92.2921 76.4751L93.9353 73.9877L84.4402 67.715L82.744 70.2827C81.0123 72.9039 81.6995 75.6438 84.6952 77.6228C87.7176 79.6195 90.534 79.1364 92.2921 76.4751ZM84.8459 70.096L91.586 74.5488L90.9146 75.5651C89.7485 77.3305 87.9935 77.5734 85.72 76.0715C83.4733 74.5872 83.0082 72.8777 84.1744 71.1124L84.8459 70.096ZM77.8229 84.5354C75.2381 81.8844 74.7845 79.2151 76.7355 77.3129C78.6864 75.4107 81.3434 75.9317 83.9281 78.5827C86.5353 81.2567 86.9889 83.926 85.0379 85.8282C83.087 87.7304 80.43 87.2094 77.8229 84.5354ZM83.8854 84.6461C85.01 83.5496 84.5438 81.8775 82.5969 79.8807C80.6612 77.8953 79.0126 77.3984 77.888 78.495C76.7633 79.5915 77.2183 81.2521 79.1541 83.2375C81.101 85.2343 82.7608 85.7427 83.8854 84.6461ZM72.7834 81.1567L70.9105 82.3029L73.9641 89.1346L69.2837 83.2986L67.3971 84.4532L72.2849 94.8038L73.8161 93.8667L70.0361 86.0326L74.9272 92.0592L76.1302 91.3229L72.9975 84.2391L78.2454 91.1559L79.7766 90.2188L72.7834 81.1567ZM65.7773 85.2799L69.3945 96.0697L67.3126 96.7677L61.3095 89.753L64.03 97.8681L62.3432 98.4336L58.726 87.6438L60.9295 86.9052L66.699 93.6262L64.0905 85.8455L65.7773 85.2799Z" fill="currentColor"/>
+    </svg>
+  </div>
+
+  <div id="top-navigation">
+    <div class="content page-width">
+      <a href="/index.html">
+        <svg id="icon-brand" xmlns="http://www.w3.org/2000/svg" width="120" height="38" viewBox="0 0 120 38" fill="none">
+          <path d="M108.608 7.59491C102.316 7.59491 97.2152 12.6955 97.2152 18.9873C97.2152 23.1819 100.616 26.5823 104.81 26.5823L108.608 26.5822C110.705 26.5822 112.405 28.2824 112.405 30.3797L97.2152 30.3797C97.2152 34.5743 100.616 37.9747 104.81 37.9747H112.405C116.6 37.9747 120 34.5743 120 30.3797C120 24.0879 114.899 18.9873 108.608 18.9873H104.81C104.81 16.89 106.51 15.1899 108.608 15.1899C110.705 15.1899 112.405 16.89 112.405 18.9873L120 18.9873C120 12.6955 114.899 7.59491 108.608 7.59491Z" fill="currentColor"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M72.9114 18.9873L72.9114 37.9747H80.5063V18.9873C80.5063 16.89 82.2065 15.1899 84.3038 15.1899C86.4011 15.1899 88.1013 16.89 88.1013 18.9873V30.3797C88.1013 34.5743 91.5016 37.9747 95.6962 37.9747V18.9873C95.6962 12.6955 90.5956 7.59491 84.3038 7.59491C78.0119 7.59491 72.9114 12.6955 72.9114 18.9873Z" fill="currentColor"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M60 22.7848C66.2919 22.7848 71.3924 17.6843 71.3924 11.3924C71.3924 5.10055 66.2919 0 60 0C53.7082 0 48.6076 5.10055 48.6076 11.3924C48.6076 17.6843 53.7082 22.7848 60 22.7848ZM60 15.1899C62.0973 15.1899 63.7975 13.4897 63.7975 11.3924C63.7975 9.29512 62.0973 7.59494 60 7.59494C57.9027 7.59494 56.2025 9.29512 56.2025 11.3924C56.2025 13.4897 57.9027 15.1899 60 15.1899Z" fill="currentColor"/>
+          <path d="M35.6962 7.59491C29.4043 7.59491 24.3038 12.6955 24.3038 18.9873C24.3038 23.1819 27.7041 26.5823 31.8987 26.5823H35.6962C37.7935 26.5823 39.4936 28.2824 39.4936 30.3797L24.3038 30.3797C24.3038 34.5743 27.7041 37.9747 31.8987 37.9747H39.4936C43.6882 37.9747 47.0886 34.5743 47.0886 30.3797C47.0886 24.0879 41.988 18.9873 35.6962 18.9873H31.8987C31.8987 16.89 33.5989 15.1899 35.6962 15.1899C37.7935 15.1899 39.4936 16.89 39.4936 18.9873L47.0886 18.9873C47.0886 12.6955 41.988 7.59491 35.6962 7.59491Z" fill="currentColor"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M0 7.59491C0 11.7895 3.40037 15.1898 7.59494 15.1898L12.9114 15.1899L0 30.3797V37.9747H22.7848C22.7848 33.7801 19.3844 30.3797 15.1899 30.3797H9.87342L22.7848 15.1899C22.7848 10.9953 19.3844 7.59494 15.1899 7.59494L0 7.59491Z" fill="currentColor"/>
+        </svg>
+      </a>
+
+      <div class="navigation-group">
+        <div class="puck"></div>
+        <div class="navigation-bg-1"></div>
+        <a href="/about.html" class="navigation-item-1">
+          <span>ABOUT</span>
+        </a>
+        <div class="navigation-bg-2"></div>
+        <a href="/visuals.html" class="navigation-item-2">
+          <span>VISUALS</span>
+        </a>
+        <div class="navigation-bg-3"></div>
+        <div class="navigation-item-3 menu-container navigation-item-active">
+          <span>GRAPHS</span>
+
+          <div class="menu-shell">
+            <div class="menu">
+              <div class="btn-menu">
+                <a href="/yarn.html"></a>
+                <span class="btn-menu-label">yarn</span>
+                <svg class="icon" viewBox="0 0 20 20"><use href="#icon-arrow-right" /></svg>
+              </div>
+              <div class="btn-menu">
+                <a href="/river.html"></a>
+                <span class="btn-menu-label">river</span>
+                <svg class="icon" viewBox="0 0 20 20"><use href="#icon-arrow-right" /></svg>
+              </div>
+              <div class="btn-menu">
+                <a href="/mountain.html"></a>
+                <span class="btn-menu-label">mountain</span>
+                <svg class="icon" viewBox="0 0 20 20"><use href="#icon-arrow-right" /></svg>
+              </div>
+              <div class="btn-menu">
+                <a href="/tower.html"></a>
+                <span class="btn-menu-label">tower</span>
+                <svg class="icon" viewBox="0 0 20 20"><use href="#icon-arrow-right" /></svg>
+              </div>
+              <div class="btn-menu">
+                <a href="/city.html"></a>
+                <span class="btn-menu-label">city</span>
+                <svg class="icon" viewBox="0 0 20 20"><use href="#icon-arrow-right" /></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-mobile-menu">
+        <svg class="btn-mobile-menu-icon" viewBox="0 0 20 20">
+          <use href="#icon-plus-subtle" />
+        </svg>
+        <div class="elevator">
+          <div class="elevator-labels">
+            <span class="elevator-label-active">CLOSE</span>
+            <span class="elevator-label-idle">MENU</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="menu-mobile-container">
+    <div class="menu-mobile">
+
+      <div class="menu-links">
+  
+        <a href="/about.html">about</a>
+  
+        <a href="/visuals.html">visuals</a>
+  
+      </div>
+  
+      <div class="menu-mobile-footer">
+  
+        <div class="infi">
+  
+          <div class="infi-text-block"><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><div></div></div>
+  
+          <div class="infi-text-block"><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><span class="infi-text">GRAPHS BELOW</span><div></div></div>
+  
+        </div>
+  
+        <div class="links">
+  
+          <div class="btn-menu">
+  
+            <a href="/yarn.html"></a><span>yarn</span>
+  
+            <svg class="icon" viewBox="0 0 20 20"><use href="#icon-arrow-right" /></svg>
+  
+          </div>
+  
+          <div class="btn-menu">
+  
+            <a href="/river.html">river</a>
+  
+            <svg class="icon" viewBox="0 0 20 20"><use href="#icon-arrow-right" /></svg>
+  
+          </div>
+  
+          <div class="btn-menu">
+  
+            <a href="/mountain.html">mountain</a>
+  
+            <svg class="icon" viewBox="0 0 20 20"><use href="#icon-arrow-right" /></svg>
+  
+          </div>
+  
+          <div class="btn-menu">
+  
+            <a href="/tower.html">tower</a>
+  
+            <svg class="icon" viewBox="0 0 20 20"><use href="#icon-arrow-right" /></svg>
+  
+          </div>
+  
+          <div class="btn-menu">
+  
+            <a href="/city.html">city</a>
+  
+            <svg class="icon" viewBox="0 0 20 20"><use href="#icon-arrow-right" /></svg>
+  
+          </div>
+  
+        </div>
+  
+        <div class="menu-mobile-icon">
+  
+          <svg class="icon-x" viewBox="0 0 318 35"><use href="#zsooons" /></svg>    
+  
+        </div>
+  
+      </div>
+  
+    </div> 
+  </section>
+
+  <main>
+    <section class="graph-hero">
+      <picture class="media-fill">
+        <source media="(max-width: 480px)" srcset="/assets/media/liquid/image-4-480px.jpg" />
+        <source media="(max-width: 960px)" srcset="/assets/media/liquid/image-4-960px.jpg" />
+        <source media="(max-width: 1440px)" srcset="/assets/media/liquid/image-4-1440px.jpg" />
+        <source media="(max-width: 1920px)" srcset="/assets/media/liquid/image-4-1920px.jpg" />
+        <img src="/assets/media/liquid/image-4-2100px.jpg" alt="" />
+      </picture>
+      <div class="graph-hero-content">
+        <div class="graph-hero-heading">
+          <p class="h1 h-scale-small">THROUGH</p>
+          <p class="h1 h-scale-small">THE</p>
+          <h1 class="h1 h-scale-small">TOWER</h1>
+        </div>
+  
+        <div class="graph-hero-text">
+          <p class="">A bar chart thar combines all the data in to on bar, which is great for some times of data.</p>
+          <p class="">This graph has many ideal use cases, and should help you with comparing simular data.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="sxs pair-group">
+      <div class="sxs-blocks page-width">
+        <div class="sxs-block-1">
+          <h4 class="h3-intense">attributes</h4>
+
+          <div class="pair">
+            <span class="label-light">Type</span>
+            <span class="label">TOWER</span>
+          </div>
+          
+          <div class="pair">
+            <div class="pair-key">
+              <span class="label-light">Labels</span>
+              <svg class="icon" viewBox="0 0 20 20" data-info-trigger>
+                <use href="#icon-info" />
+              </svg>
+            </div>
+            <span class="label">BOOLEAN/VERTICAL</span>
+          </div>
+
+          <div class="pair">
+            <span class="label-light">Value label</span>
+            <span class="label">STRING</span>
+          </div>
+
+          <div class="pair">
+            <span class="label-light">Format labels</span>
+            <span class="label">BOOLEAN</span>
+          </div>
+
+          <div class="pair">
+            <span class="label-light">Aspect</span>
+            <span class="label">NUMBER</span>
+          </div>
+        </div>
+        <div class="sxs-block-2">
+          <h4 class="h3-intense">specs</h4>
+          
+          <div class="pair">
+            <div class="pair-key">
+              <span class="label-light">Hover effect</span>
+              <svg class="icon" viewBox="0 0 20 20" data-info-trigger>
+                <use href="#icon-info" />
+              </svg>
+            </div>
+            <span class="label">TRUE</span>
+          </div>
+          
+          <div class="pair">
+            <span class="label-light">Data object(s)</span>
+            <span class="label">MULTIPLE</span>
+          </div>
+          
+          <div class="pair">
+            <div class="pair-key">
+              <span class="label-light">Load effect</span>
+              <svg class="icon" viewBox="0 0 20 20" data-info-trigger>
+                <use href="#icon-info" />
+              </svg>
+            </div>
+            <span class="label">FALSE</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="infi-large">
+      <div class="infi-text-block">
+        <p class="infi-text">DATA SHOULD BE SEEN</p>
+        <svg class="infi-icon" viewBox="0 0 20 20"><use href="#icon-graph-bars"></use></svg>
+        <p class="infi-text">DATA SHOULD BE SEEN</p>
+        <svg class="infi-icon" viewBox="0 0 20 20"><use href="#icon-graph-bars"></use></svg>
+        <p class="infi-text">DATA SHOULD BE SEEN</p>
+        <svg class="infi-icon" viewBox="0 0 20 20"><use href="#icon-graph-bars"></use></svg>
+        <p class="infi-text">DATA SHOULD BE SEEN</p>
+        <svg class="infi-icon" viewBox="0 0 20 20"><use href="#icon-graph-bars"></use></svg>
+        <p class="infi-text">DATA SHOULD BE SEEN</p>
+        <svg class="infi-icon" viewBox="0 0 20 20"><use href="#icon-graph-bars"></use></svg>
+        <p class="infi-text">DATA SHOULD BE SEEN</p>
+        <svg class="infi-icon" viewBox="0 0 20 20"><use href="#icon-graph-bars"></use></svg>
+        <p class="infi-text">DATA SHOULD BE SEEN</p>
+        <svg class="infi-icon" viewBox="0 0 20 20"><use href="#icon-graph-bars"></use></svg>
+        <div></div>
+      </div>
+      <div class="infi-text-block">
+        <p class="infi-text">DATA SHOULD BE SEEN</p>
+        <svg class="infi-icon" viewBox="0 0 20 20"><use href="#icon-graph-bars"></use></svg>
+        <p class="infi-text">DATA SHOULD BE SEEN</p>
+        <svg class="infi-icon" viewBox="0 0 20 20"><use href="#icon-graph-bars"></use></svg>
+        <p class="infi-text">DATA SHOULD BE SEEN</p>
+        <svg class="infi-icon" viewBox="0 0 20 20"><use href="#icon-graph-bars"></use></svg>
+        <p class="infi-text">DATA SHOULD BE SEEN</p>
+        <svg class="infi-icon" viewBox="0 0 20 20"><use href="#icon-graph-bars"></use></svg>
+        <p class="infi-text">DATA SHOULD BE SEEN</p>
+        <svg class="infi-icon" viewBox="0 0 20 20"><use href="#icon-graph-bars"></use></svg>
+        <p class="infi-text">DATA SHOULD BE SEEN</p>
+        <svg class="infi-icon" viewBox="0 0 20 20"><use href="#icon-graph-bars"></use></svg>
+        <p class="infi-text">DATA SHOULD BE SEEN</p>
+        <svg class="infi-icon" viewBox="0 0 20 20"><use href="#icon-graph-bars"></use></svg>
+        <div></div>
+      </div>
+    </section>
+
+    <section class="sxs graph-container-1">
+      <div class="page-width">
+        <aenother-infograph type="tower" format-labels aspect="0.5" labels="vertical" value-label="items">
+          <script slot="json" type="application/json">
+            [
+              {
+                "labels": ["Tourists"],
+                "values": [299,713,803,878,325]
+              },
+              {
+                "labels": ["Tourists"],
+                "values": [299,100,381,432,480]
+              },
+              {
+                "labels": ["Tourists"],
+                "values": [120,600,381,432,560]
+              },
+              {
+                "labels": ["Tourists"],
+                "values": [420,200,881,432,560]
+              }
+            ]
+          </script>
+        </aenother-infograph>
+      </div>
+    </section>
+
+    <section class="sxs">
+      <div class="sxs-blocks sxs-full">
+        <div class="sxs-block-1">
+          <picture class="media">
+            <source media="(max-width: 480px)" srcset="/assets/media/liquid/image-8-480px.jpg">
+            <source media="(max-width: 960px)" srcset="/assets/media/liquid/image-8-960px.jpg">
+            <source media="(max-width: 1440px)" srcset="/assets/media/liquid/image-8-1440px.jpg">
+            <source media="(max-width: 1920px)" srcset="/assets/media/liquid/image-8-1920px.jpg">
+            <img src="/assets/media/liquid/image-8-2100px.jpg" alt="">
+          </picture>
+        </div>
+        <div class="sxs-block-2">
+          <picture class="media">
+            <source media="(max-width: 480px)" srcset="/assets/media/liquid/image-2-480px.jpg">
+            <source media="(max-width: 960px)" srcset="/assets/media/liquid/image-2-960px.jpg">
+            <source media="(max-width: 1440px)" srcset="/assets/media/liquid/image-2-1440px.jpg">
+            <source media="(max-width: 1920px)" srcset="/assets/media/liquid/image-2-1920px.jpg">
+            <img src="/assets/media/liquid/image-2-2100px.jpg" alt="">
+          </picture>
+        </div>
+      </div>
+    </section>
+
+    <section class="sxs">
+      <div class="sxs-blocks page-width">
+        <div class="sxs-block-1 boxed-graph">
+          <aenother-infograph type="tower" aspect="1" labels value-label="TWh">
+            <script slot="json" type="application/json">
+              [
+                {
+                  "labels": ["1900","1910","1920","1930","1940","1950"],
+                  "values": [64,142,233,603,875,2092]
+                }
+              ]
+            </script>
+          </aenother-infograph>
+        </div>
+        <div class="sxs-block-2 boxed-graph bg-orange-subtle">
+          <aenother-infograph type="tower" aspect="1" labels value-label="TWh">
+            <script slot="json" type="application/json">
+              [
+                {
+                  "labels": ["1970","1980","1990","2000"],
+                  "values": [17339,19815,19084,23224]
+                }
+              ]
+            </script>
+          </aenother-infograph>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <section class="infi-large-subtle">
+    <div class="infi-text-block">
+      <p class="infi-text">SHOW YOUR DATA</p>
+      <svg class="infi-icon" viewBox="0 0 20 20"><use href="#icon-graph-line"></use></svg>
+      <p class="infi-text">SHOW YOUR DATA</p>
+      <svg class="infi-icon" viewBox="0 0 20 20"><use href="#icon-graph-line"></use></svg>
+      <p class="infi-text">SHOW YOUR DATA</p>
+      <svg class="infi-icon" viewBox="0 0 20 20"><use href="#icon-graph-line"></use></svg>
+      <p class="infi-text">SHOW YOUR DATA</p>
+      <svg class="infi-icon" viewBox="0 0 20 20"><use href="#icon-graph-line"></use></svg>
+      <p class="infi-text">SHOW YOUR DATA</p>
+      <svg class="infi-icon" viewBox="0 0 20 20"><use href="#icon-graph-line"></use></svg>
+      <p class="infi-text">SHOW YOUR DATA</p>
+      <svg class="infi-icon" viewBox="0 0 20 20"><use href="#icon-graph-line"></use></svg>
+      <p class="infi-text">SHOW YOUR DATA</p>
+      <svg class="infi-icon" viewBox="0 0 20 20"><use href="#icon-graph-line"></use></svg>
+      <div></div>
+    </div>
+    <div class="infi-text-block">
+      <p class="infi-text">SHOW YOUR DATA</p>
+      <svg class="infi-icon" viewBox="0 0 20 20"><use href="#icon-graph-line"></use></svg>
+      <p class="infi-text">SHOW YOUR DATA</p>
+      <svg class="infi-icon" viewBox="0 0 20 20"><use href="#icon-graph-line"></use></svg>
+      <p class="infi-text">SHOW YOUR DATA</p>
+      <svg class="infi-icon" viewBox="0 0 20 20"><use href="#icon-graph-line"></use></svg>
+      <p class="infi-text">SHOW YOUR DATA</p>
+      <svg class="infi-icon" viewBox="0 0 20 20"><use href="#icon-graph-line"></use></svg>
+      <p class="infi-text">SHOW YOUR DATA</p>
+      <svg class="infi-icon" viewBox="0 0 20 20"><use href="#icon-graph-line"></use></svg>
+      <p class="infi-text">SHOW YOUR DATA</p>
+      <svg class="infi-icon" viewBox="0 0 20 20"><use href="#icon-graph-line"></use></svg>
+      <p class="infi-text">SHOW YOUR DATA</p>
+      <svg class="infi-icon" viewBox="0 0 20 20"><use href="#icon-graph-line"></use></svg>
+      <div></div>
+    </div>
+  </section>
+
+  <footer id="footer">
+    <div class="footer-boxed page-width">
+      <div class="footer-content">
+        <div class="headed-list footer-block-1">
+          <h4 class="headed-list-title">ZSONS</h4>
+          <p>A fun graph project made by <a href="https://aenders.dk" target="_blank">Aenders.dk</a></p>
+          <p>Hopefully you will enjoy your stay, and maybe learn a thing or two that could help you with your own project.</p>
+        </div>
+        
+        <div class="footer-block-2">
+          <div class="headed-list">
+            <h4 class="headed-list-title">ABOUT</h4>
+            <ul>
+              <li class="headed-list-item"><a href="/about.html">About</a></li>
+              <li class="headed-list-item"><a href="/visuals.html">Visuals</a></li>
+            </ul>
+          </div>
+          <div class="headed-list">
+            <h4 class="headed-list-title">GRAPHS</h4>
+            <ul>
+              <li class="headed-list-item"><a href="/city.html">City</a></li>
+              <li class="headed-list-item"><a href="/tower.html">Tower</a></li>
+              <li class="headed-list-item"><a href="/mountain.html">Mountain</a></li>
+              <li class="headed-list-item"><a href="/river.html">River</a></li>
+              <li class="headed-list-item"><a href="/yarn.html"></a><span>yarn</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <svg class="icon-x" viewBox="0 0 318 35"><use href="#zsooons" /></svg>    
+    </div>
+  </footer>
+
+</body>

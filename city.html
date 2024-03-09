@@ -284,7 +284,7 @@
 
           <div class="pair">
             <span class="label-light">Type</span>
-            <span class="label">RIVER</span>
+            <span class="label">CITY</span>
           </div>
           
           <div class="pair">
@@ -309,7 +309,7 @@
 
           <div class="pair">
             <span class="label-light">Aspect</span>
-            <span class="label">BOOLEAN</span>
+            <span class="label">NUMBER</span>
           </div>
         </div>
         <div class="sxs-block-2">
@@ -322,7 +322,7 @@
                 <use href="#icon-info" />
               </svg>
             </div>
-            <span class="label">TRUE</span>
+            <span class="label">FALSE</span>
           </div>
           
           <div class="pair">
@@ -337,7 +337,7 @@
                 <use href="#icon-info" />
               </svg>
             </div>
-            <span class="label">TRUE</span>
+            <span class="label">FALSE</span>
           </div>
         </div>
       </div>
@@ -382,16 +382,20 @@
 
     <section class="sxs graph-container-1">
       <div class="page-width">
-        <aenother-infograph type="city" aspect="0.5" labels="vertical" value-label="days">
+        <aenother-infograph type="city" format-labels aspect="0.5" labels="vertical" value-label="ha">
           <script slot="json" type="application/json">
             [
               {
-                "labels": ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"],
-                "values": [31,28,31,30,31,30,31,31,30,31,30,31]
+                "labels": ["Cropland"],
+                "values": [149000000,143000000,184000000,282000000,1600000000]
               },
               {
-                "labels": ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"],
-                "values": [31,28,31,30,31,30,31,31,30,31,30,31]
+                "labels": ["Grazing"],
+                "values": [165000000,207000000,340000000,501000000,320000000]
+              },
+              {
+                "labels": ["Built-up Area"],
+                "values": [132000000,223000000,400000000,952000000,78000000]
               }
             ]
           </script>
@@ -404,43 +408,49 @@
         <div class="sxs-blocks">
           <div class="sxs-block-1" style="--media-ratio:2;--media-ratio-phone:2;">
             <picture class="media">
-              <source media="(max-width: 480px)" srcset="/assets/media/liquid/image-14-480px.jpg">
-              <source media="(max-width: 960px)" srcset="/assets/media/liquid/image-14-960px.jpg">
-              <source media="(max-width: 1440px)" srcset="/assets/media/liquid/image-14-1440px.jpg">
-              <source media="(max-width: 1920px)" srcset="/assets/media/liquid/image-14-1920px.jpg">
-              <img src="/assets/media/liquid/image-14-2100px.jpg" alt="">
+              <source media="(max-width: 480px)" srcset="/assets/media/liquid/image-6-480px.jpg">
+              <source media="(max-width: 960px)" srcset="/assets/media/liquid/image-6-960px.jpg">
+              <source media="(max-width: 1440px)" srcset="/assets/media/liquid/image-6-1440px.jpg">
+              <source media="(max-width: 1920px)" srcset="/assets/media/liquid/image-6-1920px.jpg">
+              <img src="/assets/media/liquid/image-6-2100px.jpg" alt="">
             </picture>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="sxs">
-      <div class="sxs-blocks page-width">
-        <div class="sxs-block-1 boxed-graph">
-          <aenother-infograph type="city" aspect="1" labels value-label="TWh">
-            <script slot="json" type="application/json">
-              [
-                {
-                  "labels": ["1900","1910","1920","1930","1940","1950"],
-                  "values": [64,142,233,603,875,2092]
-                }
-              ]
-            </script>
-          </aenother-infograph>
-        </div>
-        <div class="sxs-block-2 boxed-graph bg-orange-subtle">
-          <aenother-infograph type="city" aspect="1" labels value-label="TWh">
-            <script slot="json" type="application/json">
-              [
-                {
-                  "labels": ["1970","1980","1990","2000"],
-                  "values": [17339,19084,19815,23224]
-                }
-              ]
-            </script>
-          </aenother-infograph>
-        </div>
+    <section class="sxs graph-container-1">
+      <div class="page-width">
+        <aenother-infograph type="city" format-labels aspect="1" labels value-label="ha">
+          <script slot="json" type="application/json">
+            [
+              {
+                "labels": ["Oceania"],
+                "values": [5000000, 39200000, 316000000]
+              },
+              {
+                "labels": ["Africa"],
+                "values": [199000000,249000000,857000000]
+              },
+              {
+                "labels": ["Asia"],
+                "values": [172000000,242000000,635000000]
+              },
+              {
+                "labels": ["South America"],
+                "values": [17000000,23000000,263000000]
+              },
+              {
+                "labels": ["North America"],
+                "values": [8000000,41000000,354000000]
+              },
+              {
+                "labels": ["Europe"],
+                "values": [82000000,79000000,80000000]
+              }
+            ]
+          </script>
+        </aenother-infograph>
       </div>
     </section>
   </main>
